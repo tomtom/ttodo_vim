@@ -1,0 +1,37 @@
+*ttodo.txt*         Filtering and viewing todo.txt files
+                    Author: Tom Link, micathom at gmail com
+
+This plugin provides the |:Ttodo| command that allow easy filtering and viewing 
+of todo.txt files via |tlib#input#List()|. The plugin supports searching across 
+multiple todo.txt files.
+
+Examples: >
+    " Show all tasks
+    :Ttodo
+
+    " Show tasks that are due in the next two weeks
+    :Ttodo due=2w
+
+    " Show tasks matching /@Test
+    :Ttodo /@Test
+
+
+-----------------------------------------------------------------------
+Install~
+
+To install the vimball, edit the vba file and type: >
+
+    :so %%
+
+See :help vimball for details.
+
+To install from github, please use a plugin manager like enable_vim, pathogen, 
+VAM, Vundle, NeoBundle, vim-plug, vim-unbundle etc. or simply git.
+
+Some features requires tlib_vim to be installed:
+https://github.com/tomtom/tlib_vim
+
+Also available via git: http://github.com/tomtom/ttodo_vim
+
+
+%s
