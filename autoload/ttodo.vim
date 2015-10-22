@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-10-22
-" @Revision:    119
+" @Revision:    126
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 115
@@ -77,6 +77,11 @@ if !exists('g:ttodo#parse_rx')
 endif
 
 
+if !exists('g:ttodo#rewrite_gsub')
+    let g:ttodo#rewrite_gsub = [['^\%((\u)\s\+\)\?\zs\d\{4}-\d\d-\d\d\s\+', '']]   "{{{2
+endif
+
+
 let s:ttodo_args = {
             \ 'help': ':Ttodo'
             \ }
@@ -95,7 +100,10 @@ function! s:GetTasks() abort "{{{3
     for file in s:GetFiles()
         let lnum = 1
         for line in readfile(file)
-            if (empty(g:ttodo#task_include_rx) || line =~ g:ttodo#task_include_rx) && (empty(g:ttodo#task_exclude_rx) || line !~ g:ttodo#task_exclude_rx)
+            if !empty(line) && (empty(g:ttodo#task_include_rx) || line =~ g:ttodo#task_include_rx) && (empty(g:ttodo#task_exclude_rx) || line !~ g:ttodo#task_exclude_rx)
+                for [rx, subst] in g:ttodo#rewrite_gsub
+                    let line = substitute(line, rx, subst, 'g')
+                endfor
                 call add(qfl, {"filename": file, "lnum": lnum, "text": line, "task": s:ParseTask(line)})
             endif
             let lnum += 1
