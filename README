@@ -7,10 +7,16 @@ Examples: >
     :Ttodo
 
     " Show tasks that are due in the next two weeks
-    :Ttodo due=2w
+    :Ttodo --due=2w
 
     " Show tasks matching /@Test
-    :Ttodo /@Test
+    :Ttodo @Test
+
+The tlib_vim plugin is required:
+https://github.com/tomtom/tlib_vim
+
+For improved user experience, install trag_vim:
+https://github.com/tomtom/trag_vim
 
 
 -----------------------------------------------------------------------
