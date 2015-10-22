@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-10-21
-" @Revision:    102
+" @Last Change: 2015-10-22
+" @Revision:    117
 
 
 if !exists('g:ttodo#dirs')
@@ -68,6 +68,11 @@ if !exists('g:ttodo#parse_rx')
 endif
 
 
+let s:ttodo_args = {
+            \ 'help': ':Ttodo'
+            \ }
+
+
 function! s:GetFiles() abort "{{{3
     let path = join(g:ttodo#dirs, ',')
     let files = split(globpath(path, g:ttodo#pattern), '\n')
@@ -130,6 +135,9 @@ function! s:FilterTasks(args) abort "{{{3
     if !get(a:args, 'done', 0)
         call filter(tasks, 'empty(v:val.task.done)')
     endif
+    if has_key(a:args, 'pri')
+        call filter(tasks, 'get(v:val.task, "pri", g:ttodo#default_pri) =~# ''^['. a:args.pri .']$''')
+    endif
     return tasks
 endf
 
@@ -156,8 +164,8 @@ function! s:SortTask(a, b) abort "{{{3
 endf
 
 
-function! ttodo#Show(bang, qargs) abort "{{{3
-    let args = tlib#arg#StringAsKeyArgsEqual(a:qargs)
+function! ttodo#Show(bang, ...) abort "{{{3
+    let args = tlib#arg#GetOpts(a:000, s:ttodo_args)
     if has_key(args, "0") && has_key(g:ttodo#prefs, args['0'])
         let args = extend(copy(g:ttodo#prefs[args['0']]), args)
     else
