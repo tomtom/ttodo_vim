@@ -28,8 +28,11 @@ See :help vimball for details.
 To install from github, please use a plugin manager like enable_vim, pathogen, 
 VAM, Vundle, NeoBundle, vim-plug, vim-unbundle etc. or simply git.
 
-Some features requires tlib_vim to be installed:
+The tlib_vim plugin is required:
 https://github.com/tomtom/tlib_vim
+
+For improved user experience, install trag_vim:
+https://github.com/tomtom/trag_vim
 
 Also available via git: http://github.com/tomtom/ttodo_vim
 

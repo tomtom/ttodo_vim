@@ -1,4 +1,24 @@
+This plugin provides the |:Ttodo| command that allow easy filtering and viewing 
+of todo.txt files via |tlib#input#List()|. The plugin supports searching across 
+multiple todo.txt files.
+
+Examples: >
+    " Show all tasks
+    :Ttodo
+
+    " Show tasks that are due in the next two weeks
+    :Ttodo due=2w
+
+    " Show tasks matching /@Test
+    :Ttodo /@Test
+
+
+-----------------------------------------------------------------------
+
 Status:  Experimental
+Dependencies:
+  tlib :: http://github.com/tomtom/tlib_vim
+      > git clone git://github.com/tomtom/tlib_vim.git
 Install: See http://github.com/tomtom/vimtlib/blob/master/INSTALL.TXT
 See http://github.com/tomtom for related plugins.
 

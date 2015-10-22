@@ -2,7 +2,16 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-10-22
-" @Revision:    117
+" @Revision:    119
+
+
+if !exists('g:loaded_tlib') || g:loaded_tlib < 115
+    runtime plugin/tlib.vim
+    if !exists('g:loaded_tlib') || g:loaded_tlib < 115
+        echoerr 'tlib >= 1.15 is required'
+        finish
+    endif
+endif
 
 
 if !exists('g:ttodo#dirs')
@@ -192,7 +201,7 @@ function! ttodo#Show(bang, ...) abort "{{{3
             call setqflist(qfl)
             exec g:ttodo#cwindow
         else
-            throw 'TTodo: Unsupported value for g:ttodo#cwindow: '. string(g.ttodo#cwindow)
+            throw 'TTodo: Unsupported value for g:ttodo#cwindow: '. string(g:ttodo#cwindow)
         endif
     endif
 endf
