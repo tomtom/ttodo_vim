@@ -10,10 +10,16 @@ Examples: >
     :Ttodo
 
     " Show tasks that are due in the next two weeks
-    :Ttodo due=2w
+    :Ttodo --due=2w
 
-    " Show tasks matching /@Test
-    :Ttodo /@Test
+    " Show tasks matching @Test
+    :Ttodo @Test
+
+The tlib_vim plugin is required:
+https://github.com/tomtom/tlib_vim
+
+For improved user experience, install trag_vim:
+https://github.com/tomtom/trag_vim
 
 
 -----------------------------------------------------------------------
@@ -27,12 +33,6 @@ See :help vimball for details.
 
 To install from github, please use a plugin manager like enable_vim, pathogen, 
 VAM, Vundle, NeoBundle, vim-plug, vim-unbundle etc. or simply git.
-
-The tlib_vim plugin is required:
-https://github.com/tomtom/tlib_vim
-
-For improved user experience, install trag_vim:
-https://github.com/tomtom/trag_vim
 
 Also available via git: http://github.com/tomtom/ttodo_vim
 
@@ -53,6 +53,7 @@ Contents~
         g:ttodo#default_pri ....... |g:ttodo#default_pri|
         g:ttodo#default_due ....... |g:ttodo#default_due|
         g:ttodo#parse_rx .......... |g:ttodo#parse_rx|
+        g:ttodo#rewrite_gsub ...... |g:ttodo#rewrite_gsub|
         ttodo#Show ................ |ttodo#Show()|
 
 
@@ -123,6 +124,9 @@ g:ttodo#default_due            (default: strftime(g:ttodo#date_format, localtime
 
                                                     *g:ttodo#parse_rx*
 g:ttodo#parse_rx               (default: {'due': '\<due:\zs'. g:ttodo#date_rx .'\>', 't': '\<t:\zs'. g:ttodo#date_rx .'\>', 'pri': '^(\zs\u\ze)', 'done?': '^\cx\ze\s'})
+
+                                                    *g:ttodo#rewrite_gsub*
+g:ttodo#rewrite_gsub           (default: [['^\%((\u)\s\+\)\?\zs\d\{4}-\d\d-\d\d\s\+', '']])
 
                                                     *ttodo#Show()*
 ttodo#Show(bang, ...)

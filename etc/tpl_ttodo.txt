@@ -12,7 +12,7 @@ Examples: >
     " Show tasks that are due in the next two weeks
     :Ttodo --due=2w
 
-    " Show tasks matching /@Test
+    " Show tasks matching @Test
     :Ttodo @Test
 
 The tlib_vim plugin is required:
