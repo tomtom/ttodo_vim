@@ -1,0 +1,129 @@
+*ttodo.txt*         Filtering and viewing todo.txt files
+                    Author: Tom Link, micathom at gmail com
+
+This plugin provides the |:Ttodo| command that allow easy filtering and viewing 
+of todo.txt files via |tlib#input#List()|. The plugin supports searching across 
+multiple todo.txt files.
+
+Examples: >
+    " Show all tasks
+    :Ttodo
+
+    " Show tasks that are due in the next two weeks
+    :Ttodo due=2w
+
+    " Show tasks matching /@Test
+    :Ttodo /@Test
+
+
+-----------------------------------------------------------------------
+Install~
+
+To install the vimball, edit the vba file and type: >
+
+    :so %
+
+See :help vimball for details.
+
+To install from github, please use a plugin manager like enable_vim, pathogen, 
+VAM, Vundle, NeoBundle, vim-plug, vim-unbundle etc. or simply git.
+
+Some features requires tlib_vim to be installed:
+https://github.com/tomtom/tlib_vim
+
+Also available via git: http://github.com/tomtom/ttodo_vim
+
+
+========================================================================
+Contents~
+
+        :Ttodo .................... |:Ttodo|
+        g:ttodo#dirs .............. |g:ttodo#dirs|
+        g:ttodo#pattern ........... |g:ttodo#pattern|
+        g:ttodo#exclude_rx ........ |g:ttodo#exclude_rx|
+        g:ttodo#task_include_rx ... |g:ttodo#task_include_rx|
+        g:ttodo#task_exclude_rx ... |g:ttodo#task_exclude_rx|
+        g:ttodo#cwindow ........... |g:ttodo#cwindow|
+        g:ttodo#prefs ............. |g:ttodo#prefs|
+        g:ttodo#date_rx ........... |g:ttodo#date_rx|
+        g:ttodo#date_format ....... |g:ttodo#date_format|
+        g:ttodo#default_pri ....... |g:ttodo#default_pri|
+        g:ttodo#default_due ....... |g:ttodo#default_due|
+        g:ttodo#parse_rx .......... |g:ttodo#parse_rx|
+        ttodo#Show ................ |ttodo#Show()|
+
+
+========================================================================
+plugin/ttodo.vim~
+
+                                                    *:Ttodo*
+:Ttodo [ARGS] [INITIAL FILTER]
+
+    ARGS is an argument list. The following arguments are supported:
+      --pref=PREF ... PREF is the name of a preferences set in 
+                      |g:ttodo#prefs| (default: "default")
+      --due=DATE .... show only tasks with due dates >= DATE. DATE can be
+                      - a DATE in the form YYYY-MM-DD or
+                      - a number of days or
+                      - a number of weeks as in "4w"
+                      (default: |g:ttodo#default_due|)
+      --pri=PRI ..... Show tasks with a priority matching [PRI] (see 
+                      |/[]|)
+      --undated ..... Show tasks with no due dates when using the due 
+                      argument
+      --done ........ Show done tasks
+
+    INITIAL FILTER is a |regexp| for filtering the task list. The 
+    interpretation of INITIAL FILTER depends on the value of 
+    |g:tlib#input#filter_mode|. The INITIAL FILTER is only effective if 
+    |g.ttodo#cwindow| is "trag".
+
+    NOTE: The use of INITIAL FILTER requires the trag_vim plugin to be 
+    installed.
+
+
+========================================================================
+autoload/ttodo.vim~
+
+                                                    *g:ttodo#dirs*
+g:ttodo#dirs                   (default: [])
+
+                                                    *g:ttodo#pattern*
+g:ttodo#pattern                (default: '*.txt')
+
+                                                    *g:ttodo#exclude_rx*
+g:ttodo#exclude_rx             (default: '[\/]done\.txt$')
+
+                                                    *g:ttodo#task_include_rx*
+g:ttodo#task_include_rx        (default: '')
+
+                                                    *g:ttodo#task_exclude_rx*
+g:ttodo#task_exclude_rx        (default: '')
+
+                                                    *g:ttodo#cwindow*
+g:ttodo#cwindow                (default: exists(':Tragcw') == 2 ? 'trag' : ':cwindow')
+
+                                                    *g:ttodo#prefs*
+g:ttodo#prefs                  (default: {'default': {'done': 0}})
+
+                                                    *g:ttodo#date_rx*
+g:ttodo#date_rx                (default: '\<\d\{4}-\d\d-\d\d\>')
+
+                                                    *g:ttodo#date_format*
+g:ttodo#date_format            (default: '%Y-%m-%d')
+
+                                                    *g:ttodo#default_pri*
+g:ttodo#default_pri            (default: 'T')
+
+                                                    *g:ttodo#default_due*
+g:ttodo#default_due            (default: strftime(g:ttodo#date_format, localtime() + g:tlib#date#dayshift * 14))
+
+                                                    *g:ttodo#parse_rx*
+g:ttodo#parse_rx               (default: {'due': '\<due:\zs'. g:ttodo#date_rx .'\>', 't': '\<t:\zs'. g:ttodo#date_rx .'\>', 'pri': '^(\zs\u\ze)', 'done?': '^\cx\ze\s'})
+
+                                                    *ttodo#Show()*
+ttodo#Show(bang, ...)
+
+
+
+vim:tw=78:fo=w2croql:isk=!-~,^*,^|,^":ts=8:ft=help:norl:
