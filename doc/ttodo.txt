@@ -6,8 +6,11 @@ of todo.txt files via |tlib#input#List()|. The plugin supports searching across
 multiple todo.txt files.
 
 Examples: >
-    " Show all tasks
+    " Show all tasks; default map (|g:ttodo_nmap|): <Leader>1
     :Ttodo
+
+    " Show important tasks; default map (|g:ttodo_nmap_important|): <Leader>!
+    :Ttodo!
 
     " Show tasks that are due in the next two weeks
     :Ttodo --due=2w
@@ -40,13 +43,15 @@ Also available via git: http://github.com/tomtom/ttodo_vim
 ========================================================================
 Contents~
 
+        g:ttodo_nmap .............. |g:ttodo_nmap|
+        g:ttodo_nmap_important .... |g:ttodo_nmap_important|
         :Ttodo .................... |:Ttodo|
         g:ttodo#dirs .............. |g:ttodo#dirs|
-        g:ttodo#pattern ........... |g:ttodo#pattern|
-        g:ttodo#exclude_rx ........ |g:ttodo#exclude_rx|
+        g:ttodo#file_pattern ...... |g:ttodo#file_pattern|
+        g:ttodo#file_exclude_rx ... |g:ttodo#file_exclude_rx|
         g:ttodo#task_include_rx ... |g:ttodo#task_include_rx|
         g:ttodo#task_exclude_rx ... |g:ttodo#task_exclude_rx|
-        g:ttodo#cwindow ........... |g:ttodo#cwindow|
+        g:ttodo#viewer ............ |g:ttodo#viewer|
         g:ttodo#prefs ............. |g:ttodo#prefs|
         g:ttodo#date_rx ........... |g:ttodo#date_rx|
         g:ttodo#date_format ....... |g:ttodo#date_format|
@@ -60,10 +65,20 @@ Contents~
 ========================================================================
 plugin/ttodo.vim~
 
+                                                    *g:ttodo_nmap*
+g:ttodo_nmap                   (default: '<Leader>1')
+
+                                                    *g:ttodo_nmap_important*
+g:ttodo_nmap_important         (default: '<Leader>!')
+
                                                     *:Ttodo*
-:Ttodo [ARGS] [INITIAL FILTER]
+:Ttodo[!] [ARGS] [INITIAL FILTER]
 
     ARGS is an argument list. The following arguments are supported:
+      --path=PATH ... Search files in this path (default: use 
+                      |g:ttodo#dirs|)
+      --pattern=PAT . Search files matching this pattern (default: 
+                      |g:ttodo#file_pattern|)
       --pref=PREF ... PREF is the name of a preferences set in 
                       |g:ttodo#prefs| (default: "default")
       --due=DATE .... show only tasks with due dates >= DATE. DATE can be
@@ -77,10 +92,12 @@ plugin/ttodo.vim~
                       argument
       --done ........ Show done tasks
 
+    When the [!] is included show only important tasks.
+
     INITIAL FILTER is a |regexp| for filtering the task list. The 
     interpretation of INITIAL FILTER depends on the value of 
-    |g:tlib#input#filter_mode|. The INITIAL FILTER is only effective if 
-    |g.ttodo#cwindow| is "trag".
+    |g:tlib#input#filter_mode|. The format of INITIAL FILTER depends on 
+    the value of |g:ttodo#viewer|.
 
     NOTE: The use of INITIAL FILTER requires the trag_vim plugin to be 
     installed.
@@ -92,11 +109,11 @@ autoload/ttodo.vim~
                                                     *g:ttodo#dirs*
 g:ttodo#dirs                   (default: [])
 
-                                                    *g:ttodo#pattern*
-g:ttodo#pattern                (default: '*.txt')
+                                                    *g:ttodo#file_pattern*
+g:ttodo#file_pattern           (default: '*.txt')
 
-                                                    *g:ttodo#exclude_rx*
-g:ttodo#exclude_rx             (default: '[\/]done\.txt$')
+                                                    *g:ttodo#file_exclude_rx*
+g:ttodo#file_exclude_rx        (default: '[\/]done\.txt$')
 
                                                     *g:ttodo#task_include_rx*
 g:ttodo#task_include_rx        (default: '')
@@ -104,11 +121,17 @@ g:ttodo#task_include_rx        (default: '')
                                                     *g:ttodo#task_exclude_rx*
 g:ttodo#task_exclude_rx        (default: '')
 
-                                                    *g:ttodo#cwindow*
-g:ttodo#cwindow                (default: exists(':Tragcw') == 2 ? 'trag' : ':cwindow')
+                                                    *g:ttodo#viewer*
+g:ttodo#viewer                 (default: exists(':Tragcw') == 2 ? 'trag' : ':cwindow')
+    Supported values:
+      trag ...... Use the trag_vim plugin; the syntax of |:Ttodo|'s 
+                  initial filter depends on the value of 
+                  |g:tlib#input#filter_mode|
+      :COMMAND .. E.g. `:cwindow`. In this case initial filter is a 
+                  standard |regexp|.
 
                                                     *g:ttodo#prefs*
-g:ttodo#prefs                  (default: {'default': {'done': 0}})
+g:ttodo#prefs                  (default: {'default': {'done': 0}, 'important': {'done': 0, 'due': '1w', 'pri': 'A-C'}})
 
                                                     *g:ttodo#date_rx*
 g:ttodo#date_rx                (default: '\<\d\{4}-\d\d-\d\d\>')
@@ -129,7 +152,7 @@ g:ttodo#parse_rx               (default: {'due': '\<due:\zs'. g:ttodo#date_rx .'
 g:ttodo#rewrite_gsub           (default: [['^\%((\u)\s\+\)\?\zs\d\{4}-\d\d-\d\d\s\+', '']])
 
                                                     *ttodo#Show()*
-ttodo#Show(bang, ...)
+ttodo#Show(bang, args)
 
 
 

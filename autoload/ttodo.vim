@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-10-22
-" @Revision:    126
+" @Last Change: 2015-10-23
+" @Revision:    160
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 115
@@ -22,13 +22,13 @@ if !exists('g:ttodo#dirs')
 endif
 
 
-if !exists('g:ttodo#pattern')
-    let g:ttodo#pattern = '*.txt'   "{{{2
+if !exists('g:ttodo#file_pattern')
+    let g:ttodo#file_pattern = '*.txt'   "{{{2
 endif
 
 
-if !exists('g:ttodo#exclude_rx')
-    let g:ttodo#exclude_rx = '[\/]done\.txt$'   "{{{2
+if !exists('g:ttodo#file_exclude_rx')
+    let g:ttodo#file_exclude_rx = '[\/]done\.txt$'   "{{{2
 endif
 
 
@@ -42,13 +42,22 @@ if !exists('g:ttodo#task_exclude_rx')
 endif
 
 
-if !exists('g:ttodo#cwindow')
-    let g:ttodo#cwindow = exists(':Tragcw') == 2 ? 'trag' : ':cwindow'   "{{{2
+if !exists('g:ttodo#viewer')
+    " Supported values:
+    "   trag ...... Use the trag_vim plugin; the syntax of |:Ttodo|'s 
+    "               initial filter depends on the value of 
+    "               |g:tlib#input#filter_mode|
+    "   :COMMAND .. E.g. `:cwindow`. In this case initial filter is a 
+    "               standard |regexp|.
+    let g:ttodo#viewer = exists(':Tragcw') == 2 ? 'trag' : ':cwindow'   "{{{2
 endif
 
 
 if !exists('g:ttodo#prefs')
-    let g:ttodo#prefs = {'default': {'done': 0}}   "{{{2
+    let g:ttodo#prefs = {'default': {'done': 0}, 'important': {'done': 0, 'due': '1w', 'pri': 'A-C'}}   "{{{2
+    if exists('g:ttodo#prefs_user')
+        let g:ttodo#prefs = extend(g:ttodo#prefs, g:ttodo#prefs_user)
+    endif
 endif
 
 
@@ -87,24 +96,25 @@ let s:ttodo_args = {
             \ }
 
 
-function! s:GetFiles() abort "{{{3
-    let path = join(g:ttodo#dirs, ',')
-    let files = split(globpath(path, g:ttodo#pattern), '\n')
-    let files = filter(files, 'v:val !~# g:ttodo#exclude_rx')
+function! s:GetFiles(args) abort "{{{3
+    let path = get(a:args, 'path', join(g:ttodo#dirs, ','))
+    let pattern = get(a:args, 'pattern', g:ttodo#file_pattern)
+    let files = split(globpath(path, pattern), '\n')
+    let files = filter(files, 'v:val !~# g:ttodo#file_exclude_rx')
     return files
 endf
 
 
-function! s:GetTasks() abort "{{{3
+function! s:GetTasks(args) abort "{{{3
     let qfl = []
-    for file in s:GetFiles()
+    for file in s:GetFiles(a:args)
         let lnum = 1
         for line in readfile(file)
             if !empty(line) && (empty(g:ttodo#task_include_rx) || line =~ g:ttodo#task_include_rx) && (empty(g:ttodo#task_exclude_rx) || line !~ g:ttodo#task_exclude_rx)
                 for [rx, subst] in g:ttodo#rewrite_gsub
                     let line = substitute(line, rx, subst, 'g')
                 endfor
-                call add(qfl, {"filename": file, "lnum": lnum, "text": line, "task": s:ParseTask(line)})
+                call add(qfl, {"filename": file, "lnum": lnum, "text": line, "task": s:ParseTask(a:args, line)})
             endif
             let lnum += 1
         endfor
@@ -113,7 +123,7 @@ function! s:GetTasks() abort "{{{3
 endf
 
 
-function! s:ParseTask(task) abort "{{{3
+function! s:ParseTask(args, task) abort "{{{3
     let task = {'text': a:task}
     for [key, rx] in items(g:ttodo#parse_rx)
         let val = matchstr(a:task, rx)
@@ -131,26 +141,26 @@ endf
 
 
 function! s:FilterTasks(args) abort "{{{3
-    let tasks = s:GetTasks()
+    let tasks = s:GetTasks(a:args)
     if has_key(a:args, 'due')
         let due = a:args.due
         let today = strftime(g:ttodo#date_format)
         if due =~ '^t%\[oday]$'
-            call filter(tasks, 'empty(v:val.task.due) || v:val.task.due <= '. string(today))
+            call filter(tasks, 'empty(get(v:val.task, "due", "")) || get(v:val.task, "due", "") <= '. string(today))
         elseif due =~ '^\d\+-\d\+-\d\+$'
-            call filter(tasks, 'empty(v:val.task.due) || v:val.task.due <= '. string(due))
+            call filter(tasks, 'empty(get(v:val.task, "due", "")) || get(v:val.task, "due", "") <= '. string(due))
         else
             if due =~ '^\d\+w$'
                 let due = matchstr(due, '^\d\+') * 7
             endif
-            call filter(tasks, 'empty(v:val.task.due) || tlib#date#DiffInDays(v:val.task.due) <= '. due)
+            call filter(tasks, 'empty(get(v:val.task, "due", "")) || tlib#date#DiffInDays(v:val.task.due) <= '. due)
         endif
         if !get(a:args, 'undated', 0)
-            call filter(tasks, 'empty(v:val.task.due)')
+            call filter(tasks, '!empty(get(v:val.task, "due", ""))')
         endif
     endif
     if !get(a:args, 'done', 0)
-        call filter(tasks, 'empty(v:val.task.done)')
+        call filter(tasks, 'empty(get(v:val.task, "done", ""))')
     endif
     if has_key(a:args, 'pri')
         call filter(tasks, 'get(v:val.task, "pri", g:ttodo#default_pri) =~# ''^['. a:args.pri .']$''')
@@ -159,7 +169,7 @@ function! s:FilterTasks(args) abort "{{{3
 endf
 
 
-function! s:SortTasks(qfl) abort "{{{3
+function! s:SortTasks(args, qfl) abort "{{{3
     " TLogVAR a:qfl
     let qfl = sort(a:qfl, 's:SortTask')
     return qfl
@@ -181,36 +191,42 @@ function! s:SortTask(a, b) abort "{{{3
 endf
 
 
-function! ttodo#Show(bang, ...) abort "{{{3
-    let args = tlib#arg#GetOpts(a:000, s:ttodo_args)
-    if has_key(args, "0") && has_key(g:ttodo#prefs, args['0'])
-        let args = extend(copy(g:ttodo#prefs[args['0']]), args)
-    else
-        let args = extend(copy(g:ttodo#prefs['default']), args)
-    endif
+function! ttodo#Show(bang, args) abort "{{{3
+    let args = tlib#arg#GetOpts(a:args, s:ttodo_args)
+    " TLogVAR args
+    let pref = get(args, 'pref', a:bang ? 'important' : 'default')
+    let args = extend(copy(g:ttodo#prefs[pref]), args)
     let qfl = s:FilterTasks(args)
-    let qfl = s:SortTasks(qfl)
+    let qfl = s:SortTasks(args, qfl)
+    let flt = get(args, '__rest__', [])
     if !empty(qfl)
-        if g:ttodo#cwindow ==# 'trag'
+        if g:ttodo#viewer ==# 'trag'
             let w = {}
-            if has_key(args, '__posargs__')
-                let flt = map(copy(args.__posargs__), 'args[v:val]')
-                for i in range(len(flt))
-                    if flt[i] =~# '^/'
-                        let flt = flt[i : -1]
-                        let flt[0] = substitute(flt[0], '^/', '', '')
-                        let w.initial_filter = [flt]
-                    endif
-                endfor
+            if !empty(flt)
+                let w.initial_filter = [flt]
             endif
             " TLogVAR w, qfl
             call trag#BrowseList(w, qfl)
-        elseif g:ttodo#cwindow =~# '^:'
+        elseif g:ttodo#viewer =~# '^:'
+            if !empty(flt)
+                let qfl = filter(qfl, 's:FilterQFL(v:val, flt)')
+            endif
             call setqflist(qfl)
-            exec g:ttodo#cwindow
+            exec g:ttodo#viewer
         else
-            throw 'TTodo: Unsupported value for g:ttodo#cwindow: '. string(g:ttodo#cwindow)
+            throw 'TTodo: Unsupported value for g:ttodo#viewer: '. string(g:ttodo#viewer)
         endif
     endif
+endf
+
+
+function! s:FilterQFL(item, flts) abort "{{{3
+    let text = a:item.text
+    for flt in a:flts
+        if text !~ flt
+            return 0
+        endif
+    endfor
+    return 1
 endf
 
