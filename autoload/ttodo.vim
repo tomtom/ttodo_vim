@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-10-23
-" @Revision:    160
+" @Last Change: 2015-10-24
+" @Revision:    192
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 115
@@ -105,19 +105,35 @@ function! s:GetFiles(args) abort "{{{3
 endf
 
 
+function! ttodo#GetFileTasks(args, file) abort "{{{3
+    let qfl = []
+    let lnum = 0
+    for line in readfile(a:file)
+        let lnum += 1
+        for [rx, subst] in g:ttodo#rewrite_gsub
+            let line = substitute(line, rx, subst, 'g')
+        endfor
+        call add(qfl, {"filename": a:file, "lnum": lnum, "text": line, "task": s:ParseTask(a:args, line)})
+    endfor
+    return qfl
+endf
+
+
+function! s:GetFileTasks(args, file) abort "{{{3
+    let cfile = tlib#cache#Filename('ttodo_tasks', a:file, 1)
+    let fqfl = tlib#cache#Value(cfile, 'ttodo#GetFileTasks', getftime(a:file), [a:args, a:file], {'in_memory': 1})
+    return fqfl
+endf
+
+
 function! s:GetTasks(args) abort "{{{3
     let qfl = []
     for file in s:GetFiles(a:args)
-        let lnum = 1
-        for line in readfile(file)
-            if !empty(line) && (empty(g:ttodo#task_include_rx) || line =~ g:ttodo#task_include_rx) && (empty(g:ttodo#task_exclude_rx) || line !~ g:ttodo#task_exclude_rx)
-                for [rx, subst] in g:ttodo#rewrite_gsub
-                    let line = substitute(line, rx, subst, 'g')
-                endfor
-                call add(qfl, {"filename": file, "lnum": lnum, "text": line, "task": s:ParseTask(a:args, line)})
-            endif
-            let lnum += 1
-        endfor
+        let fqfl = s:GetFileTasks(a:args, file)
+        let fqfl = filter(copy(fqfl), '!empty(v:val.text) && (empty(g:ttodo#task_include_rx) || v:val.text =~ g:ttodo#task_include_rx) && (empty(g:ttodo#task_exclude_rx) || v:val.text !~ g:ttodo#task_exclude_rx)')
+        if !empty(fqfl)
+            let qfl = extend(qfl, fqfl) 
+        endif
     endfor
     return qfl
 endf
@@ -228,5 +244,26 @@ function! s:FilterQFL(item, flts) abort "{{{3
         endif
     endfor
     return 1
+endf
+
+
+function! ttodo#CComplete(ArgLead, CmdLine, CursorPos) abort "{{{3
+    " let lead = matchstr(a:ArgLead, '\w\+$')
+    let lead = a:ArgLead
+    if empty(lead)
+        return []
+    else
+        let words = {'-h': 1, '--help': 1, '--path=': 1, '--pri=': 1, '--pref=': 1, '--due=': 1, '--undated': 1, '--done': 1}
+        let nchar = len(lead)
+        call filter(words, 'strpart(v:key, 0, nchar) ==# lead')
+        for task in s:GetTasks({})
+            for word in split(task.text, '\s\+')
+                if strpart(word, 0, nchar) ==# lead
+                    let words[word] = 1
+                endif
+            endfor
+        endfor
+        return sort(keys(words))
+    endif
 endf
 
