@@ -21,6 +21,23 @@ Examples: >
 The tlib_vim plugin is required:
 https://github.com/tomtom/tlib_vim
 
+NOTE: This plugins doesn't provide a ftplugin for todo.txt files. For this 
+purpose use one of:
+
+    - https://github.com/freitass/todo.txt-vim
+        - todo-txt.vim : Vim plugin for Todo.txt 
+          https://github.com/dbeniamine/todo.txt-vim or
+          http://www.vim.org/scripts/script.php?script_id=5134
+    - https://github.com/mivok/vimtodo or
+      http://www.vim.org/scripts/script.php?script_id=3264
+    - https://github.com/davidoc/todo.txt-vim
+        - My fork: https://github.com/tomtom/todo.txt-vim-1
+    - https://github.com/dsiroky/vim-todotxt
+    - ...
+
+Related work:
+    - https://github.com/elentok/todo.vim
+
 
 -----------------------------------------------------------------------
 Install~
