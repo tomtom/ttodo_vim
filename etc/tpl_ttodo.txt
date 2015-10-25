@@ -15,6 +15,9 @@ Examples: >
     " Show tasks that are due in the next two weeks
     :Ttodo --due=2w
 
+    " Show tasks with priorities A to C
+    :Ttodo --pri=A-C
+
     " Show tasks matching @Test
     :Ttodo @Test
 

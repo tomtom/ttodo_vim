@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-10-25
-" @Revision:    203
+" @Revision:    207
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 115
@@ -100,7 +100,9 @@ function! s:GetFiles(args) abort "{{{3
     let path = get(a:args, 'path', join(g:ttodo#dirs, ','))
     let pattern = get(a:args, 'pattern', g:ttodo#file_pattern)
     let files = split(globpath(path, pattern), '\n')
-    let files = filter(files, 'v:val !~# g:ttodo#file_exclude_rx')
+    let task_include_rx = get(a:args, 'task_include_rx', g:ttodo#task_include_rx)
+    let file_exclude_rx = get(a:args, 'file_exclude_rx', g:ttodo#file_exclude_rx)
+    let files = filter(files, 'v:val !~# file_exclude_rx')
     return files
 endf
 
@@ -128,9 +130,11 @@ endf
 
 function! s:GetTasks(args) abort "{{{3
     let qfl = []
+    let task_include_rx = get(a:args, 'task_include_rx', g:ttodo#task_include_rx)
+    let task_exclude_rx = get(a:args, 'task_exclude_rx', g:ttodo#task_exclude_rx)
     for file in s:GetFiles(a:args)
         let fqfl = s:GetFileTasks(a:args, file)
-        let fqfl = filter(copy(fqfl), '!empty(v:val.text) && (empty(g:ttodo#task_include_rx) || v:val.text =~ g:ttodo#task_include_rx) && (empty(g:ttodo#task_exclude_rx) || v:val.text !~ g:ttodo#task_exclude_rx)')
+        let fqfl = filter(copy(fqfl), '!empty(v:val.text) && (empty(task_include_rx) || v:val.text =~ task_include_rx) && (empty(task_exclude_rx) || v:val.text !~ task_exclude_rx)')
         if !empty(fqfl)
             let qfl = extend(qfl, fqfl) 
         endif

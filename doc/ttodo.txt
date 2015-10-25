@@ -15,6 +15,9 @@ Examples: >
     " Show tasks that are due in the next two weeks
     :Ttodo --due=2w
 
+    " Show tasks with priorities A to C
+    :Ttodo --pri=A-C
+
     " Show tasks matching @Test
     :Ttodo @Test
 
@@ -91,10 +94,6 @@ g:ttodo_nmap_important         (default: '<Leader>!')
 :Ttodo[!] [ARGS] [INITIAL FILTER]
 
     ARGS is an argument list. The following arguments are supported:
-      --path=PATH ... Search files in this path (default: use 
-                      |g:ttodo#dirs|)
-      --pattern=PAT . Search files matching this pattern (default: 
-                      |g:ttodo#file_pattern|)
       --pref=PREF ... PREF is the name of a preferences set in 
                       |g:ttodo#prefs| (default: "default")
       --due=DATE .... show only tasks with due dates >= DATE. DATE can be
@@ -108,6 +107,13 @@ g:ttodo_nmap_important         (default: '<Leader>!')
                       argument
       --done ........ Show done tasks
       --hidden ...... Show hidden tasks (h:1)
+      --path=PATH ... Search files in this path (default: use 
+                      |g:ttodo#dirs|)
+      --pattern=PAT . Search files matching this pattern (default: 
+                      |g:ttodo#file_pattern|)
+      --file_exclude_rx=RX ... Default: |g:ttodo#file_exclude_rx|
+      --task_include_rx=RX ... Default: |g:ttodo#task_include_rx|
+      --task_exclude_rx=RX ... Default: |g:ttodo#task_exclude_rx|
 
     When the [!] is included show only important tasks.
 

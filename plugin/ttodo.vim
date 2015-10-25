@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-10-25
-" @Revision:    45
+" @Revision:    48
 " GetLatestVimScripts: 0 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -27,10 +27,6 @@ endif
 " :display: :Ttodo[!] [ARGS] [INITIAL FILTER]
 "
 " ARGS is an argument list. The following arguments are supported:
-"   --path=PATH ... Search files in this path (default: use 
-"                   |g:ttodo#dirs|)
-"   --pattern=PAT . Search files matching this pattern (default: 
-"                   |g:ttodo#file_pattern|)
 "   --pref=PREF ... PREF is the name of a preferences set in 
 "                   |g:ttodo#prefs| (default: "default")
 "   --due=DATE .... show only tasks with due dates >= DATE. DATE can be
@@ -44,6 +40,13 @@ endif
 "                   argument
 "   --done ........ Show done tasks
 "   --hidden ...... Show hidden tasks (h:1)
+"   --path=PATH ... Search files in this path (default: use 
+"                   |g:ttodo#dirs|)
+"   --pattern=PAT . Search files matching this pattern (default: 
+"                   |g:ttodo#file_pattern|)
+"   --file_exclude_rx=RX ... Default: |g:ttodo#file_exclude_rx|
+"   --task_include_rx=RX ... Default: |g:ttodo#task_include_rx|
+"   --task_exclude_rx=RX ... Default: |g:ttodo#task_exclude_rx|
 "
 " When the [!] is included show only important tasks.
 " 
