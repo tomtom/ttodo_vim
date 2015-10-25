@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-10-24
-" @Revision:    201
+" @Last Change: 2015-10-25
+" @Revision:    203
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 115
@@ -222,7 +222,7 @@ function! ttodo#Show(bang, args) abort "{{{3
         if g:ttodo#viewer ==# 'tlib'
             let w = {}
             if !empty(flt)
-                let w.initial_filter = [flt]
+                let w.initial_filter = [[""], flt]
             endif
             " TLogVAR w, qfl
             call tlib#qfl#QflList(qfl, w)
