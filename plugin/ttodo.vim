@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-10-24
-" @Revision:    43
+" @Last Change: 2015-10-25
+" @Revision:    45
 " GetLatestVimScripts: 0 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -43,6 +43,7 @@ endif
 "   --undated ..... Show tasks with no due dates when using the due 
 "                   argument
 "   --done ........ Show done tasks
+"   --hidden ...... Show hidden tasks (h:1)
 "
 " When the [!] is included show only important tasks.
 " 
@@ -50,9 +51,6 @@ endif
 " interpretation of INITIAL FILTER depends on the value of 
 " |g:tlib#input#filter_mode|. The format of INITIAL FILTER depends on 
 " the value of |g:ttodo#viewer|.
-"
-" NOTE: The use of INITIAL FILTER requires the trag_vim plugin to be 
-" installed.
 command! -bang -nargs=* -complete=customlist,ttodo#CComplete Ttodo call ttodo#Show(!empty("<bang>"), [<f-args>])
 
 

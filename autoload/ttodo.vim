@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-10-24
-" @Revision:    192
+" @Revision:    201
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 115
@@ -44,17 +44,17 @@ endif
 
 if !exists('g:ttodo#viewer')
     " Supported values:
-    "   trag ...... Use the trag_vim plugin; the syntax of |:Ttodo|'s 
+    "   tlib ...... Use the tlib_vim plugin; the syntax of |:Ttodo|'s 
     "               initial filter depends on the value of 
     "               |g:tlib#input#filter_mode|
     "   :COMMAND .. E.g. `:cwindow`. In this case initial filter is a 
     "               standard |regexp|.
-    let g:ttodo#viewer = exists(':Tragcw') == 2 ? 'trag' : ':cwindow'   "{{{2
+    let g:ttodo#viewer = exists('g:loaded_tlib') ? 'tlib' : ':cwindow'   "{{{2
 endif
 
 
 if !exists('g:ttodo#prefs')
-    let g:ttodo#prefs = {'default': {'done': 0}, 'important': {'done': 0, 'due': '1w', 'pri': 'A-C'}}   "{{{2
+    let g:ttodo#prefs = {'default': {'hidden': 0, 'done': 0}, 'important': {'hidden': 0, 'done': 0, 'due': '1w', 'pri': 'A-C'}}   "{{{2
     if exists('g:ttodo#prefs_user')
         let g:ttodo#prefs = extend(g:ttodo#prefs, g:ttodo#prefs_user)
     endif
@@ -82,7 +82,7 @@ endif
 
 
 if !exists('g:ttodo#parse_rx')
-    let g:ttodo#parse_rx = {'due': '\<due:\zs'. g:ttodo#date_rx .'\>', 't': '\<t:\zs'. g:ttodo#date_rx .'\>', 'pri': '^(\zs\u\ze)', 'done?': '^\cx\ze\s'}   "{{{2
+    let g:ttodo#parse_rx = {'due': '\<due:\zs'. g:ttodo#date_rx .'\>', 't': '\<t:\zs'. g:ttodo#date_rx .'\>', 'pri': '^(\zs\u\ze)', 'hidden?': '\<h:1\>', 'done?': '^\Cx\ze\s'}   "{{{2
 endif
 
 
@@ -178,6 +178,9 @@ function! s:FilterTasks(args) abort "{{{3
     if !get(a:args, 'done', 0)
         call filter(tasks, 'empty(get(v:val.task, "done", ""))')
     endif
+    if !get(a:args, 'hidden', 0)
+        call filter(tasks, 'empty(get(v:val.task, "hidden", ""))')
+    endif
     if has_key(a:args, 'pri')
         call filter(tasks, 'get(v:val.task, "pri", g:ttodo#default_pri) =~# ''^['. a:args.pri .']$''')
     endif
@@ -216,13 +219,13 @@ function! ttodo#Show(bang, args) abort "{{{3
     let qfl = s:SortTasks(args, qfl)
     let flt = get(args, '__rest__', [])
     if !empty(qfl)
-        if g:ttodo#viewer ==# 'trag'
+        if g:ttodo#viewer ==# 'tlib'
             let w = {}
             if !empty(flt)
                 let w.initial_filter = [flt]
             endif
             " TLogVAR w, qfl
-            call trag#BrowseList(w, qfl)
+            call tlib#qfl#QflList(qfl, w)
         elseif g:ttodo#viewer =~# '^:'
             if !empty(flt)
                 let qfl = filter(qfl, 's:FilterQFL(v:val, flt)')
@@ -253,7 +256,11 @@ function! ttodo#CComplete(ArgLead, CmdLine, CursorPos) abort "{{{3
     if empty(lead)
         return []
     else
-        let words = {'-h': 1, '--help': 1, '--path=': 1, '--pri=': 1, '--pref=': 1, '--due=': 1, '--undated': 1, '--done': 1}
+        let words = {'-h': 1, '--help': 1
+                    \, '--path=': 1, '--pri=': 1, '--pref=': 1, '--due=': 1
+                    \, '--undated': 1, '--done': 1, '--hidden': 1
+                    \, '--no-undated': 1, '--no-done': 1, '--no-hidden': 1
+                    \ }
         let nchar = len(lead)
         call filter(words, 'strpart(v:key, 0, nchar) ==# lead')
         for task in s:GetTasks({})

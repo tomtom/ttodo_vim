@@ -21,9 +21,6 @@ Examples: >
 The tlib_vim plugin is required:
 https://github.com/tomtom/tlib_vim
 
-For improved user experience, install trag_vim:
-https://github.com/tomtom/trag_vim
-
 
 -----------------------------------------------------------------------
 Install~
@@ -59,7 +56,9 @@ Contents~
         g:ttodo#default_due ....... |g:ttodo#default_due|
         g:ttodo#parse_rx .......... |g:ttodo#parse_rx|
         g:ttodo#rewrite_gsub ...... |g:ttodo#rewrite_gsub|
+        ttodo#GetFileTasks ........ |ttodo#GetFileTasks()|
         ttodo#Show ................ |ttodo#Show()|
+        ttodo#CComplete ........... |ttodo#CComplete()|
 
 
 ========================================================================
@@ -91,6 +90,7 @@ g:ttodo_nmap_important         (default: '<Leader>!')
       --undated ..... Show tasks with no due dates when using the due 
                       argument
       --done ........ Show done tasks
+      --hidden ...... Show hidden tasks (h:1)
 
     When the [!] is included show only important tasks.
 
@@ -98,9 +98,6 @@ g:ttodo_nmap_important         (default: '<Leader>!')
     interpretation of INITIAL FILTER depends on the value of 
     |g:tlib#input#filter_mode|. The format of INITIAL FILTER depends on 
     the value of |g:ttodo#viewer|.
-
-    NOTE: The use of INITIAL FILTER requires the trag_vim plugin to be 
-    installed.
 
 
 ========================================================================
@@ -122,16 +119,16 @@ g:ttodo#task_include_rx        (default: '')
 g:ttodo#task_exclude_rx        (default: '')
 
                                                     *g:ttodo#viewer*
-g:ttodo#viewer                 (default: exists(':Tragcw') == 2 ? 'trag' : ':cwindow')
+g:ttodo#viewer                 (default: exists('g:loaded_tlib') ? 'tlib' : ':cwindow')
     Supported values:
-      trag ...... Use the trag_vim plugin; the syntax of |:Ttodo|'s 
+      tlib ...... Use the tlib_vim plugin; the syntax of |:Ttodo|'s 
                   initial filter depends on the value of 
                   |g:tlib#input#filter_mode|
       :COMMAND .. E.g. `:cwindow`. In this case initial filter is a 
                   standard |regexp|.
 
                                                     *g:ttodo#prefs*
-g:ttodo#prefs                  (default: {'default': {'done': 0}, 'important': {'done': 0, 'due': '1w', 'pri': 'A-C'}})
+g:ttodo#prefs                  (default: {'default': {'hidden': 0, 'done': 0}, 'important': {'hidden': 0, 'done': 0, 'due': '1w', 'pri': 'A-C'}})
 
                                                     *g:ttodo#date_rx*
 g:ttodo#date_rx                (default: '\<\d\{4}-\d\d-\d\d\>')
@@ -146,13 +143,19 @@ g:ttodo#default_pri            (default: 'T')
 g:ttodo#default_due            (default: strftime(g:ttodo#date_format, localtime() + g:tlib#date#dayshift * 14))
 
                                                     *g:ttodo#parse_rx*
-g:ttodo#parse_rx               (default: {'due': '\<due:\zs'. g:ttodo#date_rx .'\>', 't': '\<t:\zs'. g:ttodo#date_rx .'\>', 'pri': '^(\zs\u\ze)', 'done?': '^\cx\ze\s'})
+g:ttodo#parse_rx               (default: {'due': '\<due:\zs'. g:ttodo#date_rx .'\>', 't': '\<t:\zs'. g:ttodo#date_rx .'\>', 'pri': '^(\zs\u\ze)', 'hidden?': '\<h:1\>', 'done?': '^\Cx\ze\s'})
 
                                                     *g:ttodo#rewrite_gsub*
 g:ttodo#rewrite_gsub           (default: [['^\%((\u)\s\+\)\?\zs\d\{4}-\d\d-\d\d\s\+', '']])
 
+                                                    *ttodo#GetFileTasks()*
+ttodo#GetFileTasks(args, file)
+
                                                     *ttodo#Show()*
 ttodo#Show(bang, args)
+
+                                                    *ttodo#CComplete()*
+ttodo#CComplete(ArgLead, CmdLine, CursorPos)
 
 
 
