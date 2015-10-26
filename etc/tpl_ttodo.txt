@@ -21,9 +21,6 @@ Examples: >
     " Show tasks matching @Test
     :Ttodo @Test
 
-The tlib_vim plugin is required:
-https://github.com/tomtom/tlib_vim
-
 NOTE: This plugins doesn't provide a ftplugin for todo.txt files. For this 
 purpose use one of:
 
@@ -53,6 +50,9 @@ See :help vimball for details.
 
 To install from github, please use a plugin manager like enable_vim, pathogen, 
 VAM, Vundle, NeoBundle, vim-plug, vim-unbundle etc. or simply git.
+
+The tlib_vim plugin is required:
+https://github.com/tomtom/tlib_vim
 
 Also available via git: http://github.com/tomtom/ttodo_vim
 

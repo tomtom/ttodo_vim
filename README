@@ -12,11 +12,11 @@ Examples: >
     " Show tasks that are due in the next two weeks
     :Ttodo --due=2w
 
+    " Show tasks with priorities A to C
+    :Ttodo --pri=A-C
+
     " Show tasks matching @Test
     :Ttodo @Test
-
-The tlib_vim plugin is required:
-https://github.com/tomtom/tlib_vim
 
 NOTE: This plugins doesn't provide a ftplugin for todo.txt files. For this 
 purpose use one of:
