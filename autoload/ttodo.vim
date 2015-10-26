@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-10-25
-" @Revision:    207
+" @Last Change: 2015-10-26
+" @Revision:    216
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 115
@@ -56,7 +56,7 @@ endif
 if !exists('g:ttodo#prefs')
     let g:ttodo#prefs = {'default': {'hidden': 0, 'done': 0}, 'important': {'hidden': 0, 'done': 0, 'due': '1w', 'pri': 'A-C'}}   "{{{2
     if exists('g:ttodo#prefs_user')
-        let g:ttodo#prefs = extend(g:ttodo#prefs, g:ttodo#prefs_user)
+        let g:ttodo#prefs = tlib#eval#Extend(g:ttodo#prefs, g:ttodo#prefs_user)
     endif
 endif
 
@@ -92,7 +92,8 @@ endif
 
 
 let s:ttodo_args = {
-            \ 'help': ':Ttodo'
+            \ 'help': ':Ttodo',
+            \ 'handle_exit_code': 1,
             \ }
 
 
@@ -215,29 +216,47 @@ endf
 
 
 function! ttodo#Show(bang, args) abort "{{{3
-    let args = tlib#arg#GetOpts(a:args, s:ttodo_args)
-    " TLogVAR args
-    let pref = get(args, 'pref', a:bang ? 'important' : 'default')
-    let args = extend(copy(g:ttodo#prefs[pref]), args)
-    let qfl = s:FilterTasks(args)
-    let qfl = s:SortTasks(args, qfl)
-    let flt = get(args, '__rest__', [])
-    if !empty(qfl)
-        if g:ttodo#viewer ==# 'tlib'
-            let w = {}
-            if !empty(flt)
-                let w.initial_filter = [[""], flt]
+    let args = tlib#arg#GetOpts(a:args, s:ttodo_args, 1)
+    if args.__exit__
+        return
+    else
+        " TLogVAR args
+        let pref = get(args, 'pref', a:bang ? 'important' : 'default')
+        let args = extend(copy(g:ttodo#prefs[pref]), args)
+        let qfl = s:FilterTasks(args)
+        let qfl = s:SortTasks(args, qfl)
+        let flt = get(args, '__rest__', [])
+        if !empty(qfl)
+            if g:ttodo#viewer ==# 'tlib'
+                let w = {}
+                if !empty(flt)
+                    let w.initial_filter = [[""], flt]
+                endif
+                " let index_next_syntax = {}
+                " let n = 0
+                " let today = strftime(g:ttodo#date_format)
+                " for qfe in qfl
+                "     let n += 1
+                "     let due = get(qfe.task, 'due', '')
+                "     if empty(due) || due > today
+                "         break
+                "     endif
+                "     let index_next_syntax[n] = 'TtodoOverdue'
+                " endfor
+                " if !empty(index_next_syntax)
+                "     let w.index_next_syntax = index_next_syntax
+                " endif
+                " TLogVAR w, qfl
+                call tlib#qfl#QflList(qfl, w)
+            elseif g:ttodo#viewer =~# '^:'
+                if !empty(flt)
+                    let qfl = filter(qfl, 's:FilterQFL(v:val, flt)')
+                endif
+                call setqflist(qfl)
+                exec g:ttodo#viewer
+            else
+                throw 'TTodo: Unsupported value for g:ttodo#viewer: '. string(g:ttodo#viewer)
             endif
-            " TLogVAR w, qfl
-            call tlib#qfl#QflList(qfl, w)
-        elseif g:ttodo#viewer =~# '^:'
-            if !empty(flt)
-                let qfl = filter(qfl, 's:FilterQFL(v:val, flt)')
-            endif
-            call setqflist(qfl)
-            exec g:ttodo#viewer
-        else
-            throw 'TTodo: Unsupported value for g:ttodo#viewer: '. string(g:ttodo#viewer)
         endif
     endif
 endf
