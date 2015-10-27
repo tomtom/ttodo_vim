@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-10-27
-" @Revision:    247
+" @Revision:    268
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -112,13 +112,35 @@ if !exists('g:ttodo#rewrite_gsub')
 endif
 
 
+if !exists('g:ttodo#debug')
+    let g:ttodo#debug = 0   "{{{2
+endif
+
+if g:ttodo#debug
+    call tlib#debug#Init()
+endif
+
+
 let s:ttodo_args = {
             \ 'help': ':Ttodo',
             \ 'handle_exit_code': 1,
+            \ 'values': {
+            \   'done': {'type': -1},
+            \   'due': {'type': 1},
+            \   'file_exclude_rx': {'type': 1},
+            \   'file_include_rx': {'type': 1},
+            \   'hidden': {'type': -1},
+            \   'path': {'type': 1},
+            \   'pref': {'type': 1},
+            \   'pri': {'type': 1},
+            \   'task_exclude_rx': {'type': 1},
+            \   'task_include_rx': {'type': 1},
+            \   'undated': {'type': -1},
+            \ },
             \ 'flags': {
             \   'A': '--file_include_rx', 'R': '--file_exclude_rx',
             \   'i': '--task_include_rx', 'x': '--task_exclude_rx',
-            \ }
+            \ },
             \ }
 
 
@@ -128,6 +150,7 @@ function! s:GetFiles(args) abort "{{{3
         throw 'TTodo: Please set g:ttodo#dirs'
     endif
     let pattern = get(a:args, 'pattern', g:ttodo#file_pattern)
+    TLibTrace g:ttodo#debug, path, pattern
     let files = split(globpath(path, pattern), '\n')
     let task_include_rx = get(a:args, 'task_include_rx', g:ttodo#task_include_rx)
     let file_include_rx = get(a:args, 'file_include_rx', g:ttodo#file_include_rx)
@@ -138,6 +161,7 @@ function! s:GetFiles(args) abort "{{{3
     if !empty(file_exclude_rx)
         let files = filter(files, 'v:val !~# file_exclude_rx')
     endif
+    TLibTrace g:ttodo#debug, files
     return files
 endf
 
@@ -253,13 +277,16 @@ endf
 ":nodoc:
 function! ttodo#Show(bang, args) abort "{{{3
     let args = tlib#arg#GetOpts(a:args, s:ttodo_args, 1)
+    TLibTrace g:ttodo#debug, args
     " TLogVAR args
     if args.__exit__
         return
     else
         " TLogVAR args
         let pref = get(args, 'pref', a:bang ? 'important' : 'default')
-        let args = extend(copy(g:ttodo#prefs[pref]), args)
+        TLibTrace g:ttodo#debug, pref
+        let args = tlib#eval#Extend(copy(g:ttodo#prefs[pref]), args)
+        TLibTrace g:ttodo#debug, args
         let qfl = s:FilterTasks(args)
         let qfl = s:SortTasks(args, qfl)
         let flt = get(args, '__rest__', [])
@@ -312,26 +339,19 @@ endf
 
 ":nodoc:
 function! ttodo#CComplete(ArgLead, CmdLine, CursorPos) abort "{{{3
-    " let lead = matchstr(a:ArgLead, '\w\+$')
-    let lead = a:ArgLead
-    if empty(lead)
-        return []
-    else
-        let words = {'-h': 1, '--help': 1
-                    \, '--path=': 1, '--pri=': 1, '--pref=': 1, '--due=': 1
-                    \, '--undated': 1, '--done': 1, '--hidden': 1
-                    \, '--no-undated': 1, '--no-done': 1, '--no-hidden': 1
-                    \ }
-        let nchar = len(lead)
-        call filter(words, 'strpart(v:key, 0, nchar) ==# lead')
+    let words = tlib#arg#CComplete(s:ttodo_args, a:ArgLead)
+    if !empty(a:ArgLead)
+        let nchar = len(a:ArgLead)
+        let texts = {}
         for task in s:GetTasks({})
             for word in split(task.text, '\s\+')
-                if strpart(word, 0, nchar) ==# lead
-                    let words[word] = 1
+                if strpart(word, 0, nchar) ==# a:ArgLead
+                    let texts[word] = 1
                 endif
             endfor
         endfor
-        return sort(keys(words))
+        let words += sort(keys(texts))
     endif
+    return words
 endf
 
