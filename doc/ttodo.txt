@@ -1,4 +1,4 @@
-*ttodo.txt*         Filtering and viewing todo.txt files
+*ttodo.txt*         View, sort, and filter todo.txt files
                     Author: Tom Link, micathom at gmail com
 
 This plugin provides the |:Ttodo| command that allow easy filtering and viewing 
@@ -57,6 +57,11 @@ https://github.com/tomtom/tlib_vim
 Also available via git: http://github.com/tomtom/ttodo_vim
 
 
+Setup~
+
+Please set |g:ttodo#dirs| in |vimrc| before using |:Ttodo|.
+
+
 ========================================================================
 Contents~
 
@@ -70,15 +75,8 @@ Contents~
         g:ttodo#task_exclude_rx ... |g:ttodo#task_exclude_rx|
         g:ttodo#viewer ............ |g:ttodo#viewer|
         g:ttodo#prefs ............. |g:ttodo#prefs|
-        g:ttodo#date_rx ........... |g:ttodo#date_rx|
-        g:ttodo#date_format ....... |g:ttodo#date_format|
         g:ttodo#default_pri ....... |g:ttodo#default_pri|
         g:ttodo#default_due ....... |g:ttodo#default_due|
-        g:ttodo#parse_rx .......... |g:ttodo#parse_rx|
-        g:ttodo#rewrite_gsub ...... |g:ttodo#rewrite_gsub|
-        ttodo#GetFileTasks ........ |ttodo#GetFileTasks()|
-        ttodo#Show ................ |ttodo#Show()|
-        ttodo#CComplete ........... |ttodo#CComplete()|
 
 
 ========================================================================
@@ -128,18 +126,23 @@ autoload/ttodo.vim~
 
                                                     *g:ttodo#dirs*
 g:ttodo#dirs                   (default: [])
+    List of directories where your todo.txt files reside.
 
                                                     *g:ttodo#file_pattern*
 g:ttodo#file_pattern           (default: '*.txt')
+    A glob pattern matching todo.txt files in |g:ttodo#dirs|.
 
                                                     *g:ttodo#file_exclude_rx*
 g:ttodo#file_exclude_rx        (default: '[\/]done\.txt$')
+    Ignore files matching this |regexp|.
 
                                                     *g:ttodo#task_include_rx*
 g:ttodo#task_include_rx        (default: '')
+    Include only tasks matching this |regexp| in the list.
 
                                                     *g:ttodo#task_exclude_rx*
 g:ttodo#task_exclude_rx        (default: '')
+    Exclude tasks matching this |regexp| from the list.
 
                                                     *g:ttodo#viewer*
 g:ttodo#viewer                 (default: exists('g:loaded_tlib') ? 'tlib' : ':cwindow')
@@ -152,33 +155,18 @@ g:ttodo#viewer                 (default: exists('g:loaded_tlib') ? 'tlib' : ':cw
 
                                                     *g:ttodo#prefs*
 g:ttodo#prefs                  (default: {'default': {'hidden': 0, 'done': 0}, 'important': {'hidden': 0, 'done': 0, 'due': '1w', 'pri': 'A-C'}})
+    A dictionary of configurations that can be invoked with the 
+    `--pref=NAME` command line option from |:Ttodo|.
 
-                                                    *g:ttodo#date_rx*
-g:ttodo#date_rx                (default: '\<\d\{4}-\d\d-\d\d\>')
-
-                                                    *g:ttodo#date_format*
-g:ttodo#date_format            (default: '%Y-%m-%d')
+    If no preference is given, "default" is used.
 
                                                     *g:ttodo#default_pri*
 g:ttodo#default_pri            (default: 'T')
+    If a task has no priortiy defined, assign this default priortiy.
 
                                                     *g:ttodo#default_due*
 g:ttodo#default_due            (default: strftime(g:ttodo#date_format, localtime() + g:tlib#date#dayshift * 14))
-
-                                                    *g:ttodo#parse_rx*
-g:ttodo#parse_rx               (default: {'due': '\<due:\zs'. g:ttodo#date_rx .'\>', 't': '\<t:\zs'. g:ttodo#date_rx .'\>', 'pri': '^(\zs\u\ze)', 'hidden?': '\<h:1\>', 'done?': '^\Cx\ze\s'})
-
-                                                    *g:ttodo#rewrite_gsub*
-g:ttodo#rewrite_gsub           (default: [['^\%((\u)\s\+\)\?\zs\d\{4}-\d\d-\d\d\s\+', '']])
-
-                                                    *ttodo#GetFileTasks()*
-ttodo#GetFileTasks(args, file)
-
-                                                    *ttodo#Show()*
-ttodo#Show(bang, args)
-
-                                                    *ttodo#CComplete()*
-ttodo#CComplete(ArgLead, CmdLine, CursorPos)
+    If a task has no due date defined, assign this default due date.
 
 
 

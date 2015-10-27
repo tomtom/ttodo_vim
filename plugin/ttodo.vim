@@ -1,9 +1,9 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-10-25
-" @Revision:    48
-" GetLatestVimScripts: 0 0 :AutoInstall: ttodo.vim
+" @Last Change: 2015-10-26
+" @Revision:    49
+" GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
     finish

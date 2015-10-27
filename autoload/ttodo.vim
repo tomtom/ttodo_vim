@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-10-26
-" @Revision:    216
+" @Last Change: 2015-10-27
+" @Revision:    236
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 115
@@ -15,29 +15,37 @@ endif
 
 
 if !exists('g:ttodo#dirs')
+    " List of directories where your todo.txt files reside.
     let g:ttodo#dirs = []   "{{{2
     if exists('g:todotxt#dir')
         call add(g:ttodo#dirs, g:todotxt#dir)
     endif
 endif
+if empty(g:ttodo#dirs)
+    echoerr 'TTodo: Please set g:ttodo#dirs'
+endif
 
 
 if !exists('g:ttodo#file_pattern')
+    " A glob pattern matching todo.txt files in |g:ttodo#dirs|.
     let g:ttodo#file_pattern = '*.txt'   "{{{2
 endif
 
 
 if !exists('g:ttodo#file_exclude_rx')
+    " Ignore files matching this |regexp|.
     let g:ttodo#file_exclude_rx = '[\/]done\.txt$'   "{{{2
 endif
 
 
 if !exists('g:ttodo#task_include_rx')
+    " Include only tasks matching this |regexp| in the list.
     let g:ttodo#task_include_rx = ''   "{{{2
 endif
 
 
 if !exists('g:ttodo#task_exclude_rx')
+    " Exclude tasks matching this |regexp| from the list.
     let g:ttodo#task_exclude_rx = ''   "{{{2
 endif
 
@@ -54,6 +62,10 @@ endif
 
 
 if !exists('g:ttodo#prefs')
+    " A dictionary of configurations that can be invoked with the 
+    " `--pref=NAME` command line option from |:Ttodo|.
+    "
+    " If no preference is given, "default" is used.
     let g:ttodo#prefs = {'default': {'hidden': 0, 'done': 0}, 'important': {'hidden': 0, 'done': 0, 'due': '1w', 'pri': 'A-C'}}   "{{{2
     if exists('g:ttodo#prefs_user')
         let g:ttodo#prefs = tlib#eval#Extend(g:ttodo#prefs, g:ttodo#prefs_user)
@@ -62,31 +74,37 @@ endif
 
 
 if !exists('g:ttodo#date_rx')
+    ":nodoc:
     let g:ttodo#date_rx = '\<\d\{4}-\d\d-\d\d\>'   "{{{2
 endif
 
 
 if !exists('g:ttodo#date_format')
+    ":nodoc:
     let g:ttodo#date_format = '%Y-%m-%d'   "{{{2
 endif
 
 
 if !exists('g:ttodo#default_pri')
+    " If a task has no priortiy defined, assign this default priortiy.
     let g:ttodo#default_pri = 'T'   "{{{2
 endif
 
 
 if !exists('g:ttodo#default_due')
+    " If a task has no due date defined, assign this default due date.
     let g:ttodo#default_due = strftime(g:ttodo#date_format, localtime() + g:tlib#date#dayshift * 14)   "{{{2
 endif
 
 
 if !exists('g:ttodo#parse_rx')
+    ":nodoc:
     let g:ttodo#parse_rx = {'due': '\<due:\zs'. g:ttodo#date_rx .'\>', 't': '\<t:\zs'. g:ttodo#date_rx .'\>', 'pri': '^(\zs\u\ze)', 'hidden?': '\<h:1\>', 'done?': '^\Cx\ze\s'}   "{{{2
 endif
 
 
 if !exists('g:ttodo#rewrite_gsub')
+    ":nodoc:
     let g:ttodo#rewrite_gsub = [['^\%((\u)\s\+\)\?\zs\d\{4}-\d\d-\d\d\s\+', '']]   "{{{2
 endif
 
@@ -108,6 +126,7 @@ function! s:GetFiles(args) abort "{{{3
 endf
 
 
+":nodoc:
 function! ttodo#GetFileTasks(args, file) abort "{{{3
     let qfl = []
     let lnum = 0
@@ -215,6 +234,7 @@ function! s:SortTask(a, b) abort "{{{3
 endf
 
 
+":nodoc:
 function! ttodo#Show(bang, args) abort "{{{3
     let args = tlib#arg#GetOpts(a:args, s:ttodo_args, 1)
     if args.__exit__
@@ -273,6 +293,7 @@ function! s:FilterQFL(item, flts) abort "{{{3
 endf
 
 
+":nodoc:
 function! ttodo#CComplete(ArgLead, CmdLine, CursorPos) abort "{{{3
     " let lead = matchstr(a:ArgLead, '\w\+$')
     let lead = a:ArgLead
