@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-10-26
-" @Revision:    49
+" @Last Change: 2015-10-27
+" @Revision:    54
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -44,9 +44,10 @@ endif
 "                   |g:ttodo#dirs|)
 "   --pattern=PAT . Search files matching this pattern (default: 
 "                   |g:ttodo#file_pattern|)
-"   --file_exclude_rx=RX ... Default: |g:ttodo#file_exclude_rx|
-"   --task_include_rx=RX ... Default: |g:ttodo#task_include_rx|
-"   --task_exclude_rx=RX ... Default: |g:ttodo#task_exclude_rx|
+"   -A=RX, --file_include_rx=RX ... Default: |g:ttodo#file_include_rx|
+"   -R=RX, --file_exclude_rx=RX ... Default: |g:ttodo#file_exclude_rx|
+"   -i=RX, --task_include_rx=RX ... Default: |g:ttodo#task_include_rx|
+"   -x=RX, --task_exclude_rx=RX ... Default: |g:ttodo#task_exclude_rx|
 "
 " When the [!] is included show only important tasks.
 " 

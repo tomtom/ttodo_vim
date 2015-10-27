@@ -2,13 +2,13 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-10-27
-" @Revision:    236
+" @Revision:    247
 
 
-if !exists('g:loaded_tlib') || g:loaded_tlib < 115
+if !exists('g:loaded_tlib') || g:loaded_tlib < 116
     runtime plugin/tlib.vim
-    if !exists('g:loaded_tlib') || g:loaded_tlib < 115
-        echoerr 'tlib >= 1.15 is required'
+    if !exists('g:loaded_tlib') || g:loaded_tlib < 116
+        echoerr 'tlib >= 1.16 is required'
         finish
     endif
 endif
@@ -21,14 +21,17 @@ if !exists('g:ttodo#dirs')
         call add(g:ttodo#dirs, g:todotxt#dir)
     endif
 endif
-if empty(g:ttodo#dirs)
-    echoerr 'TTodo: Please set g:ttodo#dirs'
-endif
 
 
 if !exists('g:ttodo#file_pattern')
     " A glob pattern matching todo.txt files in |g:ttodo#dirs|.
     let g:ttodo#file_pattern = '*.txt'   "{{{2
+endif
+
+
+if !exists('g:ttodo#file_include_rx')
+    " Consider only files matching this |regexp|.
+    let g:ttodo#file_include_rx = ''   "{{{2
 endif
 
 
@@ -112,16 +115,29 @@ endif
 let s:ttodo_args = {
             \ 'help': ':Ttodo',
             \ 'handle_exit_code': 1,
+            \ 'flags': {
+            \   'A': '--file_include_rx', 'R': '--file_exclude_rx',
+            \   'i': '--task_include_rx', 'x': '--task_exclude_rx',
+            \ }
             \ }
 
 
 function! s:GetFiles(args) abort "{{{3
     let path = get(a:args, 'path', join(g:ttodo#dirs, ','))
+    if empty(path)
+        throw 'TTodo: Please set g:ttodo#dirs'
+    endif
     let pattern = get(a:args, 'pattern', g:ttodo#file_pattern)
     let files = split(globpath(path, pattern), '\n')
     let task_include_rx = get(a:args, 'task_include_rx', g:ttodo#task_include_rx)
+    let file_include_rx = get(a:args, 'file_include_rx', g:ttodo#file_include_rx)
+    if !empty(file_include_rx)
+        let files = filter(files, 'v:val =~# file_include_rx')
+    endif
     let file_exclude_rx = get(a:args, 'file_exclude_rx', g:ttodo#file_exclude_rx)
-    let files = filter(files, 'v:val !~# file_exclude_rx')
+    if !empty(file_exclude_rx)
+        let files = filter(files, 'v:val !~# file_exclude_rx')
+    endif
     return files
 endf
 
@@ -237,6 +253,7 @@ endf
 ":nodoc:
 function! ttodo#Show(bang, args) abort "{{{3
     let args = tlib#arg#GetOpts(a:args, s:ttodo_args, 1)
+    " TLogVAR args
     if args.__exit__
         return
     else
