@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-10-27
-" @Revision:    54
+" @Last Change: 2015-10-28
+" @Revision:    57
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -44,6 +44,7 @@ endif
 "                   |g:ttodo#dirs|)
 "   --pattern=PAT . Search files matching this pattern (default: 
 "                   |g:ttodo#file_pattern|)
+"   --sort=FIELDS . default: |g:ttodo#sort|
 "   -A=RX, --file_include_rx=RX ... Default: |g:ttodo#file_include_rx|
 "   -R=RX, --file_exclude_rx=RX ... Default: |g:ttodo#file_exclude_rx|
 "   -i=RX, --task_include_rx=RX ... Default: |g:ttodo#task_include_rx|
