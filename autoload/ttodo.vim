@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-03
-" @Revision:    417
+" @Revision:    419
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -201,7 +201,7 @@ function! s:GetFiles(args) abort "{{{3
         endif
         let pattern = get(a:args, 'pattern', g:ttodo#file_pattern)
         TLibTrace 'ttodo', path, pattern
-        let files = split(globpath(path, pattern), '\n')
+        let files = tlib#file#Globpath(path, pattern)
         let task_include_rx = get(a:args, 'task_include_rx', g:ttodo#task_include_rx)
         let file_include_rx = get(a:args, 'file_include_rx', g:ttodo#file_include_rx)
         if !empty(file_include_rx)
