@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-03
-" @Revision:    416
+" @Revision:    417
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -109,7 +109,7 @@ endif
 
 
 if !exists('g:ttodo#use_vikitasks')
-    let g:ttodo#use_vikitasks = exists('g:loaded_vikitasks')   "{{{2
+    let g:ttodo#use_vikitasks = exists('g:loaded_vikitasks') && g:loaded_vikitasks >= 102   "{{{2
 endif
 
 
