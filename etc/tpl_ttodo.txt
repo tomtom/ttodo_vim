@@ -21,8 +21,12 @@ Examples: >
     " Show tasks matching @Test
     :Ttodo @Test
 
-NOTE: This plugins doesn't provide a ftplugin for todo.txt files. For this 
-purpose use one of:
+NOTE: In order to use this plugin as a ftplugin, it is recommended to also 
+install the vikitasks_vim plugin. Users have to set |g:ttodo_enable_ftdetect| 
+to 1 in their |vimrc| file.
+
+Other ftplugin for todo.txt files, which can be used in conjunction with the 
+ttodo plugin, include:
 
     - https://github.com/freitass/todo.txt-vim
         - todo-txt.vim : Vim plugin for Todo.txt 

@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-10-28
-" @Revision:    57
+" @Last Change: 2015-11-02
+" @Revision:    60
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -24,6 +24,13 @@ if !exists('g:ttodo_nmap_important')
 endif
 
 
+if !exists('g:ttodo_enable_ftdetect')
+    " Set this variable to 1 in |vimrc| in order to enable the ttodo 
+    " filetype for todo.txt files.
+    let g:ttodo_enable_ftdetect = 0   "{{{2
+endif
+
+
 " :display: :Ttodo[!] [ARGS] [INITIAL FILTER]
 "
 " ARGS is an argument list. The following arguments are supported:
@@ -40,6 +47,7 @@ endif
 "                   argument
 "   --done ........ Show done tasks
 "   --hidden ...... Show hidden tasks (h:1)
+"   --files=FILE1,FILE2... .. A comma-separated list of todo.txt files
 "   --path=PATH ... Search files in this path (default: use 
 "                   |g:ttodo#dirs|)
 "   --pattern=PAT . Search files matching this pattern (default: 

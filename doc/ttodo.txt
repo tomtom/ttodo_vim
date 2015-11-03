@@ -21,8 +21,12 @@ Examples: >
     " Show tasks matching @Test
     :Ttodo @Test
 
-NOTE: This plugins doesn't provide a ftplugin for todo.txt files. For this 
-purpose use one of:
+NOTE: In order to use this plugin as a ftplugin, it is recommended to also 
+install the vikitasks_vim plugin. Users have to set |g:ttodo_enable_ftdetect| 
+to 1 in their |vimrc| file.
+
+Other ftplugin for todo.txt files, which can be used in conjunction with the 
+ttodo plugin, include:
 
     - https://github.com/freitass/todo.txt-vim
         - todo-txt.vim : Vim plugin for Todo.txt 
@@ -65,18 +69,26 @@ Please set |g:ttodo#dirs| in |vimrc| before using |:Ttodo|.
 ========================================================================
 Contents~
 
-        g:ttodo_nmap .............. |g:ttodo_nmap|
-        g:ttodo_nmap_important .... |g:ttodo_nmap_important|
-        :Ttodo .................... |:Ttodo|
-        g:ttodo#dirs .............. |g:ttodo#dirs|
-        g:ttodo#file_pattern ...... |g:ttodo#file_pattern|
-        g:ttodo#file_exclude_rx ... |g:ttodo#file_exclude_rx|
-        g:ttodo#task_include_rx ... |g:ttodo#task_include_rx|
-        g:ttodo#task_exclude_rx ... |g:ttodo#task_exclude_rx|
-        g:ttodo#viewer ............ |g:ttodo#viewer|
-        g:ttodo#prefs ............. |g:ttodo#prefs|
-        g:ttodo#default_pri ....... |g:ttodo#default_pri|
-        g:ttodo#default_due ....... |g:ttodo#default_due|
+        g:ttodo_nmap ................... |g:ttodo_nmap|
+        g:ttodo_nmap_important ......... |g:ttodo_nmap_important|
+        g:ttodo_enable_ftdetect ........ |g:ttodo_enable_ftdetect|
+        :Ttodo ......................... |:Ttodo|
+        g:ttodo#dirs ................... |g:ttodo#dirs|
+        g:ttodo#file_pattern ........... |g:ttodo#file_pattern|
+        g:ttodo#file_include_rx ........ |g:ttodo#file_include_rx|
+        g:ttodo#file_exclude_rx ........ |g:ttodo#file_exclude_rx|
+        g:ttodo#task_include_rx ........ |g:ttodo#task_include_rx|
+        g:ttodo#task_exclude_rx ........ |g:ttodo#task_exclude_rx|
+        g:ttodo#viewer ................. |g:ttodo#viewer|
+        g:ttodo#sort ................... |g:ttodo#sort|
+        g:ttodo#prefs .................. |g:ttodo#prefs|
+        g:ttodo#default_pri ............ |g:ttodo#default_pri|
+        g:ttodo#default_due ............ |g:ttodo#default_due|
+        g:ttodo#use_vikitasks .......... |g:ttodo#use_vikitasks|
+        g:ttodo#mapleader .............. |g:ttodo#mapleader|
+        g:ttodo#debug .................. |g:ttodo#debug|
+        ttodo#FiletypeDetect ........... |ttodo#FiletypeDetect()|
+        ttodo#ftplugin#WithVikitasks ... |ttodo#ftplugin#WithVikitasks()|
 
 
 ========================================================================
@@ -87,6 +99,11 @@ g:ttodo_nmap                   (default: '<Leader>1')
 
                                                     *g:ttodo_nmap_important*
 g:ttodo_nmap_important         (default: '<Leader>!')
+
+                                                    *g:ttodo_enable_ftdetect*
+g:ttodo_enable_ftdetect        (default: 0)
+    Set this variable to 1 in |vimrc| in order to enable the ttodo 
+    filetype for todo.txt files.
 
                                                     *:Ttodo*
 :Ttodo[!] [ARGS] [INITIAL FILTER]
@@ -105,13 +122,16 @@ g:ttodo_nmap_important         (default: '<Leader>!')
                       argument
       --done ........ Show done tasks
       --hidden ...... Show hidden tasks (h:1)
+      --files=FILE1,FILE2... .. A comma-separated list of todo.txt files
       --path=PATH ... Search files in this path (default: use 
                       |g:ttodo#dirs|)
       --pattern=PAT . Search files matching this pattern (default: 
                       |g:ttodo#file_pattern|)
-      --file_exclude_rx=RX ... Default: |g:ttodo#file_exclude_rx|
-      --task_include_rx=RX ... Default: |g:ttodo#task_include_rx|
-      --task_exclude_rx=RX ... Default: |g:ttodo#task_exclude_rx|
+      --sort=FIELDS . default: |g:ttodo#sort|
+      -A=RX, --file_include_rx=RX ... Default: |g:ttodo#file_include_rx|
+      -R=RX, --file_exclude_rx=RX ... Default: |g:ttodo#file_exclude_rx|
+      -i=RX, --task_include_rx=RX ... Default: |g:ttodo#task_include_rx|
+      -x=RX, --task_exclude_rx=RX ... Default: |g:ttodo#task_exclude_rx|
 
     When the [!] is included show only important tasks.
 
@@ -128,9 +148,16 @@ autoload/ttodo.vim~
 g:ttodo#dirs                   (default: [])
     List of directories where your todo.txt files reside.
 
+    If the todotxt plugin is used, |g:todotxt#dir| is added to the 
+    list.
+
                                                     *g:ttodo#file_pattern*
-g:ttodo#file_pattern           (default: '*.txt')
+g:ttodo#file_pattern           (default: '*todo.txt')
     A glob pattern matching todo.txt files in |g:ttodo#dirs|.
+
+                                                    *g:ttodo#file_include_rx*
+g:ttodo#file_include_rx        (default: '')
+    Consider only files matching this |regexp|.
 
                                                     *g:ttodo#file_exclude_rx*
 g:ttodo#file_exclude_rx        (default: '[\/]done\.txt$')
@@ -153,8 +180,11 @@ g:ttodo#viewer                 (default: exists('g:loaded_tlib') ? 'tlib' : ':cw
       :COMMAND .. E.g. `:cwindow`. In this case initial filter is a 
                   standard |regexp|.
 
+                                                    *g:ttodo#sort*
+g:ttodo#sort                   (default: 'pri,due,done,text')
+
                                                     *g:ttodo#prefs*
-g:ttodo#prefs                  (default: {'default': {'hidden': 0, 'done': 0}, 'important': {'hidden': 0, 'done': 0, 'due': '1w', 'pri': 'A-C'}})
+g:ttodo#prefs                  (default: {'default': {'hidden': 0, 'done': 0}, 'important': {'hidden': 0, 'done': 0, 'undated': 1, 'due': '2w', 'pri': 'A-C'}})
     A dictionary of configurations that can be invoked with the 
     `--pref=NAME` command line option from |:Ttodo|.
 
@@ -165,8 +195,27 @@ g:ttodo#default_pri            (default: 'T')
     If a task has no priortiy defined, assign this default priortiy.
 
                                                     *g:ttodo#default_due*
-g:ttodo#default_due            (default: strftime(g:ttodo#date_format, localtime() + g:tlib#date#dayshift * 14))
+g:ttodo#default_due            (default: strftime(g:tlib#date#date_format, localtime() + g:tlib#date#dayshift * 14))
     If a task has no due date defined, assign this default due date.
+
+                                                    *g:ttodo#use_vikitasks*
+g:ttodo#use_vikitasks          (default: exists('g:loaded_vikitasks'))
+
+                                                    *g:ttodo#mapleader*
+g:ttodo#mapleader              (default: '<LocalLeader>t')
+
+                                                    *g:ttodo#debug*
+g:ttodo#debug                  (default: 0)
+
+                                                    *ttodo#FiletypeDetect()*
+ttodo#FiletypeDetect()
+
+
+========================================================================
+autoload/ttodo/ftplugin.vim~
+
+                                                    *ttodo#ftplugin#WithVikitasks()*
+ttodo#ftplugin#WithVikitasks(fn, ...)
 
 
 
