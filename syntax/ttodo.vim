@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-03.
+" @Last Change: 2015-11-04.
 
 if version < 600
     syntax clear
@@ -9,6 +9,29 @@ elseif exists("b:current_syntax")
     finish
 endif
 
+if has('conceal') && &enc == 'utf-8'
+    let s:sym_cluster = []
+    for [s:name, s:chars, s:cchar] in [
+                \ ['Dash', '--', '—'],
+                \ ['Unequal', '!=', '≠'],
+                \ ['Identity', '==', '≡'],
+                \ ['Approx', '~~', '≈'],
+                \ ['ArrowLR', '<-\+>', '↔'],
+                \ ['ArrowL', '<-\+', '←'],
+                \ ['ArrowR', '-\+>', '→'],
+                \ ['ARROWLR', '<=\+>', '⇔'],
+                \ ['ARROWL', '<=\+', '⇐'],
+                \ ['ARROWR', '=\+>', '⇒'],
+                \ ['ArrowTildeLR', '<~\+>', '↭'],
+                \ ['ArrowTildeL', '<~\+', '↜'],
+                \ ['ArrowTildeR', '~\+>', '↝'],
+                \ ['Ellipsis', '...', '…'],
+                \ ]
+        
+        exec 'syn match ttodoSymbol'. s:name .' /\V'. s:chars .'/ conceal cchar='. s:cchar
+    endfor
+    unlet! s:sym_cluster s:name s:chars s:cchar
+endif
 
 syntax match TtodoPri /([D-Z])/
 syntax match TtodoPriA /(A)/

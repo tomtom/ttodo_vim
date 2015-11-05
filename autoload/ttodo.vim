@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-03
-" @Revision:    419
+" @Last Change: 2015-11-04
+" @Revision:    473
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -96,6 +96,12 @@ if !exists('g:ttodo#default_due')
 endif
 
 
+if !exists('g:ttodo#default_t')
+    " If a task has no threshold date defined, assign this default threshold date.
+    let g:ttodo#default_t = '-31d'   "{{{2
+endif
+
+
 if !exists('g:ttodo#parse_rx')
     ":nodoc:
     let g:ttodo#parse_rx = {'due': '\<due:\zs'. g:tlib#date#date_rx .'\>', 't': '\<t:\zs'. g:tlib#date#date_rx .'\>', 'pri': '^(\zs\u\ze)', 'hidden?': '\<h:1\>', 'done?': '^\Cx\ze\s', 'donedate': '^\Cx\s\+\zs'. g:tlib#date#date_rx, 'rec': '\<rec:\zs+\?\d\+[dwmy]\ze\>'}   "{{{2
@@ -176,7 +182,7 @@ let s:ttodo_args = {
             \   'files': {'type': 1, 'complete': 'files'},
             \   'path': {'type': 1, 'complete': 'dirs'},
             \   'pref': {'type': 1, 'complete_customlist': 'keys(g:ttodo#prefs)'},
-            \   'pri': {'type': 1},
+            \   'pri': {'type': 1, 'complete_customlist': '["", "A-", "A-C", "W", "X-Z"]'},
             \   'sort': {'type': 1},
             \   'task_exclude_rx': {'type': 1},
             \   'task_include_rx': {'type': 1},
@@ -226,7 +232,12 @@ function! ttodo#GetFileTasks(args, file) abort "{{{3
         for [rx, subst] in g:ttodo#rewrite_gsub
             let line = substitute(line, rx, subst, 'g')
         endfor
-        call add(qfl, {"filename": a:file, "lnum": lnum, "text": line, "task": s:ParseTask(a:args, line)})
+        if line =~ '^\s\+' && !empty(qfl)
+            let line = substitute(line, '^\%(\s\{'. &shiftwidth .'}\)', ' ', 'g')
+            let qfl[-1].text .= ' '. &showbreak . line
+        else
+            call add(qfl, {"filename": a:file, "lnum": lnum, "text": line, "task": ttodo#ParseTask(line)})
+        endif
     endfor
     return qfl
 endf
@@ -234,7 +245,7 @@ endf
 
 function! s:GetLines(filename) abort "{{{3
     let bufnr = bufnr(a:filename)
-    if bufnr == -1
+    if bufnr == -1 || !bufloaded(bufnr)
         return readfile(a:filename)
     else
         return getbufline(bufnr, 1, '$')
@@ -255,54 +266,16 @@ function! s:GetTasks(args) abort "{{{3
     let task_exclude_rx = get(a:args, 'task_exclude_rx', g:ttodo#task_exclude_rx)
     for file in s:GetFiles(a:args)
         let fqfl = s:GetFileTasks(a:args, file)
-        " TLogVAR file, fqfl
-        " let rqfl = filter(copy(fqfl), 'get(v:val.task, "done", 0) && !empty(get(v:val.task, "rec", ""))')
-        " " TLogVAR 1, rqfl
-        " let rqfl = map(rqfl, 's:RecurringTask(v:val, a:args)')
-        " " TLogVAR 2, rqfl
-        " let rqfl = filter(rqfl, '!empty(v:val)')
-        " if !empty(rqfl)
-        "     let qfl = extend(qfl, rqfl) 
-        " endif
         let fqfl = filter(copy(fqfl), '!empty(v:val.text) && (empty(task_include_rx) || v:val.text =~ task_include_rx) && (empty(task_exclude_rx) || v:val.text !~ task_exclude_rx)')
         if !empty(fqfl)
-            let qfl = extend(qfl, fqfl) 
+            let qfl = extend(qfl, fqfl)
         endif
     endfor
     return qfl
 endf
 
 
-" function! s:RecurringTask(qfe, args) abort "{{{3
-"     let qfe = copy(a:qfe)
-"     let text = qfe.text
-"     let text = substitute(text, '^\Cx\s\+'. g:tlib#date#date_rx .'\s\+\%(\d\d:\d\d\s\+\)\?', '', '')
-"     let donedate = get(qfe.task, 'donedate', '')
-"     let due = qfe.task.rec =~ '^+' ? qfe.task.due : donedate
-"     if empty(due)
-"         echohl WarningMsg
-"         echom 'Ttodo: Cannot set due date for recurring task:' qfe.text
-"         echohl NONE
-"         return {}
-"     else
-"         let ndue = due
-"         let refdate_check = empty(donedate) ? '< '. string(strftime(g:tlib#date#date_format)) : '<= '. string(donedate)
-"         exec 'while ndue' refdate_check
-"             let ndue = tlib#date#Shift(ndue, matchstr(qfe.task.rec, '\d\+\a$'))
-"         endwh
-"         if text =~# '\<due:'. g:tlib#date#date_rx
-"             let text = substitute(text, '\<due:\zs'. g:tlib#date#date_rx, ndue, '')
-"         else
-"             let text .= ' due:'. ndue
-"         endif
-"         let qfe.text = text
-"         let qfe.task = s:ParseTask(a:args, text)
-"         return qfe
-"     endif
-" endf
-
-
-function! s:ParseTask(args, task) abort "{{{3
+function! ttodo#ParseTask(task) abort "{{{3
     let task = {'text': a:task}
     for [key, rx] in items(g:ttodo#parse_rx)
         let val = matchstr(a:task, rx)
@@ -313,8 +286,8 @@ function! s:ParseTask(args, task) abort "{{{3
             let task[key] = val
         endif
     endfor
-    let task.lists = map(split(a:task, '\ze@'), 'matchstr(v:val, "^@\S\+")')
-    let task.tags = map(split(a:task, '\ze+'), 'matchstr(v:val, "^+\S\+")')
+    let task.lists = filter(map(split(a:task, '\ze@'), 'matchstr(v:val, ''^@\zs\S\+'')'), '!empty(v:val)')
+    let task.tags = filter(map(split(a:task, '\ze+'), 'matchstr(v:val, ''^+\zs\S\+'')'), '!empty(v:val)')
     return task
 endf
 
@@ -356,12 +329,32 @@ endf
 
 
 function! s:CheckThreshold(t, due, today) abort "{{{3
+    " TLogVAR a:t, a:due, a:today
+    let t = 0
+    let tn = ''
     if !empty(a:t)
         if a:t =~ '^'. g:tlib#date#date_rx .'$'
-            return a:today <= a:t
+            let t = a:t
+        elseif !empty(a:due)
+            let tn = a:t
+        endif
+    else
+        let tn = g:ttodo#default_t
+    endif
+    if t == 0 && !empty(tn) && !empty(a:due)
+        let n = str2nr(matchstr(tn, '^-\?\d\+\ze[d]$'))
+        if n != 0
+            if tn =~ 'd$'
+                let t = strftime(g:tlib#date#date_format, tlib#date#SecondsSince1970(a:due) + n * g:tlib#date#dayshift)
+            endif
         endif
     endif
-    return 1
+    " TLogVAR tn, t
+    if !empty(t)
+        return a:today >= t
+    else
+        return 1
+    endif
 endf
 
 
@@ -410,21 +403,6 @@ function! ttodo#Show(bang, args) abort "{{{3
                 if !empty(flt)
                     let w.initial_filter = [[""], flt]
                 endif
-                " let index_next_syntax = {}
-                " let n = 0
-                " let today = strftime(g:tlib#date#date_format)
-                " for qfe in qfl
-                "     let n += 1
-                "     let due = get(qfe.task, 'due', '')
-                "     if empty(due) || due > today
-                "         break
-                "     endif
-                "     let index_next_syntax[n] = 'TtodoOverdue'
-                " endfor
-                " if !empty(index_next_syntax)
-                "     let w.index_next_syntax = index_next_syntax
-                " endif
-                " TLogVAR w, qfl
                 call tlib#qfl#QflList(qfl, w)
             elseif g:ttodo#viewer =~# '^:'
                 if !empty(flt)
@@ -480,11 +458,16 @@ function! ttodo#CComplete(ArgLead, CmdLine, CursorPos) abort "{{{3
 endf
 
 
-function! ttodo#FiletypeDetect() abort "{{{3
-    let bdir = substitute(expand('%:p:h'), '\\', '/', 'g')
+function! ttodo#FiletypeDetect(...) abort "{{{3
+    let filename = a:0 >= 1 ? a:1 : expand('%:p')
+    " TLogVAR filename
+    let bdir = substitute(filename, '\\', '/', 'g')
+    let bdir = substitute(bdir, '/[^/]\+$', '', '')
     let dirs = map(copy(g:ttodo#dirs), 'substitute(resolve(fnamemodify(v:val, ":p:h")), ''\\'', ''/'', ''g'')')
+    " TLogVAR bdir, dirs
     if index(dirs, bdir, 0, !has('fname_case')) != -1
         setf ttodo
+        " TLogVAR &ft
     endif
 endf
 
