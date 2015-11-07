@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-04
-" @Revision:    50
+" @Last Change: 2015-11-07
+" @Revision:    51
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -21,10 +21,10 @@ endif
 
 
 function! ttodo#ftplugin#WithVikitasks(fn, ...) abort "{{{3
-    TLibTrace 'ttodo', a:fn, a:000
+    Tlibtrace 'ttodo', a:fn, a:000
     let ftdef = vikitasks#ft#todotxt#GetInstance()
     let args = map(copy(a:000), 'type(v:val) == 1 && v:val ==# "{ftdef}" ? ftdef : v:val')
-    " TLibTrace 'ttodo', args " DBG
+    " Tlibtrace 'ttodo', args " DBG
     return call(a:fn, args)
 endf
 
@@ -70,12 +70,12 @@ endf
 function! ttodo#ftplugin#Note() abort "{{{3
     let line = getline('.')
     let task = ttodo#ParseTask(line)
-    TLibTrace 'ttodo', task
+    Tlibtrace 'ttodo', task
     let nname = get(task.lists, 0, 'misc')
     let nname = substitute(nname, '\W', '_', 'g')
     let date = strftime('%Y%m%d')
     let dir = expand('%:p:h')
-    TLibTrace 'ttodo', nname, dir
+    Tlibtrace 'ttodo', nname, dir
     let n = 0
     while 1
         let shortname = printf(g:ttodo#ftplugin#notef, nname, date, n)
@@ -87,7 +87,7 @@ function! ttodo#ftplugin#Note() abort "{{{3
             break
         endif
     endwh
-    TLibTrace 'ttodo', filename
+    Tlibtrace 'ttodo', filename
     call setline('.', join([line, notename]))
     call tlib#dir#Ensure(fnamemodify(filename, ':p:h'))
     exec g:ttodo#ftplugin#edit_note fnameescape(filename)

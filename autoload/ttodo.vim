@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-04
-" @Revision:    473
+" @Last Change: 2015-11-07
+" @Revision:    474
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -206,7 +206,7 @@ function! s:GetFiles(args) abort "{{{3
             throw 'TTodo: Please set g:ttodo#dirs'
         endif
         let pattern = get(a:args, 'pattern', g:ttodo#file_pattern)
-        TLibTrace 'ttodo', path, pattern
+        Tlibtrace 'ttodo', path, pattern
         let files = tlib#file#Globpath(path, pattern)
         let task_include_rx = get(a:args, 'task_include_rx', g:ttodo#task_include_rx)
         let file_include_rx = get(a:args, 'file_include_rx', g:ttodo#file_include_rx)
@@ -218,7 +218,7 @@ function! s:GetFiles(args) abort "{{{3
             let files = filter(files, 'v:val !~# file_exclude_rx')
         endif
     endif
-    TLibTrace 'ttodo', files
+    Tlibtrace 'ttodo', files
     return files
 endf
 
@@ -384,16 +384,16 @@ endf
 ":nodoc:
 function! ttodo#Show(bang, args) abort "{{{3
     let args = tlib#arg#GetOpts(a:args, s:ttodo_args, 1)
-    TLibTrace 'ttodo', args
+    Tlibtrace 'ttodo', args
     " TLogVAR args
     if args.__exit__
         return
     else
         " TLogVAR args
         let pref = get(args, 'pref', a:bang ? 'important' : 'default')
-        TLibTrace 'ttodo', pref
+        Tlibtrace 'ttodo', pref
         let args = tlib#eval#Extend(copy(g:ttodo#prefs[pref]), args)
-        TLibTrace 'ttodo', args
+        Tlibtrace 'ttodo', args
         let qfl = s:FilterTasks(args)
         let qfl = s:SortTasks(args, qfl)
         let flt = get(args, '__rest__', [])
