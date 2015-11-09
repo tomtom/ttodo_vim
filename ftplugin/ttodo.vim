@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-04.
-" @Revision:    19
+" @Last Change: 2015-11-09.
+" @Revision:    43
 
 if exists("b:did_ftplugin")
     finish
@@ -23,6 +23,12 @@ if g:ttodo#use_vikitasks
 endif
 
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'n :<C-U>call ttodo#ftplugin#Note()<cr>'
+
+nnoremap <buffer> <cr> :<C-U>call ttodo#ftplugin#New(xor(g:ttodo#ftplugin#add_at_eof, v:count > 0) ? "G" : "", 0)<cr>
+nnoremap <buffer> <c-cr> :<C-U>call ttodo#ftplugin#New(xor(g:ttodo#ftplugin#add_at_eof, v:count > 0) ? "G" : "", 1)<cr>
+
+imap <buffer> <cr> <C-\><C-O><cr>
+imap <buffer> <c-cr> <C-\><C-O><c-cr>
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

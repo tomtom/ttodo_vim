@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-07
-" @Revision:    474
+" @Last Change: 2015-11-09
+" @Revision:    505
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -138,6 +138,7 @@ let s:list_env = {
             \ 'qfl_short_filename': 1,
             \ 'qfl_list_syntax': 'ttodo',
             \ 'qfl_list_syntax_nextgroup': '@TtodoTask',
+            \ 'set_syntax': 'ttodo#InitListBuffer',
             \ 'scratch': '__Ttodo__',
             \ }
 
@@ -286,6 +287,11 @@ function! ttodo#ParseTask(task) abort "{{{3
             let task[key] = val
         endif
     endfor
+    if has_key(task, 'due')
+        if task.due < strftime(g:tlib#date#date_format)
+            let task.overdue = 1
+        endif
+    endif
     let task.lists = filter(map(split(a:task, '\ze@'), 'matchstr(v:val, ''^@\zs\S\+'')'), '!empty(v:val)')
     let task.tags = filter(map(split(a:task, '\ze+'), 'matchstr(v:val, ''^+\zs\S\+'')'), '!empty(v:val)')
     return task
@@ -403,6 +409,10 @@ function! ttodo#Show(bang, args) abort "{{{3
                 if !empty(flt)
                     let w.initial_filter = [[""], flt]
                 endif
+                let overdue = filter(copy(qfl), 'get(v:val.task, "overdue", 0)')
+                if !empty(overdue)
+                    let w.overdue_rx = '\V\<due:\%('. join(map(overdue, 'v:val.task.due'), '\|') .'\)\>'
+                endif
                 call tlib#qfl#QflList(qfl, w)
             elseif g:ttodo#viewer =~# '^:'
                 if !empty(flt)
@@ -414,6 +424,18 @@ function! ttodo#Show(bang, args) abort "{{{3
                 throw 'TTodo: Unsupported value for g:ttodo#viewer: '. string(g:ttodo#viewer)
             endif
         endif
+    endif
+endf
+
+
+function! ttodo#InitListBuffer() dict abort "{{{3
+    call call('tlib#qfl#SetSyntax', [], self)
+    if has_key(self, 'overdue_rx')
+        Tlibtrace self.overdue_rx
+        TLogVAR self.overdue_rx
+        exec 'syntax match TtodoOverdue /'. escape(self.overdue_rx, '/') .'/ contained containedin=TtodoTag'
+        hi def link TtodoOverdue ErrorMsg
+        syntax cluster TtodoTask add=TtodoOverdue
     endif
 endf
 

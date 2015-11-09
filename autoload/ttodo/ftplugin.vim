@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-07
-" @Revision:    51
+" @Last Change: 2015-11-09
+" @Revision:    67
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -17,6 +17,15 @@ endif
 
 if !exists('g:ttodo#ftplugin#edit_note')
     let g:ttodo#ftplugin#edit_note = 'split'   "{{{2
+endif
+
+
+if !exists('g:ttodo#ftplugin#add_at_eof')
+    " If false, invoking the <cr> or <c-cr> map with a count will make 
+    " ttodo add a new task at the end of the file. Otherwise the task 
+    " will be added below the current line.
+    " If true, the meaning of the count is reversed.
+    let g:ttodo#ftplugin#add_at_eof = 0   "{{{2
 endif
 
 
@@ -91,5 +100,20 @@ function! ttodo#ftplugin#Note() abort "{{{3
     call setline('.', join([line, notename]))
     call tlib#dir#Ensure(fnamemodify(filename, ':p:h'))
     exec g:ttodo#ftplugin#edit_note fnameescape(filename)
+endf
+
+
+function! ttodo#ftplugin#New(move, copytags) abort "{{{3
+    let new = strftime(g:tlib#date#date_format)
+    let task = ttodo#ParseTask(getline('.'))
+    if a:copytags
+        if !empty(task.lists)
+            let new .= ' '. join(map(copy(task.lists), '"@".v:val'))
+        endif
+        if !empty(task.tags)
+            let new .= ' '. join(map(copy(task.tags), '"+".v:val'))
+        endif
+    endif
+    exec 'norm!' a:move . 'o'. new .' '
 endf
 
