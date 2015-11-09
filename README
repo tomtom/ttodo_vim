@@ -22,15 +22,28 @@ In order to use this plugin as a ftplugin, the vikitasks_vim plugin should be
 installed. Users might also want to set |g:ttodo_enable_ftdetect| to 1 in their 
 |vimrc| file.
 
-Default keymaps of the ftplugin (with vikitasks_vim installed):
+If filetype is ttodo, the following default keymaps are enabled:
 
-    <LocalLeader>tx ... Mark done
-    <LocalLeader>td ... Mark due in N days
-    <LocalLeader>tw ... Mark due in N weeks
-    <LocalLeader>tm ... Mark due in N months
-    <LocalLeader>tp ... Set priority
-    <LocalLeader>ta ... Archive done items
-    <LocalLeader>tn ... Add a note (the filename uses the first @list tag)
+    <cr> ................. Add a new task;
+                           if either |g:ttodo#ftplugin#add_at_eof| is true or 
+                           the map was invoked with a count, add the task at 
+                           the end of file
+    <c-cr> ............... Add a new task; copy any list and tags from the 
+                           current task;
+                           if either |g:ttodo#ftplugin#add_at_eof| is true or 
+                           the map was invoked with a count, add the task at 
+                           the end of file
+
+If vikitasks_vim is installed (see |g:ttodo#use_vikitasks|), the following maps 
+are available too:
+
+    <LocalLeader>tx ...... Mark done
+    <LocalLeader>td ...... Mark due in N days
+    <LocalLeader>tw ...... Mark due in N weeks
+    <LocalLeader>tm ...... Mark due in N months
+    <LocalLeader>tp ...... Set priority
+    <LocalLeader>ta ...... Archive done items
+    <LocalLeader>tn ...... Add a note (the filename uses the first @list tag)
 
 As a ftplugin, ttodo (in conjunction with vikitasks) supports the following 
 syntax/extensions to todo.txt (see also 
