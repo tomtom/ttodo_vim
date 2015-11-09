@@ -1,14 +1,14 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-02
-" @Revision:    60
+" @Last Change: 2015-11-09
+" @Revision:    61
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
     finish
 endif
-let loaded_ttodo = 1
+let loaded_ttodo = 2
 
 let s:save_cpo = &cpo
 set cpo&vim
