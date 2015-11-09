@@ -101,7 +101,8 @@ The tlib_vim plugin is required:
 https://github.com/tomtom/tlib_vim
 
 Optional enhancement:
-- https://github.com/tomtom/vikitasks_vim
+- https://github.com/tomtom/vikitasks_vim for additional maps
+- https://github.com/tomtom/autolinker_vim for hyperlinking
 
 Also available via git: http://github.com/tomtom/ttodo_vim
 
