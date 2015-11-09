@@ -1,0 +1,12 @@
+version: "0.02"
+  - :Ttodo -A, -R, -i, -x command line options; require tlib >= 1.16
+  - ttodo#CComplete(): use tlib#arg#Complete; misc
+  - NEW --sort command-line option; vikitask integration for manipulating todo.txt files; misc enh
+  - NEW own ftplugin; misc improvements
+  - Require vikitasks >= 1.02
+  - Use tlib#file#Globpath()
+  - various improvements
+  - s/TLibTrace/Tlibtrace/g
+  - version 0.01-151109
+  MD5 checksum: e6b8be03504c4a9d948ca4a38de683f3
+
