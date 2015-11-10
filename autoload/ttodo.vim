@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-09
-" @Revision:    505
+" @Last Change: 2015-11-10
+" @Revision:    507
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -405,8 +405,9 @@ function! ttodo#Show(bang, args) abort "{{{3
         let flt = get(args, '__rest__', [])
         if !empty(qfl)
             if g:ttodo#viewer ==# 'tlib'
-                let w = s:list_env
+                let w = copy(s:list_env)
                 if !empty(flt)
+                    Tlibtrace 'ttodo', flt
                     let w.initial_filter = [[""], flt]
                 endif
                 let overdue = filter(copy(qfl), 'get(v:val.task, "overdue", 0)')
