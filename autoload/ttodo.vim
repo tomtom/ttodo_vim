@@ -68,7 +68,7 @@ endif
 
 
 if !exists('g:ttodo#sort')
-    let g:ttodo#sort = 'pri,due,done,text'   "{{{2
+    let g:ttodo#sort = 'pri,due,done,lists,tags,idx'   "{{{2
 endif
 
 
@@ -494,4 +494,20 @@ function! ttodo#FiletypeDetect(...) abort "{{{3
     endif
 endf
 
+
+function! ttodo#SortBuffer(args) abort "{{{3
+    let args = tlib#arg#GetOpts(a:args, {})
+    let filename = expand('%:p')
+    let qfl = ttodo#GetFileTasks(args, filename)
+    let qfl = s:SortTasks(args, qfl)
+    let tasks = map(qfl, 'v:val.task.text')
+    let pos = getpos('.')
+    try
+        1,$delete
+        call append(1, tasks)
+        1delete
+    finally
+        call setpos('.', pos)
+    endtry
+endf
 

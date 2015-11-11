@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-09.
-" @Revision:    43
+" @Last Change: 2015-11-10.
+" @Revision:    48
 
 if exists("b:did_ftplugin")
     finish
@@ -29,6 +29,10 @@ nnoremap <buffer> <c-cr> :<C-U>call ttodo#ftplugin#New(xor(g:ttodo#ftplugin#add_
 
 imap <buffer> <cr> <C-\><C-O><cr>
 imap <buffer> <c-cr> <C-\><C-O><c-cr>
+
+
+command! -buffer -bar -nargs=* -complete=customlist,ttodo#CComplete Ttodosort call ttodo#SortBuffer([<f-args>])
+
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
