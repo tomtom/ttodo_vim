@@ -66,7 +66,7 @@ https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):
     t:YYYY-MM-DD ..... Hide the tasks until the given date
     t:-Nd ............ Hide the tasks until N days before the due date
     indented tasks ... Are handled similar to the outline addon; unless 
-                       `children` is true, only tasks with no open subtasks 
+                       `has_subtasks` is true, only tasks with no open subtasks 
                        will be shown (see also 
                        https://github.com/samuelsnyder/outline-todo.txt)
 
