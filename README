@@ -62,6 +62,10 @@ https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):
                        |g:vikitasks#ft#todotxt#copy_rec_items|)
     t:YYYY-MM-DD ..... Hide the tasks until the given date
     t:-Nd ............ Hide the tasks until N days before the due date
+    indented tasks ... Are handled similar to the outline addon; unless 
+                       `children` is true, only tasks with no open subtasks 
+                       will be shown (see also 
+                       https://github.com/samuelsnyder/outline-todo.txt)
 
 Other ftplugin for todo.txt files, which can be used in conjunction with the 
 ttodo plugin, include:
