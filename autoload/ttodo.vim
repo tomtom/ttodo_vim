@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-10
-" @Revision:    507
+" @Last Change: 2015-11-11
+" @Revision:    648
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -77,7 +77,7 @@ if !exists('g:ttodo#prefs')
     " `--pref=NAME` command line option from |:Ttodo|.
     "
     " If no preference is given, "default" is used.
-    let g:ttodo#prefs = {'default': {'hidden': 0, 'done': 0}, 'important': {'hidden': 0, 'done': 0, 'undated': 1, 'due': '2w', 'pri': 'A-C'}}   "{{{2
+    let g:ttodo#prefs = {'default': {'hidden': 0, 'has_subtasks': 0, 'done': 0}, 'important': {'hidden': 0, 'has_subtasks': 0, 'done': 0, 'undated': 1, 'due': '2w', 'pri': 'A-C'}}   "{{{2
     if exists('g:ttodo#prefs_user')
         let g:ttodo#prefs = tlib#eval#Extend(g:ttodo#prefs, g:ttodo#prefs_user)
     endif
@@ -104,13 +104,13 @@ endif
 
 if !exists('g:ttodo#parse_rx')
     ":nodoc:
-    let g:ttodo#parse_rx = {'due': '\<due:\zs'. g:tlib#date#date_rx .'\>', 't': '\<t:\zs'. g:tlib#date#date_rx .'\>', 'pri': '^(\zs\u\ze)', 'hidden?': '\<h:1\>', 'done?': '^\Cx\ze\s', 'donedate': '^\Cx\s\+\zs'. g:tlib#date#date_rx, 'rec': '\<rec:\zs+\?\d\+[dwmy]\ze\>'}   "{{{2
+    let g:ttodo#parse_rx = {'created': '^\C\%(x\s\+'. g:tlib#date#date_rx .'\s\+\)\?\%((\u)\s\+\)\?\zs'. g:tlib#date#date_rx, 'due': '\<due:\zs'. g:tlib#date#date_rx .'\>', 't': '\<t:\zs'. g:tlib#date#date_rx .'\>', 'pri': '^(\zs\u\ze)', 'hidden?': '\<h:1\>', 'done?': '^\C\s*x\ze\s', 'donedate': '^\Cx\s\+\zs'. g:tlib#date#date_rx, 'rec': '\<rec:\zs+\?\d\+[dwmy]\ze\>'}   "{{{2
 endif
 
 
 if !exists('g:ttodo#rewrite_gsub')
     ":nodoc:
-    let g:ttodo#rewrite_gsub = [['^\%((\u)\s\+\)\?\zs\d\{4}-\d\d-\d\d\s\+', '']]   "{{{2
+    let g:ttodo#rewrite_gsub = [['^\C\%((\u)\s\+\)\?\zs'. g:tlib#date#date_rx .'\s*', '']]   "{{{2
 endif
 
 
@@ -180,11 +180,12 @@ let s:ttodo_args = {
             \   'file_exclude_rx': {'type': 1},
             \   'file_include_rx': {'type': 1},
             \   'hidden': {'type': -1},
+            \   'has_subtasks': {'type': -1},
             \   'files': {'type': 1, 'complete': 'files'},
             \   'path': {'type': 1, 'complete': 'dirs'},
             \   'pref': {'type': 1, 'complete_customlist': 'keys(g:ttodo#prefs)'},
             \   'pri': {'type': 1, 'complete_customlist': '["", "A-", "A-C", "W", "X-Z"]'},
-            \   'sort': {'type': 1},
+            \   'sort': {'type': 1, 'complete_customlist': 'map(keys(g:ttodo#parse_rx), "substitute(v:val, ''\\W$'', '''', ''g'')")'},
             \   'task_exclude_rx': {'type': 1},
             \   'task_include_rx': {'type': 1},
             \   'undated': {'type': -1},
@@ -228,17 +229,55 @@ endf
 function! ttodo#GetFileTasks(args, file) abort "{{{3
     let qfl = []
     let lnum = 0
+    let pred_idx = -1
     for line in s:GetLines(a:file)
         let lnum += 1
-        for [rx, subst] in g:ttodo#rewrite_gsub
-            let line = substitute(line, rx, subst, 'g')
-        endfor
-        if line =~ '^\s\+' && !empty(qfl)
-            let line = substitute(line, '^\%(\s\{'. &shiftwidth .'}\)', ' ', 'g')
-            let qfl[-1].text .= ' '. &showbreak . line
-        else
-            call add(qfl, {"filename": a:file, "lnum": lnum, "text": line, "task": ttodo#ParseTask(line)})
+        let task = ttodo#ParseTask(line)
+        " TLogVAR task
+        if line =~ '^\s\+' && pred_idx >= 0
+            " TLogVAR task
+            let indentstr = matchstr(line, '^\%(\s\{1,'. &shiftwidth .'}\)\+')
+            " TLogVAR indentstr
+            let indentstr = substitute(indentstr, '\%(\s\{1,'. &shiftwidth .'}\)', '+', 'g')
+            let indent = len(indentstr)
+            " TLogVAR indentstr, indent
+            let line = substitute(line, '^\s\+', '', '')
+            let parent = qfl[-1]
+            " TLogVAR -1, parent
+            let parent_indent = get(parent.task, '__indent__', 0)
+            " TLogVAR parent_indent, indent
+            if parent_indent == indent
+                let parent_idx = parent.task.__parent_idx__
+                let parent = qfl[parent_idx]
+                let parent_indent = get(parent.task, '__indent__', 0)
+                " TLogVAR parent_idx, parent
+            else
+                let parent_idx = pred_idx
+                " TLogVAR parent_idx
+            endif
+            if parent_indent < indent && !task.done
+                " let parent.task.has_subtasks = get(parent.task, 'has_subtasks', 0) + 1
+                let parent.task.has_subtasks = 1
+                " TLogVAR parent, parent_idx, pred_idx
+                let qfl[parent_idx] = parent
+            endif
+            let task.has_subtasks = 0
+            let task0 = copy(task)
+            let task = tlib#eval#Extend(task, parent.task, 'keep')
+            let task.__indent__ = indent
+            let task.__parent_idx__ = parent_idx
+            let task.lists += parent.task.lists
+            let task.tags += parent.task.tags
+            let line = s:FormatTask({'text': parent.text}).text .'|'. line
+            " let line = substitute(s:FormatTask({'text': parent.text}).text, '^\C\s*\%(x\s\+\)\?\%((\u)\s\+\)\?', '', '') .'|'. line
+            " if has_key(parent.task, 'pri') " && parent.task.pri != get(task0, 'pri', '')
+            "     let line = '('. parent.task.pri .') '. line
+            " endif
+            " TLogVAR task, qfl[parent_idx]
         endif
+        let pred_idx += 1
+        let task.idx = pred_idx
+        call add(qfl, {"filename": a:file, "lnum": lnum, "text": line, "task": task})
     endfor
     return qfl
 endf
@@ -254,20 +293,18 @@ function! s:GetLines(filename) abort "{{{3
 endf
 
 
-function! s:GetFileTasks(args, file) abort "{{{3
-    let cfile = tlib#cache#Filename('ttodo_tasks', a:file, 1)
-    let fqfl = tlib#cache#Value(cfile, 'ttodo#GetFileTasks', getftime(a:file), [a:args, a:file], {'in_memory': 1})
+function! s:GetFileTasks(args, filename) abort "{{{3
+    let cfile = tlib#cache#Filename('ttodo_tasks', a:filename, 1)
+    let fqfl = tlib#cache#Value(cfile, 'ttodo#GetFileTasks', getftime(a:filename), [a:args, a:filename], {'in_memory': 1})
+    let fqfl = filter(fqfl, '!empty(v:val.text)')
     return fqfl
 endf
 
 
 function! s:GetTasks(args) abort "{{{3
     let qfl = []
-    let task_include_rx = get(a:args, 'task_include_rx', g:ttodo#task_include_rx)
-    let task_exclude_rx = get(a:args, 'task_exclude_rx', g:ttodo#task_exclude_rx)
-    for file in s:GetFiles(a:args)
-        let fqfl = s:GetFileTasks(a:args, file)
-        let fqfl = filter(copy(fqfl), '!empty(v:val.text) && (empty(task_include_rx) || v:val.text =~ task_include_rx) && (empty(task_exclude_rx) || v:val.text !~ task_exclude_rx)')
+    for filename in s:GetFiles(a:args)
+        let fqfl = s:GetFileTasks(a:args, filename)
         if !empty(fqfl)
             let qfl = extend(qfl, fqfl)
         endif
@@ -299,38 +336,44 @@ endf
 
 
 function! s:FilterTasks(args) abort "{{{3
-    let tasks = s:GetTasks(a:args)
+    let qfl = s:GetTasks(a:args)
+    let task_include_rx = get(a:args, 'task_include_rx', g:ttodo#task_include_rx)
+    let task_exclude_rx = get(a:args, 'task_exclude_rx', g:ttodo#task_exclude_rx)
+    let qfl = filter(qfl, '(empty(task_include_rx) || v:val.text =~ task_include_rx) && (empty(task_exclude_rx) || v:val.text !~ task_exclude_rx)')
     if has_key(a:args, 'due')
         let due = a:args.due
         let today = strftime(g:tlib#date#date_format)
         if due =~ '^t%\[oday]$'
-            call filter(tasks, 'empty(get(v:val.task, "due", "")) || get(v:val.task, "due", "") <= '. string(today))
+            call filter(qfl, 'empty(get(v:val.task, "due", "")) || get(v:val.task, "due", "") <= '. string(today))
         elseif due =~ '^\d\+-\d\+-\d\+$'
-            call filter(tasks, 'empty(get(v:val.task, "due", "")) || get(v:val.task, "due", "") <= '. string(due))
+            call filter(qfl, 'empty(get(v:val.task, "due", "")) || get(v:val.task, "due", "") <= '. string(due))
         else
             if due =~ '^\d\+w$'
                 let due = matchstr(due, '^\d\+') * 7
             endif
-            call filter(tasks, 'empty(get(v:val.task, "due", "")) || tlib#date#DiffInDays(v:val.task.due) <= '. due)
+            call filter(qfl, 'empty(get(v:val.task, "due", "")) || tlib#date#DiffInDays(v:val.task.due) <= '. due)
         endif
         if !get(a:args, 'undated', 0)
-            call filter(tasks, '!empty(get(v:val.task, "due", ""))')
+            call filter(qfl, '!empty(get(v:val.task, "due", ""))')
         endif
     endif
+    if !get(a:args, 'has_subtasks', 0)
+        call filter(qfl, 'get(v:val.task, "has_subtasks", 0) == 0')
+    endif
     if !get(a:args, 'done', 0)
-        call filter(tasks, '!get(v:val.task, "done", 0)')
+        call filter(qfl, '!get(v:val.task, "done", 0)')
     endif
     if !get(a:args, 'hidden', 0)
-        call filter(tasks, 'empty(get(v:val.task, "hidden", ""))')
+        call filter(qfl, 'empty(get(v:val.task, "hidden", ""))')
     endif
     if has_key(a:args, 'pri')
-        call filter(tasks, 'get(v:val.task, "pri", g:ttodo#default_pri) =~# ''^['. a:args.pri .']$''')
+        call filter(qfl, 'get(v:val.task, "pri", g:ttodo#default_pri) =~# ''^['. a:args.pri .']$''')
     endif
     if get(a:args, 'threshold', 1)
         let today = strftime(g:tlib#date#date_format)
-        call filter(tasks, 's:CheckThreshold(get(v:val.task, "t", ""), get(v:val.task, "due", ""), today)')
+        call filter(qfl, 's:CheckThreshold(get(v:val.task, "t", ""), get(v:val.task, "due", ""), today)')
     endif
-    return tasks
+    return qfl
 endf
 
 
@@ -378,18 +421,37 @@ function! s:SortTask(a, b) abort "{{{3
     for item in s:sort_fields
         let default = exists('g:ttodo#default_'. item) ? g:ttodo#default_{item} : ''
         let aa = get(a, item, default)
+        if type(aa) > 1
+            unlet aa
+            let aa = string(get(a, item, default))
+        endif
         let bb = get(b, item, default)
+        if type(bb) > 1
+            unlet bb
+            let bb = string(get(b, item, default))
+        endif
         if aa != bb
             return aa > bb ? 1 : -1
         endif
+        unlet! aa bb default
     endfor
     return 0
 endf
 
 
+function! s:FormatTask(qfe) abort "{{{3
+    let text = a:qfe.text
+    for [rx, subst] in g:ttodo#rewrite_gsub
+        let text = substitute(text, rx, subst, 'g')
+    endfor
+    let a:qfe.text = text
+    return a:qfe
+endf
+
+
 ":nodoc:
 function! ttodo#Show(bang, args) abort "{{{3
-    let args = tlib#arg#GetOpts(a:args, s:ttodo_args, 1)
+    let args = tlib#arg#GetOpts(a:args, s:ttodo_args)
     Tlibtrace 'ttodo', args
     " TLogVAR args
     if args.__exit__
@@ -402,6 +464,7 @@ function! ttodo#Show(bang, args) abort "{{{3
         Tlibtrace 'ttodo', args
         let qfl = s:FilterTasks(args)
         let qfl = s:SortTasks(args, qfl)
+        let qfl = map(qfl, 's:FormatTask(v:val)')
         let flt = get(args, '__rest__', [])
         if !empty(qfl)
             if g:ttodo#viewer ==# 'tlib'
@@ -433,7 +496,7 @@ function! ttodo#InitListBuffer() dict abort "{{{3
     call call('tlib#qfl#SetSyntax', [], self)
     if has_key(self, 'overdue_rx')
         Tlibtrace self.overdue_rx
-        TLogVAR self.overdue_rx
+        " TLogVAR self.overdue_rx
         exec 'syntax match TtodoOverdue /'. escape(self.overdue_rx, '/') .'/ contained containedin=TtodoTag'
         hi def link TtodoOverdue ErrorMsg
         syntax cluster TtodoTask add=TtodoOverdue

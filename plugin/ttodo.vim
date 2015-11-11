@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-09
-" @Revision:    61
+" @Last Change: 2015-11-11
+" @Revision:    70
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -34,25 +34,27 @@ endif
 " :display: :Ttodo[!] [ARGS] [INITIAL FILTER]
 "
 " ARGS is an argument list. The following arguments are supported:
-"   --pref=PREF ... PREF is the name of a preferences set in 
-"                   |g:ttodo#prefs| (default: "default")
-"   --due=DATE .... show only tasks with due dates >= DATE. DATE can be
-"                   - a DATE in the form YYYY-MM-DD or
-"                   - a number of days or
-"                   - a number of weeks as in "4w"
-"                   (default: |g:ttodo#default_due|)
-"   --pri=PRI ..... Show tasks with a priority matching [PRI] (see 
-"                   |/[]|)
-"   --undated ..... Show tasks with no due dates when using the due 
-"                   argument
-"   --done ........ Show done tasks
-"   --hidden ...... Show hidden tasks (h:1)
+"   --pref=PREF .... PREF is the name of a preferences set in 
+"                    |g:ttodo#prefs| (default: "default")
+"   --due=DATE ..... show only tasks with due dates >= DATE. DATE can be
+"                    - a DATE in the form YYYY-MM-DD or
+"                    - a number of days or
+"                    - a number of weeks as in "4w"
+"                    (default: |g:ttodo#default_due|)
+"   --pri=PRI ...... Show tasks with a priority matching [PRI] (see 
+"                    |/[]|)
+"   --undated ...... Show tasks with no due dates when using the due 
+"                    argument
+"   --done ......... Show done tasks
+"   --hidden ....... Show hidden tasks (h:1)
 "   --files=FILE1,FILE2... .. A comma-separated list of todo.txt files
-"   --path=PATH ... Search files in this path (default: use 
-"                   |g:ttodo#dirs|)
-"   --pattern=PAT . Search files matching this pattern (default: 
-"                   |g:ttodo#file_pattern|)
-"   --sort=FIELDS . default: |g:ttodo#sort|
+"   --path=PATH .... Search files in this path (default: use 
+"                    |g:ttodo#dirs|)
+"   --pattern=PAT .. Search files matching this pattern (default: 
+"                    |g:ttodo#file_pattern|)
+"   --sort=FIELDS .. default: |g:ttodo#sort|
+"   --has_subtasks . Show tasks with open subtasks (i.e. indented tasks 
+"                    below the parent task)
 "   -A=RX, --file_include_rx=RX ... Default: |g:ttodo#file_include_rx|
 "   -R=RX, --file_exclude_rx=RX ... Default: |g:ttodo#file_exclude_rx|
 "   -i=RX, --task_include_rx=RX ... Default: |g:ttodo#task_include_rx|

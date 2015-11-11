@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-04.
+" @Last Change: 2015-11-11.
 
 if version < 600
     syntax clear
@@ -43,7 +43,7 @@ syntax match TtodoTag /\<\a\+:\S\+/
 syntax match TtodoDate /\<\d\{4}-\d\d-\d\d\>/
 syntax match TtodoTime /\<\d\d:\d\d\>/
 " syntax match TtodoDone /\<x \d\{4}-\d\d-\d\d\s.*$/
-syntax match TtodoDone /^x\s.*$/
+syntax match TtodoDone /^\s*x\s.*$/
 syntax cluster TtodoTask contains=TtodoPri,TtodoPriA,TtodoPriB,TtodoPriC,TtodoList,TtodoKeyword,TtodoTag,TtodoDate,TtodoTime,TtodoDone
 
 hi def link TtodoPri Special

@@ -65,6 +65,10 @@ https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):
                        |g:vikitasks#ft#todotxt#copy_rec_items|)
     t:YYYY-MM-DD ..... Hide the tasks until the given date
     t:-Nd ............ Hide the tasks until N days before the due date
+    indented tasks ... Are handled similar to the outline addon; unless 
+                       `children` is true, only tasks with no open subtasks 
+                       will be shown (see also 
+                       https://github.com/samuelsnyder/outline-todo.txt)
 
 Other ftplugin for todo.txt files, which can be used in conjunction with the 
 ttodo plugin, include:
@@ -137,6 +141,7 @@ Contents~
         ttodo#ParseTask ....................... |ttodo#ParseTask()|
         ttodo#InitListBuffer .................. |ttodo#InitListBuffer()|
         ttodo#FiletypeDetect .................. |ttodo#FiletypeDetect()|
+        ttodo#SortBuffer ...................... |ttodo#SortBuffer()|
         g:ttodo#ftplugin#notef ................ |g:ttodo#ftplugin#notef|
         g:ttodo#ftplugin#note_prefix .......... |g:ttodo#ftplugin#note_prefix|
         g:ttodo#ftplugin#edit_note ............ |g:ttodo#ftplugin#edit_note|
@@ -166,25 +171,27 @@ g:ttodo_enable_ftdetect        (default: 0)
 :Ttodo[!] [ARGS] [INITIAL FILTER]
 
     ARGS is an argument list. The following arguments are supported:
-      --pref=PREF ... PREF is the name of a preferences set in 
-                      |g:ttodo#prefs| (default: "default")
-      --due=DATE .... show only tasks with due dates >= DATE. DATE can be
-                      - a DATE in the form YYYY-MM-DD or
-                      - a number of days or
-                      - a number of weeks as in "4w"
-                      (default: |g:ttodo#default_due|)
-      --pri=PRI ..... Show tasks with a priority matching [PRI] (see 
-                      |/[]|)
-      --undated ..... Show tasks with no due dates when using the due 
-                      argument
-      --done ........ Show done tasks
-      --hidden ...... Show hidden tasks (h:1)
+      --pref=PREF .... PREF is the name of a preferences set in 
+                       |g:ttodo#prefs| (default: "default")
+      --due=DATE ..... show only tasks with due dates >= DATE. DATE can be
+                       - a DATE in the form YYYY-MM-DD or
+                       - a number of days or
+                       - a number of weeks as in "4w"
+                       (default: |g:ttodo#default_due|)
+      --pri=PRI ...... Show tasks with a priority matching [PRI] (see 
+                       |/[]|)
+      --undated ...... Show tasks with no due dates when using the due 
+                       argument
+      --done ......... Show done tasks
+      --hidden ....... Show hidden tasks (h:1)
       --files=FILE1,FILE2... .. A comma-separated list of todo.txt files
-      --path=PATH ... Search files in this path (default: use 
-                      |g:ttodo#dirs|)
-      --pattern=PAT . Search files matching this pattern (default: 
-                      |g:ttodo#file_pattern|)
-      --sort=FIELDS . default: |g:ttodo#sort|
+      --path=PATH .... Search files in this path (default: use 
+                       |g:ttodo#dirs|)
+      --pattern=PAT .. Search files matching this pattern (default: 
+                       |g:ttodo#file_pattern|)
+      --sort=FIELDS .. default: |g:ttodo#sort|
+      --has_subtasks . Show tasks with open subtasks (i.e. indented tasks 
+                       below the parent task)
       -A=RX, --file_include_rx=RX ... Default: |g:ttodo#file_include_rx|
       -R=RX, --file_exclude_rx=RX ... Default: |g:ttodo#file_exclude_rx|
       -i=RX, --task_include_rx=RX ... Default: |g:ttodo#task_include_rx|
@@ -238,10 +245,10 @@ g:ttodo#viewer                 (default: exists('g:loaded_tlib') ? 'tlib' : ':cw
                   standard |regexp|.
 
                                                     *g:ttodo#sort*
-g:ttodo#sort                   (default: 'pri,due,done,text')
+g:ttodo#sort                   (default: 'pri,due,done,lists,tags,idx')
 
                                                     *g:ttodo#prefs*
-g:ttodo#prefs                  (default: {'default': {'hidden': 0, 'done': 0}, 'important': {'hidden': 0, 'done': 0, 'undated': 1, 'due': '2w', 'pri': 'A-C'}})
+g:ttodo#prefs                  (default: {'default': {'hidden': 0, 'has_subtasks': 0, 'done': 0}, 'important': {'hidden': 0, 'has_subtasks': 0, 'done': 0, 'undated': 1, 'due': '2w', 'pri': 'A-C'}})
     A dictionary of configurations that can be invoked with the 
     `--pref=NAME` command line option from |:Ttodo|.
 
@@ -276,6 +283,9 @@ ttodo#InitListBuffer()
 
                                                     *ttodo#FiletypeDetect()*
 ttodo#FiletypeDetect(...)
+
+                                                    *ttodo#SortBuffer()*
+ttodo#SortBuffer(args)
 
 
 ========================================================================

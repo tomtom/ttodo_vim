@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-09
-" @Revision:    67
+" @Last Change: 2015-11-11
+" @Revision:    72
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -104,16 +104,21 @@ endf
 
 
 function! ttodo#ftplugin#New(move, copytags) abort "{{{3
-    let new = strftime(g:tlib#date#date_format)
-    let task = ttodo#ParseTask(getline('.'))
-    if a:copytags
-        if !empty(task.lists)
-            let new .= ' '. join(map(copy(task.lists), '"@".v:val'))
+    if indent('.') > 0 && empty(a:move)
+        norm! o
+    else
+        let new = strftime(g:tlib#date#date_format)
+        let task = ttodo#ParseTask(getline('.'))
+        if a:copytags
+            if !empty(task.lists)
+                let new .= ' '. join(map(copy(task.lists), '"@".v:val'))
+            endif
+            if !empty(task.tags)
+                let new .= ' '. join(map(copy(task.tags), '"+".v:val'))
+            endif
         endif
-        if !empty(task.tags)
-            let new .= ' '. join(map(copy(task.tags), '"+".v:val'))
-        endif
+        exec 'norm!' a:move . 'o'. new .' '
     endif
-    exec 'norm!' a:move . 'o'. new .' '
 endf
+
 
