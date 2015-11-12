@@ -36,6 +36,7 @@ If filetype is ttodo, the following default keymaps are enabled:
                            if either |g:ttodo#ftplugin#add_at_eof| is true or 
                            the map was invoked with a count, add the task at 
                            the end of file
+    <s-cr> ............... Add a new subtask
 
 If vikitasks_vim is installed (see |g:ttodo#use_vikitasks|), the following maps 
 are available too:
@@ -52,23 +53,31 @@ As a ftplugin, ttodo (in conjunction with vikitasks) supports the following
 syntax/extensions to todo.txt (see also 
 https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):
 
-    (A) .............. A priority as upper case letter (at the beginning of the 
+    (A) DATE TASK .... A priority as upper case letter (at the beginning of the 
                        line)
-    x DATE text ...... A completed task (with completion date)
-    @list ............ list tag
-    +keyword ......... keyword tag
+    DATE TASK ........ A pending task
+    x DATE DATE TASK . A completed task (with completion date)
+    indented tasks ... A indented task is a subtask of the parent task; unless 
+                       `has_subtasks` is true, |:Ttodo| will only show tasks 
+                       with no open subtasks; this is similar to how the 
+                       outline addon handles subtasks (see also 
+                       https://github.com/samuelsnyder/outline-todo.txt)
+
+A TASK may contain the following tags:
+
+    @list ............ a "list" tag
+    +keyword ......... a "keyword" tag
+    h:1 .............. hidden task
     due:YYYY-MM-DD ... due dates
     rec:+Nx .......... When marking a task a done, add a new task with a due 
                        date in N d(ays), w(eeks), m(onths), y(ears); with the 
                        leading '+' use the original due date; else use the 
                        completion date (see also 
-                       |g:vikitasks#ft#todotxt#copy_rec_items|)
+                       |g:vikitasks#ft#todotxt#copy_rec_items|); this is 
+                       similar to how the Simpletask Android app handles `rec` 
+                       tags
     t:YYYY-MM-DD ..... Hide the tasks until the given date
     t:-Nd ............ Hide the tasks until N days before the due date
-    indented tasks ... Are handled similar to the outline addon; unless 
-                       `has_subtasks` is true, only tasks with no open subtasks 
-                       will be shown (see also 
-                       https://github.com/samuelsnyder/outline-todo.txt)
 
 Other ftplugin for todo.txt files, which can be used in conjunction with the 
 ttodo plugin, include:
