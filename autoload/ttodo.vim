@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-12
-" @Revision:    667
+" @Revision:    675
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -177,6 +177,7 @@ let s:ttodo_args = {
             \ 'values': {
             \   'done': {'type': -1},
             \   'due': {'type': 1},
+            \   'encoding': {'type': 1},
             \   'file_exclude_rx': {'type': 1},
             \   'file_include_rx': {'type': 1},
             \   'hidden': {'type': -1},
@@ -266,7 +267,7 @@ function! ttodo#GetFileTasks(args, file) abort "{{{3
             let task.tags = parent.task.tags + task.tags
             " TLogVAR task, qfl[parent_idx]
             " let line = s:FormatTask({'text': parent.text}).text .'|'. line
-            let line .= '|'. substitute(s:FormatTask({'text': parent.text}).text, '^\C\s*\%(x\s\+\)\?\%((\u)\s\+\)\?', '', '')
+            let line .= '|'. substitute(s:FormatTask(a:args, {'text': parent.text}).text, '^\C\s*\%(x\s\+\)\?\%((\u)\s\+\)\?', '', '')
             if has_key(parent.task, 'pri')
                 let line = '('. parent.task.pri .') '. line
             endif
@@ -436,11 +437,19 @@ function! s:SortTask(a, b) abort "{{{3
 endf
 
 
-function! s:FormatTask(qfe) abort "{{{3
+function! s:FormatTask(args, qfe) abort "{{{3
     let text = a:qfe.text
     for [rx, subst] in g:ttodo#rewrite_gsub
         let text = substitute(text, rx, subst, 'g')
     endfor
+    if has('iconv')
+        let tenc = get(a:args, 'encoding', &enc)
+        " TLogVAR tenc, &enc, text
+        if tenc != &enc
+            let text = iconv(text, tenc, &enc)
+            " TLogVAR text
+        endif
+    endif
     let a:qfe.text = text
     return a:qfe
 endf
@@ -461,7 +470,7 @@ function! ttodo#Show(bang, args) abort "{{{3
         Tlibtrace 'ttodo', args
         let qfl = s:FilterTasks(args)
         let qfl = s:SortTasks(args, qfl)
-        let qfl = map(qfl, 's:FormatTask(v:val)')
+        let qfl = map(qfl, 's:FormatTask(args, v:val)')
         let flt = get(args, '__rest__', [])
         if !empty(qfl)
             let done = 0

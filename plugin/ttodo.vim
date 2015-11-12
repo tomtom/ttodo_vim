@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-11
-" @Revision:    70
+" @Last Change: 2015-11-12
+" @Revision:    73
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -52,6 +52,7 @@ endif
 "                    |g:ttodo#dirs|)
 "   --pattern=PAT .. Search files matching this pattern (default: 
 "                    |g:ttodo#file_pattern|)
+"   --encoding=ENC . Encoding of the task files (default: &enc)
 "   --sort=FIELDS .. default: |g:ttodo#sort|
 "   --has_subtasks . Show tasks with open subtasks (i.e. indented tasks 
 "                    below the parent task)
