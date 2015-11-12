@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-11
-" @Revision:    648
+" @Last Change: 2015-11-12
+" @Revision:    667
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -63,7 +63,7 @@ if !exists('g:ttodo#viewer')
     "               |g:tlib#input#filter_mode|
     "   :COMMAND .. E.g. `:cwindow`. In this case initial filter is a 
     "               standard |regexp|.
-    let g:ttodo#viewer = exists('g:loaded_tlib') ? 'tlib' : ':cwindow'   "{{{2
+    let g:ttodo#viewer = exists('g:loaded_tlib') ? ['tlib'] : [':CtrlPQuickfix', ':cwindow']   "{{{2
 endif
 
 
@@ -242,20 +242,16 @@ function! ttodo#GetFileTasks(args, file) abort "{{{3
             let indent = len(indentstr)
             " TLogVAR indentstr, indent
             let line = substitute(line, '^\s\+', '', '')
-            let parent = qfl[-1]
+            let parent_idx = pred_idx
+            let parent = qfl[parent_idx]
             " TLogVAR -1, parent
-            let parent_indent = get(parent.task, '__indent__', 0)
-            " TLogVAR parent_indent, indent
-            if parent_indent == indent
+            while get(parent.task, '__indent__', 0) >= indent
                 let parent_idx = parent.task.__parent_idx__
                 let parent = qfl[parent_idx]
-                let parent_indent = get(parent.task, '__indent__', 0)
-                " TLogVAR parent_idx, parent
-            else
-                let parent_idx = pred_idx
-                " TLogVAR parent_idx
-            endif
-            if parent_indent < indent && !task.done
+            endwh
+            let parent_indent = get(parent.task, '__indent__', 0)
+            " TLogVAR indent, parent_indent, parent_idx, parent
+            if !task.done
                 " let parent.task.has_subtasks = get(parent.task, 'has_subtasks', 0) + 1
                 let parent.task.has_subtasks = 1
                 " TLogVAR parent, parent_idx, pred_idx
@@ -266,14 +262,15 @@ function! ttodo#GetFileTasks(args, file) abort "{{{3
             let task = tlib#eval#Extend(task, parent.task, 'keep')
             let task.__indent__ = indent
             let task.__parent_idx__ = parent_idx
-            let task.lists += parent.task.lists
-            let task.tags += parent.task.tags
-            let line = s:FormatTask({'text': parent.text}).text .'|'. line
-            " let line = substitute(s:FormatTask({'text': parent.text}).text, '^\C\s*\%(x\s\+\)\?\%((\u)\s\+\)\?', '', '') .'|'. line
-            " if has_key(parent.task, 'pri') " && parent.task.pri != get(task0, 'pri', '')
-            "     let line = '('. parent.task.pri .') '. line
-            " endif
+            let task.lists = parent.task.lists + task.lists
+            let task.tags = parent.task.tags + task.tags
             " TLogVAR task, qfl[parent_idx]
+            " let line = s:FormatTask({'text': parent.text}).text .'|'. line
+            let line .= '|'. substitute(s:FormatTask({'text': parent.text}).text, '^\C\s*\%(x\s\+\)\?\%((\u)\s\+\)\?', '', '')
+            if has_key(parent.task, 'pri')
+                let line = '('. parent.task.pri .') '. line
+            endif
+            " TLogVAR line
         endif
         let pred_idx += 1
         let task.idx = pred_idx
@@ -467,25 +464,38 @@ function! ttodo#Show(bang, args) abort "{{{3
         let qfl = map(qfl, 's:FormatTask(v:val)')
         let flt = get(args, '__rest__', [])
         if !empty(qfl)
-            if g:ttodo#viewer ==# 'tlib'
-                let w = copy(s:list_env)
-                if !empty(flt)
-                    Tlibtrace 'ttodo', flt
-                    let w.initial_filter = [[""], flt]
+            let done = 0
+            for viewer in g:ttodo#viewer
+                if viewer ==# 'tlib'
+                    let w = copy(s:list_env)
+                    if !empty(flt)
+                        Tlibtrace 'ttodo', flt
+                        let w.initial_filter = [[""], flt]
+                    endif
+                    let overdue = filter(copy(qfl), 'get(v:val.task, "overdue", 0)')
+                    if !empty(overdue)
+                        let w.overdue_rx = '\V\<due:\%('. join(map(overdue, 'v:val.task.due'), '\|') .'\)\>'
+                    endif
+                    let done = 1
+                    call tlib#qfl#QflList(qfl, w)
+                elseif viewer =~# '^:'
+                    if exists(viewer) == 2
+                        if !empty(flt)
+                            let qfl = filter(qfl, 's:FilterQFL(v:val, flt)')
+                        endif
+                        call setqflist(qfl)
+                        let done = 1
+                        exec viewer
+                    endif
+                else
+                    throw 'TTodo: Unsupported value for g:ttodo#viewer: '. string(viewer)
                 endif
-                let overdue = filter(copy(qfl), 'get(v:val.task, "overdue", 0)')
-                if !empty(overdue)
-                    let w.overdue_rx = '\V\<due:\%('. join(map(overdue, 'v:val.task.due'), '\|') .'\)\>'
+                if done
+                    break
                 endif
-                call tlib#qfl#QflList(qfl, w)
-            elseif g:ttodo#viewer =~# '^:'
-                if !empty(flt)
-                    let qfl = filter(qfl, 's:FilterQFL(v:val, flt)')
-                endif
-                call setqflist(qfl)
-                exec g:ttodo#viewer
-            else
-                throw 'TTodo: Unsupported value for g:ttodo#viewer: '. string(g:ttodo#viewer)
+            endfor
+            if !done
+                throw 'TTodo: No supported viewer in g:ttodo#viewer: '. string(g:ttodo#viewer)
             endif
         endif
     endif

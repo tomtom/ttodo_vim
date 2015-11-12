@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-11
-" @Revision:    72
+" @Last Change: 2015-11-12
+" @Revision:    92
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -103,9 +103,17 @@ function! ttodo#ftplugin#Note() abort "{{{3
 endf
 
 
-function! ttodo#ftplugin#New(move, copytags) abort "{{{3
+function! ttodo#ftplugin#New(move, copytags, mode) abort "{{{3
+    " TLogVAR a:move, a:copytags
+    if a:mode == 'i'
+        let o = "\<c-m>"
+    else
+        let o = "o"
+    endif
     if indent('.') > 0 && empty(a:move)
-        norm! o
+        return o
+    elseif a:move == '>'
+        return o ."\<c-t>"
     else
         let new = strftime(g:tlib#date#date_format)
         let task = ttodo#ParseTask(getline('.'))
@@ -117,7 +125,14 @@ function! ttodo#ftplugin#New(move, copytags) abort "{{{3
                 let new .= ' '. join(map(copy(task.tags), '"+".v:val'))
             endif
         endif
-        exec 'norm!' a:move . 'o'. new .' '
+        if has_key(task, 'pri')
+            let new = '('. task.pri .') '. new
+        endif
+        let move = a:move
+        if a:mode == 'i' && !empty(move)
+            let move = "\<c-\>\<c-o>"
+        endif
+        return move . o . new .' '
     endif
 endf
 
