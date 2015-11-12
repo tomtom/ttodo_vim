@@ -6,6 +6,7 @@ of todo.txt files (see http://todotxt.com) via |tlib#input#List()|. The plugin
 supports searching across multiple todo.txt files.
 
 Examples: >
+
     " Show all tasks; default map (|g:ttodo_nmap|): <Leader>1
     :Ttodo
 
@@ -20,6 +21,15 @@ Examples: >
 
     " Show tasks matching @Test
     :Ttodo @Test
+
+    " By default, |:Ttodo| scans the todo.txt files in |g:ttodo#dirs|. Users 
+    " can also scan loaded buffers.
+    " Show tasks in the current buffer
+    :Ttodo --bufname=%
+
+    " Command-line options can be collected in preference sets (see 
+    " |g:ttodo#prefs|)
+    :Ttodo --pref=work
 
 In order to use this plugin as a ftplugin, the vikitasks_vim plugin should be 
 installed. Users might also want to set |g:ttodo_enable_ftdetect| to 1 in their 

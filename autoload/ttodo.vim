@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-12
-" @Revision:    675
+" @Revision:    682
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 116
@@ -175,6 +175,8 @@ let s:ttodo_args = {
             \ 'help': ':Ttodo',
             \ 'handle_exit_code': 1,
             \ 'values': {
+            \   'bufname': {'type': 1},
+            \   'bufnr': {'type': 1},
             \   'done': {'type': -1},
             \   'due': {'type': 1},
             \   'encoding': {'type': 1},
@@ -200,25 +202,36 @@ let s:ttodo_args = {
 
 
 function! s:GetFiles(args) abort "{{{3
-    let filess = get(a:args, 'files', '')
-    if !empty(filess)
-        let files = tlib#string#SplitCommaList(filess)
+    let bufname = get(a:args, 'bufname', '')
+    if !empty(bufname)
+        let files = [bufname(bufname)]
     else
-        let path = get(a:args, 'path', join(g:ttodo#dirs, ','))
-        if empty(path)
-            throw 'TTodo: Please set g:ttodo#dirs'
-        endif
-        let pattern = get(a:args, 'pattern', g:ttodo#file_pattern)
-        Tlibtrace 'ttodo', path, pattern
-        let files = tlib#file#Globpath(path, pattern)
-        let task_include_rx = get(a:args, 'task_include_rx', g:ttodo#task_include_rx)
-        let file_include_rx = get(a:args, 'file_include_rx', g:ttodo#file_include_rx)
-        if !empty(file_include_rx)
-            let files = filter(files, 'v:val =~# file_include_rx')
-        endif
-        let file_exclude_rx = get(a:args, 'file_exclude_rx', g:ttodo#file_exclude_rx)
-        if !empty(file_exclude_rx)
-            let files = filter(files, 'v:val !~# file_exclude_rx')
+        let bufnr = get(a:args, 'bufnr', '')
+        if !empty(bufnr)
+            let bufnrs = tlib#string#SplitCommaList(bufnr)
+            let files = map(bufnrs, 'bufname(str2nr(v:val))')
+        else
+            let filess = get(a:args, 'files', '')
+            if !empty(filess)
+                let files = tlib#string#SplitCommaList(filess)
+            else
+                let path = get(a:args, 'path', join(g:ttodo#dirs, ','))
+                if empty(path)
+                    throw 'TTodo: Please set g:ttodo#dirs'
+                endif
+                let pattern = get(a:args, 'pattern', g:ttodo#file_pattern)
+                Tlibtrace 'ttodo', path, pattern
+                let files = tlib#file#Globpath(path, pattern)
+                let task_include_rx = get(a:args, 'task_include_rx', g:ttodo#task_include_rx)
+                let file_include_rx = get(a:args, 'file_include_rx', g:ttodo#file_include_rx)
+                if !empty(file_include_rx)
+                    let files = filter(files, 'v:val =~# file_include_rx')
+                endif
+                let file_exclude_rx = get(a:args, 'file_exclude_rx', g:ttodo#file_exclude_rx)
+                if !empty(file_exclude_rx)
+                    let files = filter(files, 'v:val !~# file_exclude_rx')
+                endif
+            endif
         endif
     endif
     Tlibtrace 'ttodo', files

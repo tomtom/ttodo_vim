@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-12
-" @Revision:    73
+" @Revision:    77
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -47,6 +47,9 @@ endif
 "                    argument
 "   --done ......... Show done tasks
 "   --hidden ....... Show hidden tasks (h:1)
+"   --bufnr=BUFNR .. A comma-separated list of buffer numbers (must be 
+"                    numbers)
+"   --bufname=EXPR . A buffer name expression (see |bufname()|)
 "   --files=FILE1,FILE2... .. A comma-separated list of todo.txt files
 "   --path=PATH .... Search files in this path (default: use 
 "                    |g:ttodo#dirs|)
