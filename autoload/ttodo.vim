@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-13
-" @Revision:    700
+" @Revision:    704
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 117
@@ -280,13 +280,13 @@ function! ttodo#GetFileTasks(args, file) abort "{{{3
                 " TLogVAR parent, parent_idx, pred_idx
                 let qfl[parent_idx] = parent
             endif
+            " let task0 = copy(task)
+            let task = tlib#eval#Extend(copy(parent.task), task)
             let task.has_subtasks = 0
-            let task0 = copy(task)
-            let task = tlib#eval#Extend(task, parent.task, 'keep')
             let task.__indent__ = indent
             let task.__parent_idx__ = parent_idx
-            let task.lists = parent.task.lists + task.lists
-            let task.tags = parent.task.tags + task.tags
+            " let task.lists = parent.task.lists + task.lists
+            " let task.tags = parent.task.tags + task.tags
             " TLogVAR task, qfl[parent_idx]
             " let line = s:FormatTask({'text': parent.text}).text .'|'. line
             let line .= '|'. substitute(s:FormatTask(a:args, {'text': parent.text}).text, '^\C\s*\%(x\s\+\)\?\%((\u)\s\+\)\?', '', '')
