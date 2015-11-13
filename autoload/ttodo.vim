@@ -1,14 +1,14 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-12
-" @Revision:    682
+" @Last Change: 2015-11-13
+" @Revision:    700
 
 
-if !exists('g:loaded_tlib') || g:loaded_tlib < 116
+if !exists('g:loaded_tlib') || g:loaded_tlib < 117
     runtime plugin/tlib.vim
-    if !exists('g:loaded_tlib') || g:loaded_tlib < 116
-        echoerr 'tlib >= 1.16 is required'
+    if !exists('g:loaded_tlib') || g:loaded_tlib < 117
+        echoerr 'tlib >= 1.17 is required'
         finish
     endif
 endif
@@ -114,9 +114,9 @@ if !exists('g:ttodo#rewrite_gsub')
 endif
 
 
-if !exists('g:ttodo#use_vikitasks')
-    let g:ttodo#use_vikitasks = exists('g:loaded_vikitasks') && g:loaded_vikitasks >= 102   "{{{2
-endif
+" if !exists('g:ttodo#use_vikitasks')
+"     let g:ttodo#use_vikitasks = exists('g:loaded_vikitasks') && g:loaded_vikitasks >= 102   "{{{2
+" endif
 
 
 if !exists('g:ttodo#mapleader')
@@ -142,29 +142,38 @@ let s:list_env = {
             \ 'scratch': '__Ttodo__',
             \ }
 
-if g:ttodo#use_vikitasks
+" if g:ttodo#use_vikitasks
+"     let s:list_env['key_map'] = {
+"             \     'default': {
+"             \         "\<f2>" : {'key': "\<f2>", 'agent': 'vikitasks#AgentKeymap', 'key_name': '<f2>', 'help': 'Switch to vikitasks keymap'},
+"             \             24 : {'key': 24, 'agent': 'vikitasks#AgentMarkDone', 'key_name': '<c-x>', 'help': 'Mark done'},
+"             \             4 : {'key': 4, 'agent': 'vikitasks#AgentDueDays', 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
+"             \             23 : {'key': 23, 'agent': 'vikitasks#AgentDueWeeks', 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
+"             \             3 : {'key': 3, 'agent': 'vikitasks#AgentItemChangeCategory', 'key_name': '<c-c>', 'help': 'Change task category'},
+"             \             14 : {'key': 14, 'agent': 'vikitasks#AgentPaste', 'key_name': '<c-n>', 'help': 'Paste selected items in a new buffer'},
+"             \     },
+"             \     'vikitasks': extend(copy(g:tlib#input#keyagents_InputList_s),
+"             \         {
+"             \             char2nr('x') : {'agent': 'vikitasks#AgentMarkDone', 'key_name': 'x', 'help': 'Mark done'},
+"             \             char2nr('d')  : {'agent': 'vikitasks#AgentDueDays', 'key_name': 'd', 'help': 'Mark as due in N days'},
+"             \             char2nr('w')  : {'agent': 'vikitasks#AgentDueWeeks', 'key_name': 'w', 'help': 'Mark as due in N weeks'},
+"             \             char2nr('m')  : {'agent': 'vikitasks#AgentDueMonths', 'key_name': 'w', 'help': 'Mark as due in N months'},
+"             \             char2nr('c') : {'agent': 'vikitasks#AgentItemChangeCategory', 'key_name': 'c', 'help': 'Change task category'},
+"             \             char2nr('k') : {'agent': 'vikitasks#AgentSelectCategory', 'key_name': 'k', 'help': 'Select tasks of a category'},
+"             \            'unknown_key': {'agent': 'tlib#agent#Null', 'key_name': 'other keys', 'help': 'ignore key'},
+"             \         }
+"             \     )
+"             \ }
+" else
     let s:list_env['key_map'] = {
             \     'default': {
-            \         "\<f2>" : {'key': "\<f2>", 'agent': 'vikitasks#AgentKeymap', 'key_name': '<f2>', 'help': 'Switch to vikitasks keymap'},
-            \             24 : {'key': 24, 'agent': 'vikitasks#AgentMarkDone', 'key_name': '<c-x>', 'help': 'Mark done'},
-            \             4 : {'key': 4, 'agent': 'vikitasks#AgentDueDays', 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
-            \             23 : {'key': 23, 'agent': 'vikitasks#AgentDueWeeks', 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
-            \             3 : {'key': 3, 'agent': 'vikitasks#AgentItemChangeCategory', 'key_name': '<c-c>', 'help': 'Change task category'},
-            \             14 : {'key': 14, 'agent': 'vikitasks#AgentPaste', 'key_name': '<c-n>', 'help': 'Paste selected items in a new buffer'},
-            \     },
-            \     'vikitasks': extend(copy(g:tlib#input#keyagents_InputList_s),
-            \         {
-            \             char2nr('x') : {'agent': 'vikitasks#AgentMarkDone', 'key_name': 'x', 'help': 'Mark done'},
-            \             char2nr('d')  : {'agent': 'vikitasks#AgentDueDays', 'key_name': 'd', 'help': 'Mark as due in N days'},
-            \             char2nr('w')  : {'agent': 'vikitasks#AgentDueWeeks', 'key_name': 'w', 'help': 'Mark as due in N weeks'},
-            \             char2nr('m')  : {'agent': 'vikitasks#AgentDueMonths', 'key_name': 'w', 'help': 'Mark as due in N months'},
-            \             char2nr('c') : {'agent': 'vikitasks#AgentItemChangeCategory', 'key_name': 'c', 'help': 'Change task category'},
-            \             char2nr('k') : {'agent': 'vikitasks#AgentSelectCategory', 'key_name': 'k', 'help': 'Select tasks of a category'},
-            \            'unknown_key': {'agent': 'tlib#agent#Null', 'key_name': 'other keys', 'help': 'ignore key'},
-            \         }
-            \     )
+            \             24 : {'key': 24, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDone', 0], 'key_name': '<c-x>', 'help': 'Mark done'},
+            \             4 : {'key': 4, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'd', 'Number of days: '], 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
+            \             23 : {'key': 23, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'w', 'Number of weeks: '], 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
+            \             11 : {'key': 11, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#SetCategory', 0], 'key_name': '<c-k>', 'help': 'Change task category'},
+            \     }
             \ }
-endif
+" endif
 
 if exists('g:ttodo#world_user')
     let s:list_env = tlib#eval#Extend(s:list_env, g:ttodo#world_user)
