@@ -170,7 +170,7 @@ let s:list_env = {
             \             24 : {'key': 24, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDone', 0], 'key_name': '<c-x>', 'help': 'Mark done'},
             \             4 : {'key': 4, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'd', 'Number of days: '], 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
             \             23 : {'key': 23, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'w', 'Number of weeks: '], 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
-            \             11 : {'key': 11, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#SetCategory', 0], 'key_name': '<c-k>', 'help': 'Change task category'},
+            \             49 : {'key': 49, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#SetCategory', 0], 'key_name': '<c-1>', 'help': 'Change task category'},
             \     }
             \ }
 " endif

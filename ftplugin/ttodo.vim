@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-13.
-" @Revision:    68
+" @Revision:    71
 
 if exists("b:did_ftplugin")
     finish
@@ -15,10 +15,10 @@ setl tw=0
 setl commentstring=x\ %s
 
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'x :<C-U>call ttodo#ftplugin#MarkDone(v:count)<cr>'
-exec 'nnoremap <buffer>' g:ttodo#mapleader .'d :<C-U>call ttodo#ftplugin#MarkDue("d", v:count1)<cr>'
+exec 'nnoremap <buffer>' g:ttodo#mapleader .'d :<C-U>call ttodo#ftplugin#MarkDue("d", v:count)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'w :<C-U>call ttodo#ftplugin#MarkDue("w", v:count1)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'m :<C-U>call ttodo#ftplugin#MarkDue("m", v:count1)<cr>'
-exec 'nnoremap <buffer>' g:ttodo#mapleader .'c :<C-U>call ttodo#ftplugin#SetCategory(v:count)<cr>'
+exec 'nnoremap <buffer>' g:ttodo#mapleader .'1 :<C-U>call ttodo#ftplugin#SetCategory(v:count)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'a :<C-U>call ttodo#ftplugin#ArchiveCurrentBuffer()<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'n :<C-U>call ttodo#ftplugin#Note()<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'b :<C-U>Ttodo --bufname=%<cr>'
