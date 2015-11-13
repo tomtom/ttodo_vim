@@ -3,6 +3,7 @@ of todo.txt files (see http://todotxt.com) via |tlib#input#List()|. The plugin
 supports searching across multiple todo.txt files.
 
 Examples: >
+
     " Show all tasks; default map (|g:ttodo_nmap|): <Leader>1
     :Ttodo
 
@@ -18,9 +19,17 @@ Examples: >
     " Show tasks matching @Test
     :Ttodo @Test
 
-In order to use this plugin as a ftplugin, the vikitasks_vim plugin should be 
-installed. Users might also want to set |g:ttodo_enable_ftdetect| to 1 in their 
-|vimrc| file.
+    " By default, |:Ttodo| scans the todo.txt files in |g:ttodo#dirs|. Users 
+    " can also scan loaded buffers.
+    " Show tasks in the current buffer
+    :Ttodo --bufname=%
+
+    " Command-line options can be collected in preference sets (see 
+    " |g:ttodo#prefs|)
+    :Ttodo --pref=work
+
+In order to use this plugin as a ftplugin, users might also want to set 
+|g:ttodo_enable_ftdetect| to 1 in their |vimrc| file.
 
 If filetype is ttodo, the following default keymaps are enabled:
 
@@ -34,21 +43,17 @@ If filetype is ttodo, the following default keymaps are enabled:
                            the map was invoked with a count, add the task at 
                            the end of file
     <s-cr> ............... Add a new subtask
-
-If vikitasks_vim is installed (see |g:ttodo#use_vikitasks|), the following maps 
-are available too:
-
     <LocalLeader>tx ...... Mark done
     <LocalLeader>td ...... Mark due in N days
     <LocalLeader>tw ...... Mark due in N weeks
     <LocalLeader>tm ...... Mark due in N months
     <LocalLeader>tp ...... Set priority
     <LocalLeader>ta ...... Archive done items
+    <LocalLeader>tb ...... View, filter items in the current buffer
     <LocalLeader>tn ...... Add a note (the filename uses the first @list tag)
 
-As a ftplugin, ttodo (in conjunction with vikitasks) supports the following 
-syntax/extensions to todo.txt (see also 
-https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):
+As a ftplugin, ttodo supports the following syntax/extensions to todo.txt (see 
+also https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):
 
     (A) DATE TASK .... A priority as upper case letter (at the beginning of the 
                        line)
@@ -69,10 +74,8 @@ A TASK may contain the following tags:
     rec:+Nx .......... When marking a task a done, add a new task with a due 
                        date in N d(ays), w(eeks), m(onths), y(ears); with the 
                        leading '+' use the original due date; else use the 
-                       completion date (see also 
-                       |g:vikitasks#ft#todotxt#copy_rec_items|); this is 
-                       similar to how the Simpletask Android app handles `rec` 
-                       tags
+                       completion date; this is similar to how the Simpletask 
+                       Android app handles `rec` tags
     t:YYYY-MM-DD ..... Hide the tasks until the given date
     t:-Nd ............ Hide the tasks until N days before the due date
 
