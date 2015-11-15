@@ -34,14 +34,12 @@ In order to use this plugin as a ftplugin, users might also want to set
 If filetype is ttodo, the following default keymaps are enabled:
 
     <cr> ................. Add a new task;
-                           if either |g:ttodo#ftplugin#add_at_eof| is true or 
-                           the map was invoked with a count, add the task at 
-                           the end of file
+                           if |g:ttodo#ftplugin#add_at_eof| is true, add the 
+                           task at the end of file
     <c-cr> ............... Add a new task; copy any list and tags from the 
                            current task;
-                           if either |g:ttodo#ftplugin#add_at_eof| is true or 
-                           the map was invoked with a count, add the task at 
-                           the end of file
+                           if |g:ttodo#ftplugin#add_at_eof| is true, add the 
+                           task at the end of file
     <s-cr> ............... Add a new subtask
     <LocalLeader>tx ...... Mark done
     <LocalLeader>td ...... Mark due in N days
