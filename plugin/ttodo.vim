@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-12
-" @Revision:    77
+" @Last Change: 2015-11-15
+" @Revision:    78
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -45,7 +45,7 @@ endif
 "                    |/[]|)
 "   --undated ...... Show tasks with no due dates when using the due 
 "                    argument
-"   --done ......... Show done tasks
+"   --done ......... Show completed tasks
 "   --hidden ....... Show hidden tasks (h:1)
 "   --bufnr=BUFNR .. A comma-separated list of buffer numbers (must be 
 "                    numbers)

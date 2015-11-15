@@ -44,12 +44,12 @@ If filetype is ttodo, the following default keymaps are enabled:
                            if |g:ttodo#ftplugin#add_at_eof| is true, add the 
                            task at the end of file
     <s-cr> ............... Add a new subtask
-    <LocalLeader>tx ...... Mark done
+    <LocalLeader>tx ...... Mark "done"
     <LocalLeader>td ...... Mark due in N days
     <LocalLeader>tw ...... Mark due in N weeks
     <LocalLeader>tm ...... Mark due in N months
     <LocalLeader>tp ...... Set priority
-    <LocalLeader>ta ...... Archive done items
+    <LocalLeader>ta ...... Archive completed items
     <LocalLeader>tb ...... View, filter items in the current buffer
     <LocalLeader>tn ...... Add a note (the filename uses the first @list tag)
 
@@ -72,7 +72,7 @@ A TASK may contain the following tags:
     +keyword ......... a "keyword" tag
     h:1 .............. hidden task
     due:YYYY-MM-DD ... due dates
-    rec:+Nx .......... When marking a task a done, add a new task with a due 
+    rec:+Nx .......... When marking a task a "done", add a new task with a due 
                        date in N d(ays), w(eeks), m(onths), y(ears); with the 
                        leading '+' use the original due date; else use the 
                        completion date; this is similar to how the Simpletask 
