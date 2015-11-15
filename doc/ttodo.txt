@@ -162,7 +162,7 @@ Contents~
         ttodo#ftplugin#New .................... |ttodo#ftplugin#New()|
         ttodo#ftplugin#MarkDone ............... |ttodo#ftplugin#MarkDone()|
         ttodo#ftplugin#MarkDue ................ |ttodo#ftplugin#MarkDue()|
-        ttodo#ftplugin#SetCategory ............ |ttodo#ftplugin#SetCategory()|
+        ttodo#ftplugin#SetPriority ............ |ttodo#ftplugin#SetPriority()|
         ttodo#ftplugin#Agent .................. |ttodo#ftplugin#Agent()|
 
 
@@ -253,13 +253,13 @@ g:ttodo#task_exclude_rx        (default: '')
     Exclude tasks matching this |regexp| from the list.
 
                                                     *g:ttodo#viewer*
-g:ttodo#viewer                 (default: exists('g:loaded_tlib') ? ['tlib'] : [':CtrlPQuickfix', ':cwindow'])
+g:ttodo#viewer                 (default: 'tlib')
     Supported values:
       tlib ...... Use the tlib_vim plugin; the syntax of |:Ttodo|'s 
                   initial filter depends on the value of 
                   |g:tlib#input#filter_mode|
-      :COMMAND .. E.g. `:cwindow`. In this case initial filter is a 
-                  standard |regexp|.
+      :COMMAND .. E.g. `:cwindow` or `:CtrlPQuickfix`. In this case 
+                  initial filter is a standard |regexp|.
 
                                                     *g:ttodo#sort*
 g:ttodo#sort                   (default: 'pri,due,done,lists,tags,idx')
@@ -339,8 +339,8 @@ ttodo#ftplugin#MarkDone(count)
                                                     *ttodo#ftplugin#MarkDue()*
 ttodo#ftplugin#MarkDue(unit, count)
 
-                                                    *ttodo#ftplugin#SetCategory()*
-ttodo#ftplugin#SetCategory(count)
+                                                    *ttodo#ftplugin#SetPriority()*
+ttodo#ftplugin#SetPriority(count)
 
                                                     *ttodo#ftplugin#Agent()*
 ttodo#ftplugin#Agent(world, selected, fn, ...)

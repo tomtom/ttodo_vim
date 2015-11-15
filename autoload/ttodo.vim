@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-13
-" @Revision:    704
+" @Last Change: 2015-11-15
+" @Revision:    707
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 117
@@ -61,9 +61,9 @@ if !exists('g:ttodo#viewer')
     "   tlib ...... Use the tlib_vim plugin; the syntax of |:Ttodo|'s 
     "               initial filter depends on the value of 
     "               |g:tlib#input#filter_mode|
-    "   :COMMAND .. E.g. `:cwindow`. In this case initial filter is a 
-    "               standard |regexp|.
-    let g:ttodo#viewer = exists('g:loaded_tlib') ? ['tlib'] : [':CtrlPQuickfix', ':cwindow']   "{{{2
+    "   :COMMAND .. E.g. `:cwindow` or `:CtrlPQuickfix`. In this case 
+    "               initial filter is a standard |regexp|.
+    let g:ttodo#viewer = 'tlib'   "{{{2
 endif
 
 
@@ -114,11 +114,6 @@ if !exists('g:ttodo#rewrite_gsub')
 endif
 
 
-" if !exists('g:ttodo#use_vikitasks')
-"     let g:ttodo#use_vikitasks = exists('g:loaded_vikitasks') && g:loaded_vikitasks >= 102   "{{{2
-" endif
-
-
 if !exists('g:ttodo#mapleader')
     let g:ttodo#mapleader = '<LocalLeader>t'   "{{{2
 endif
@@ -142,38 +137,14 @@ let s:list_env = {
             \ 'scratch': '__Ttodo__',
             \ }
 
-" if g:ttodo#use_vikitasks
-"     let s:list_env['key_map'] = {
-"             \     'default': {
-"             \         "\<f2>" : {'key': "\<f2>", 'agent': 'vikitasks#AgentKeymap', 'key_name': '<f2>', 'help': 'Switch to vikitasks keymap'},
-"             \             24 : {'key': 24, 'agent': 'vikitasks#AgentMarkDone', 'key_name': '<c-x>', 'help': 'Mark done'},
-"             \             4 : {'key': 4, 'agent': 'vikitasks#AgentDueDays', 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
-"             \             23 : {'key': 23, 'agent': 'vikitasks#AgentDueWeeks', 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
-"             \             3 : {'key': 3, 'agent': 'vikitasks#AgentItemChangeCategory', 'key_name': '<c-c>', 'help': 'Change task category'},
-"             \             14 : {'key': 14, 'agent': 'vikitasks#AgentPaste', 'key_name': '<c-n>', 'help': 'Paste selected items in a new buffer'},
-"             \     },
-"             \     'vikitasks': extend(copy(g:tlib#input#keyagents_InputList_s),
-"             \         {
-"             \             char2nr('x') : {'agent': 'vikitasks#AgentMarkDone', 'key_name': 'x', 'help': 'Mark done'},
-"             \             char2nr('d')  : {'agent': 'vikitasks#AgentDueDays', 'key_name': 'd', 'help': 'Mark as due in N days'},
-"             \             char2nr('w')  : {'agent': 'vikitasks#AgentDueWeeks', 'key_name': 'w', 'help': 'Mark as due in N weeks'},
-"             \             char2nr('m')  : {'agent': 'vikitasks#AgentDueMonths', 'key_name': 'w', 'help': 'Mark as due in N months'},
-"             \             char2nr('c') : {'agent': 'vikitasks#AgentItemChangeCategory', 'key_name': 'c', 'help': 'Change task category'},
-"             \             char2nr('k') : {'agent': 'vikitasks#AgentSelectCategory', 'key_name': 'k', 'help': 'Select tasks of a category'},
-"             \            'unknown_key': {'agent': 'tlib#agent#Null', 'key_name': 'other keys', 'help': 'ignore key'},
-"             \         }
-"             \     )
-"             \ }
-" else
-    let s:list_env['key_map'] = {
+let s:list_env['key_map'] = {
             \     'default': {
             \             24 : {'key': 24, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDone', 0], 'key_name': '<c-x>', 'help': 'Mark done'},
             \             4 : {'key': 4, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'd', 'Number of days: '], 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
             \             23 : {'key': 23, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'w', 'Number of weeks: '], 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
-            \             49 : {'key': 49, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#SetCategory', 0], 'key_name': '<c-1>', 'help': 'Change task category'},
+            \             49 : {'key': 49, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#SetPriority', 0], 'key_name': '<c-1>', 'help': 'Change task category'},
             \     }
             \ }
-" endif
 
 if exists('g:ttodo#world_user')
     let s:list_env = tlib#eval#Extend(s:list_env, g:ttodo#world_user)
@@ -495,38 +466,27 @@ function! ttodo#Show(bang, args) abort "{{{3
         let qfl = map(qfl, 's:FormatTask(args, v:val)')
         let flt = get(args, '__rest__', [])
         if !empty(qfl)
-            let done = 0
-            for viewer in g:ttodo#viewer
-                if viewer ==# 'tlib'
-                    let w = copy(s:list_env)
+            if g:ttodo#viewer ==# 'tlib'
+                let w = copy(s:list_env)
+                if !empty(flt)
+                    Tlibtrace 'ttodo', flt
+                    let w.initial_filter = [[""], flt]
+                endif
+                let overdue = filter(copy(qfl), 'get(v:val.task, "overdue", 0)')
+                if !empty(overdue)
+                    let w.overdue_rx = '\V\<due:\%('. join(map(overdue, 'v:val.task.due'), '\|') .'\)\>'
+                endif
+                call tlib#qfl#QflList(qfl, w)
+            elseif g:ttodo#viewer =~# '^:'
+                if exists(g:ttodo#viewer) == 2
                     if !empty(flt)
-                        Tlibtrace 'ttodo', flt
-                        let w.initial_filter = [[""], flt]
+                        let qfl = filter(qfl, 's:FilterQFL(v:val, flt)')
                     endif
-                    let overdue = filter(copy(qfl), 'get(v:val.task, "overdue", 0)')
-                    if !empty(overdue)
-                        let w.overdue_rx = '\V\<due:\%('. join(map(overdue, 'v:val.task.due'), '\|') .'\)\>'
-                    endif
-                    let done = 1
-                    call tlib#qfl#QflList(qfl, w)
-                elseif viewer =~# '^:'
-                    if exists(viewer) == 2
-                        if !empty(flt)
-                            let qfl = filter(qfl, 's:FilterQFL(v:val, flt)')
-                        endif
-                        call setqflist(qfl)
-                        let done = 1
-                        exec viewer
-                    endif
-                else
-                    throw 'TTodo: Unsupported value for g:ttodo#viewer: '. string(viewer)
+                    call setqflist(qfl)
+                    exec g:ttodo#viewer
                 endif
-                if done
-                    break
-                endif
-            endfor
-            if !done
-                throw 'TTodo: No supported viewer in g:ttodo#viewer: '. string(g:ttodo#viewer)
+            else
+                throw 'TTodo: Unsupported value for g:ttodo#viewer: '. string(g:ttodo#viewer)
             endif
         endif
     endif

@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-13.
-" @Revision:    71
+" @Revision:    80
 
 if exists("b:did_ftplugin")
     finish
@@ -18,7 +18,7 @@ exec 'nnoremap <buffer>' g:ttodo#mapleader .'x :<C-U>call ttodo#ftplugin#MarkDon
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'d :<C-U>call ttodo#ftplugin#MarkDue("d", v:count)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'w :<C-U>call ttodo#ftplugin#MarkDue("w", v:count1)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'m :<C-U>call ttodo#ftplugin#MarkDue("m", v:count1)<cr>'
-exec 'nnoremap <buffer>' g:ttodo#mapleader .'1 :<C-U>call ttodo#ftplugin#SetCategory(v:count)<cr>'
+exec 'nnoremap <buffer>' g:ttodo#mapleader .'1 :<C-U>call ttodo#ftplugin#SetPriority(v:count)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'a :<C-U>call ttodo#ftplugin#ArchiveCurrentBuffer()<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'n :<C-U>call ttodo#ftplugin#Note()<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'b :<C-U>Ttodo --bufname=%<cr>'
@@ -31,9 +31,10 @@ inoremap <buffer> <expr> <cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "
 inoremap <buffer> <expr> <c-cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 1, "i")
 inoremap <buffer> <expr> <s-cr> ttodo#ftplugin#New(">", 1, "i")
 
-
 command! -buffer -bar -nargs=* -complete=customlist,ttodo#CComplete Ttodosort call ttodo#SortBuffer([<f-args>])
-
+command! -buffer -bar Ttodoarchive call ttodo#ftplugin#ArchiveCurrentBuffer()
+command! -buffer -bar Ttodobuffer Ttodo --bufname=%
+command! -buffer -bar Ttodonote call ttodo#ftplugin#Note()
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
