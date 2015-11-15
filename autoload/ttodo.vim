@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-15
-" @Revision:    707
+" @Revision:    711
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 117
@@ -56,6 +56,11 @@ if !exists('g:ttodo#task_exclude_rx')
 endif
 
 
+if !exists('g:ttodo#task_hide_rx')
+    let g:ttodo#task_hide_rx = ''   "{{{2
+endif
+
+
 if !exists('g:ttodo#viewer')
     " Supported values:
     "   tlib ...... Use the tlib_vim plugin; the syntax of |:Ttodo|'s 
@@ -104,7 +109,7 @@ endif
 
 if !exists('g:ttodo#parse_rx')
     ":nodoc:
-    let g:ttodo#parse_rx = {'created': '^\C\%(x\s\+'. g:tlib#date#date_rx .'\s\+\)\?\%((\u)\s\+\)\?\zs'. g:tlib#date#date_rx, 'due': '\<due:\zs'. g:tlib#date#date_rx .'\>', 't': '\<t:\zs'. g:tlib#date#date_rx .'\>', 'pri': '^(\zs\u\ze)', 'hidden?': '\<h:1\>', 'done?': '^\C\s*x\ze\s', 'donedate': '^\Cx\s\+\zs'. g:tlib#date#date_rx, 'rec': '\<rec:\zs+\?\d\+[dwmy]\ze\>'}   "{{{2
+    let g:ttodo#parse_rx = {'created': '^\C\%(x\s\+'. g:tlib#date#date_rx .'\s\+\)\?\%((\u)\s\+\)\?\zs'. g:tlib#date#date_rx, 'due': '\<due:\zs'. g:tlib#date#date_rx .'\>', 't': '\<t:\zs\%(-\d\+[d]\|'. g:tlib#date#date_rx .'\)\>', 'pri': '^(\zs\u\ze)', 'hidden?': '\%(\<h:1\>\|'. g:ttodo#task_hide_rx .'\)', 'done?': '^\C\s*x\ze\s', 'donedate': '^\Cx\s\+\zs'. g:tlib#date#date_rx, 'rec': '\<rec:\zs+\?\d\+[dwmy]\ze\>'}   "{{{2
 endif
 
 

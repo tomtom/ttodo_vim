@@ -138,6 +138,7 @@ Contents~
         g:ttodo#file_exclude_rx ............... |g:ttodo#file_exclude_rx|
         g:ttodo#task_include_rx ............... |g:ttodo#task_include_rx|
         g:ttodo#task_exclude_rx ............... |g:ttodo#task_exclude_rx|
+        g:ttodo#task_hide_rx .................. |g:ttodo#task_hide_rx|
         g:ttodo#viewer ........................ |g:ttodo#viewer|
         g:ttodo#sort .......................... |g:ttodo#sort|
         g:ttodo#prefs ......................... |g:ttodo#prefs|
@@ -194,7 +195,8 @@ g:ttodo_enable_ftdetect        (default: 0)
       --undated ...... Show tasks with no due dates when using the due 
                        argument
       --done ......... Show completed tasks
-      --hidden ....... Show hidden tasks (h:1)
+      --hidden ....... Show hidden tasks, i.e. tasks with a "h:1" tag or 
+                       tasks matching |g:ttodo#task_hide_rx|
       --bufnr=BUFNR .. A comma-separated list of buffer numbers (must be 
                        numbers)
       --bufname=EXPR . A buffer name expression (see |bufname()|)
@@ -249,6 +251,9 @@ g:ttodo#task_include_rx        (default: '')
                                                     *g:ttodo#task_exclude_rx*
 g:ttodo#task_exclude_rx        (default: '')
     Exclude tasks matching this |regexp| from the list.
+
+                                                    *g:ttodo#task_hide_rx*
+g:ttodo#task_hide_rx           (default: '')
 
                                                     *g:ttodo#viewer*
 g:ttodo#viewer                 (default: 'tlib')
