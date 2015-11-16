@@ -48,10 +48,11 @@ If filetype is ttodo, the following default keymaps are enabled:
     <LocalLeader>td ...... Mark due in N days
     <LocalLeader>tw ...... Mark due in N weeks
     <LocalLeader>tm ...... Mark due in N months
-    <LocalLeader>tp ...... Set priority
+    <LocalLeader>ty ...... Set priority
     <LocalLeader>ta ...... Archive completed items
     <LocalLeader>tb ...... View, filter items in the current buffer
     <LocalLeader>tn ...... Add a note (the filename uses the first @list tag)
+    <LocalLeader>ti ...... Add a hopefully unique ID (an Adler32 hash)
 
 As a ftplugin, ttodo supports the following syntax/extensions to todo.txt (see 
 also https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):
@@ -132,8 +133,10 @@ Contents~
         g:ttodo_nmap_important ................ |g:ttodo_nmap_important|
         g:ttodo_enable_ftdetect ............... |g:ttodo_enable_ftdetect|
         :Ttodo ................................ |:Ttodo|
+        :Ttodotask ............................ |:Ttodotask|
         g:ttodo#dirs .......................... |g:ttodo#dirs|
         g:ttodo#file_pattern .................. |g:ttodo#file_pattern|
+        g:ttodo#default_file .................. |g:ttodo#default_file|
         g:ttodo#file_include_rx ............... |g:ttodo#file_include_rx|
         g:ttodo#file_exclude_rx ............... |g:ttodo#file_exclude_rx|
         g:ttodo#task_include_rx ............... |g:ttodo#task_include_rx|
@@ -146,11 +149,15 @@ Contents~
         g:ttodo#default_due ................... |g:ttodo#default_due|
         g:ttodo#default_t ..................... |g:ttodo#default_t|
         g:ttodo#mapleader ..................... |g:ttodo#mapleader|
+        g:ttodo#new_task ...................... |g:ttodo#new_task|
         g:ttodo#debug ......................... |g:ttodo#debug|
         ttodo#ParseTask ....................... |ttodo#ParseTask()|
         ttodo#InitListBuffer .................. |ttodo#InitListBuffer()|
         ttodo#FiletypeDetect .................. |ttodo#FiletypeDetect()|
         ttodo#SortBuffer ...................... |ttodo#SortBuffer()|
+        ttodo#NewTask ......................... |ttodo#NewTask()|
+        ttodo#FormatTags ...................... |ttodo#FormatTags()|
+        ttodo#MaybeAppend ..................... |ttodo#MaybeAppend()|
         g:ttodo#ftplugin#notef ................ |g:ttodo#ftplugin#notef|
         g:ttodo#ftplugin#note_prefix .......... |g:ttodo#ftplugin#note_prefix|
         g:ttodo#ftplugin#edit_note ............ |g:ttodo#ftplugin#edit_note|
@@ -163,6 +170,7 @@ Contents~
         ttodo#ftplugin#MarkDue ................ |ttodo#ftplugin#MarkDue()|
         ttodo#ftplugin#SetPriority ............ |ttodo#ftplugin#SetPriority()|
         ttodo#ftplugin#Agent .................. |ttodo#ftplugin#Agent()|
+        ttodo#ftplugin#AddId .................. |ttodo#ftplugin#AddId()|
 
 
 ========================================================================
@@ -221,6 +229,9 @@ g:ttodo_enable_ftdetect        (default: 0)
     |g:tlib#input#filter_mode|. The format of INITIAL FILTER depends on 
     the value of |g:ttodo#viewer|.
 
+                                                    *:Ttodotask*
+:Ttodotask
+
 
 ========================================================================
 autoload/ttodo.vim~
@@ -235,6 +246,9 @@ g:ttodo#dirs                   (default: [])
                                                     *g:ttodo#file_pattern*
 g:ttodo#file_pattern           (default: '*todo.txt')
     A glob pattern matching todo.txt files in |g:ttodo#dirs|.
+
+                                                    *g:ttodo#default_file*
+g:ttodo#default_file           (default: tlib#file#Join([get(g:ttodo#dirs, 0, '.'), 'todo.txt']))
 
                                                     *g:ttodo#file_include_rx*
 g:ttodo#file_include_rx        (default: '')
@@ -279,7 +293,7 @@ g:ttodo#default_pri            (default: 'T')
     If a task has no priortiy defined, assign this default priortiy.
 
                                                     *g:ttodo#default_due*
-g:ttodo#default_due            (default: strftime(g:tlib#date#date_format, localtime() + g:tlib#date#dayshift * 14))
+g:ttodo#default_due            (default: strftime(g:tlib#date#date_format, localtime() + g:tlib#date#dayshift * 28))
     If a task has no due date defined, assign this default due date.
 
                                                     *g:ttodo#default_t*
@@ -288,6 +302,10 @@ g:ttodo#default_t              (default: '-31d')
 
                                                     *g:ttodo#mapleader*
 g:ttodo#mapleader              (default: '<LocalLeader>t')
+
+                                                    *g:ttodo#new_task*
+g:ttodo#new_task               (default: {'lists': ['inbox'], 'pri': 'B'})
+    Defintion for tasks added via |:Ttodotask|.
 
                                                     *g:ttodo#debug*
 g:ttodo#debug                  (default: 0)
@@ -303,6 +321,15 @@ ttodo#FiletypeDetect(...)
 
                                                     *ttodo#SortBuffer()*
 ttodo#SortBuffer(args)
+
+                                                    *ttodo#NewTask()*
+ttodo#NewTask(args)
+
+                                                    *ttodo#FormatTags()*
+ttodo#FormatTags(prefix, lists)
+
+                                                    *ttodo#MaybeAppend()*
+ttodo#MaybeAppend(text, suffix)
 
 
 ========================================================================
@@ -334,7 +361,7 @@ ttodo#ftplugin#ArchiveCurrentBuffer()
 ttodo#ftplugin#Note()
 
                                                     *ttodo#ftplugin#New()*
-ttodo#ftplugin#New(move, copytags, mode)
+ttodo#ftplugin#New(move, copytags, mode, ...)
 
                                                     *ttodo#ftplugin#MarkDone()*
 ttodo#ftplugin#MarkDone(count)
@@ -347,6 +374,9 @@ ttodo#ftplugin#SetPriority(count)
 
                                                     *ttodo#ftplugin#Agent()*
 ttodo#ftplugin#Agent(world, selected, fn, ...)
+
+                                                    *ttodo#ftplugin#AddId()*
+ttodo#ftplugin#AddId(count)
 
 
 

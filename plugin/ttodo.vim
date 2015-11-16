@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-15
-" @Revision:    79
+" @Last Change: 2015-11-16
+" @Revision:    81
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -72,6 +72,9 @@ endif
 " |g:tlib#input#filter_mode|. The format of INITIAL FILTER depends on 
 " the value of |g:ttodo#viewer|.
 command! -bang -nargs=* -complete=customlist,ttodo#CComplete Ttodo call ttodo#Show(!empty("<bang>"), [<f-args>])
+
+
+command! -nargs=+ Ttodotask call ttodo#NewTask([<f-args>])
 
 
 if !empty(g:ttodo_nmap)

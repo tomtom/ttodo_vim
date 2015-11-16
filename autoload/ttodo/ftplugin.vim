@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-13
-" @Revision:    152
+" @Last Change: 2015-11-16
+" @Revision:    160
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -92,7 +92,7 @@ function! ttodo#ftplugin#Note() abort "{{{3
 endf
 
 
-function! ttodo#ftplugin#New(move, copytags, mode) abort "{{{3
+function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
     " TLogVAR a:move, a:copytags
     if a:mode == 'i'
         let o = "\<c-m>"
@@ -104,15 +104,11 @@ function! ttodo#ftplugin#New(move, copytags, mode) abort "{{{3
     elseif a:move == '>'
         return o ."\<c-t>"
     else
+        let task = a:0 >= 1 ? a:1 : ttodo#ParseTask(getline('.'))
         let new = strftime(g:tlib#date#date_format)
-        let task = ttodo#ParseTask(getline('.'))
         if a:copytags
-            if !empty(task.lists)
-                let new .= ' '. join(map(copy(task.lists), '"@".v:val'))
-            endif
-            if !empty(task.tags)
-                let new .= ' '. join(map(copy(task.tags), '"+".v:val'))
-            endif
+            let new = ttodo#MaybeAppend(new, ttodo#FormatTags('@', task.lists))
+            let new = ttodo#MaybeAppend(new, ttodo#FormatTags('+', task.tags))
         endif
         if has_key(task, 'pri')
             let new = '('. task.pri .') '. new
@@ -218,5 +214,15 @@ function! ttodo#ftplugin#Agent(world, selected, fn, ...) abort "{{{3
     Tlibtrace 'ttodo', cmd
     let world = tlib#qfl#RunCmdOnSelected(a:world, a:selected, cmd)
     return world
+endf
+
+
+function! ttodo#ftplugin#AddId(count) abort "{{{3
+    for lnum in range(line('.'), line('.') + a:count)
+        let line = getline(lnum)
+        let id = tlib#hash#Adler32(line)
+        let line .= ' id:'. id
+        call setline(lnum, line)
+    endfor
 endf
 

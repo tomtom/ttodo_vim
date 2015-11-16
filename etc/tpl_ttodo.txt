@@ -48,10 +48,11 @@ If filetype is ttodo, the following default keymaps are enabled:
     <LocalLeader>td ...... Mark due in N days
     <LocalLeader>tw ...... Mark due in N weeks
     <LocalLeader>tm ...... Mark due in N months
-    <LocalLeader>tp ...... Set priority
+    <LocalLeader>ty ...... Set priority
     <LocalLeader>ta ...... Archive completed items
     <LocalLeader>tb ...... View, filter items in the current buffer
     <LocalLeader>tn ...... Add a note (the filename uses the first @list tag)
+    <LocalLeader>ti ...... Add a hopefully unique ID (an Adler32 hash)
 
 As a ftplugin, ttodo supports the following syntax/extensions to todo.txt (see 
 also https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):

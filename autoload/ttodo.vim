@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-15
-" @Revision:    711
+" @Last Change: 2015-11-16
+" @Revision:    746
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 117
@@ -29,6 +29,11 @@ endif
 if !exists('g:ttodo#file_pattern')
     " A glob pattern matching todo.txt files in |g:ttodo#dirs|.
     let g:ttodo#file_pattern = '*todo.txt'   "{{{2
+endif
+
+
+if !exists('g:ttodo#default_file')
+    let g:ttodo#default_file = tlib#file#Join([get(g:ttodo#dirs, 0, '.'), 'todo.txt'])  "{{{2
 endif
 
 
@@ -97,7 +102,7 @@ endif
 
 if !exists('g:ttodo#default_due')
     " If a task has no due date defined, assign this default due date.
-    let g:ttodo#default_due = strftime(g:tlib#date#date_format, localtime() + g:tlib#date#dayshift * 14)   "{{{2
+    let g:ttodo#default_due = strftime(g:tlib#date#date_format, localtime() + g:tlib#date#dayshift * 28)   "{{{2
 endif
 
 
@@ -124,6 +129,12 @@ if !exists('g:ttodo#mapleader')
 endif
 
 
+if !exists('g:ttodo#new_task')
+    " Defintion for tasks added via |:Ttodotask|.
+    let g:ttodo#new_task = {'lists': ['inbox'], 'pri': 'B'}   "{{{2
+endif
+
+
 if !exists('g:ttodo#debug')
     let g:ttodo#debug = 0   "{{{2
 endif
@@ -147,7 +158,7 @@ let s:list_env['key_map'] = {
             \             24 : {'key': 24, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDone', 0], 'key_name': '<c-x>', 'help': 'Mark done'},
             \             4 : {'key': 4, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'd', 'Number of days: '], 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
             \             23 : {'key': 23, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'w', 'Number of weeks: '], 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
-            \             49 : {'key': 49, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#SetPriority', 0], 'key_name': '<c-1>', 'help': 'Change task category'},
+            \             25 : {'key': 25, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#SetPriority', 0], 'key_name': '<c-y>', 'help': 'Change task category'},
             \     }
             \ }
 
@@ -170,6 +181,8 @@ let s:ttodo_args = {
             \   'hidden': {'type': -1},
             \   'has_subtasks': {'type': -1},
             \   'files': {'type': 1, 'complete': 'files'},
+            \   'lists': {'type': 3},
+            \   'tags': {'type': 3},
             \   'path': {'type': 1, 'complete': 'dirs'},
             \   'pref': {'type': 1, 'complete_customlist': 'keys(g:ttodo#prefs)'},
             \   'pri': {'type': 1, 'complete_customlist': '["", "A-", "A-C", "W", "X-Z"]'},
@@ -256,16 +269,12 @@ function! ttodo#GetFileTasks(args, file) abort "{{{3
                 " TLogVAR parent, parent_idx, pred_idx
                 let qfl[parent_idx] = parent
             endif
-            " let task0 = copy(task)
             let task = tlib#eval#Extend(copy(parent.task), task)
             let task.has_subtasks = 0
             let task.__indent__ = indent
             let task.__parent_idx__ = parent_idx
-            " let task.lists = parent.task.lists + task.lists
-            " let task.tags = parent.task.tags + task.tags
             " TLogVAR task, qfl[parent_idx]
-            " let line = s:FormatTask({'text': parent.text}).text .'|'. line
-            let line .= '|'. substitute(s:FormatTask(a:args, {'text': parent.text}).text, '^\C\s*\%(x\s\+\)\?\%((\u)\s\+\)\?', '', '')
+            let line .= ' | '. substitute(s:FormatTask(a:args, {'text': parent.text}).text, '^\C\s*\%(x\s\+\)\?\%((\u)\s\+\)\?', '', '')
             if has_key(parent.task, 'pri')
                 let line = '('. parent.task.pri .') '. line
             endif
@@ -578,5 +587,30 @@ function! ttodo#SortBuffer(args) abort "{{{3
     finally
         call setpos('.', pos)
     endtry
+endf
+
+
+function! ttodo#NewTask(args) abort "{{{3
+    let args = extend(copy(g:ttodo#new_task), tlib#arg#GetOpts(a:args, s:ttodo_args))
+    let text = join(args.__rest__)
+    let text = ttodo#MaybeAppend(text, get(args, 'suffix', ''))
+    let text = ttodo#MaybeAppend(text, ttodo#FormatTags('@', get(args, 'lists', [])))
+    let text = ttodo#MaybeAppend(text, ttodo#FormatTags('+', get(args, 'tags', [])))
+    exec 'tab drop' g:ttodo#default_file
+    exec 'norm!' ttodo#ftplugin#New('G', 0, 'n', args) . text
+endf
+
+
+function! ttodo#FormatTags(prefix, lists) abort "{{{3
+    return join(map(copy(a:lists), 'a:prefix . v:val'))
+endf
+
+
+function! ttodo#MaybeAppend(text, suffix) abort "{{{3
+    if empty(a:suffix)
+        return a:text
+    else
+        return a:text .' '. a:suffix
+    endif
 endf
 
