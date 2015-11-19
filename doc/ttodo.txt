@@ -134,6 +134,7 @@ Contents~
         g:ttodo_enable_ftdetect ............... |g:ttodo_enable_ftdetect|
         :Ttodo ................................ |:Ttodo|
         :Ttodotask ............................ |:Ttodotask|
+        g:ttodo#filesargs ..................... |g:ttodo#filesargs|
         g:ttodo#file_pattern .................. |g:ttodo#file_pattern|
         g:ttodo#file_include_rx ............... |g:ttodo#file_include_rx|
         g:ttodo#file_exclude_rx ............... |g:ttodo#file_exclude_rx|
@@ -235,6 +236,10 @@ g:ttodo_enable_ftdetect        (default: 0)
 
 ========================================================================
 autoload/ttodo.vim~
+
+                                                    *g:ttodo#filesargs*
+g:ttodo#filesargs              (default: {})
+    A dictionary of {filename regexp: {additional args}}.
 
                                                     *g:ttodo#file_pattern*
 g:ttodo#file_pattern           (default: '*todo.txt')

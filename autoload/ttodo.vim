@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-19
-" @Revision:    992
+" @Revision:    1007
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 117
@@ -36,6 +36,12 @@ if !exists('g:ttodo#dirs')
     "
     " Changes to this variable will have an effect only after restart.
     let g:ttodo#dirs = []
+endif
+
+
+if !exists('g:ttodo#filesargs')
+    " A dictionary of {filename regexp: {additional args}}.
+    let g:ttodo#filesargs = {}   "{{{2
 endif
 
 
@@ -310,18 +316,20 @@ let s:ttodo_args = {
 
 function! s:GetFiles(args) abort "{{{3
     let bufname = get(a:args, 'bufname', '')
+    let filedefs = []
     if !empty(bufname)
-        let files = [bufname(bufname)]
-        let filesdef = [{'filesargs': {}, 'files': files}]
+        call add(filedefs, [{'fileargs': {}, 'file': bufname(bufname)}])
     else
         let bufnr = get(a:args, 'bufnr', '')
         if !empty(bufnr)
             let bufnrs = tlib#string#SplitCommaList(bufnr)
             let files = map(bufnrs, 'bufname(str2nr(v:val))')
-            let filesdef = [{'filesargs': {}, 'files': files}]
+            for file in files
+                call add(filedefs, {'fileargs': {}, 'file': file})
+            endfor
         else
             if has_key(a:args, 'files')
-                let filesdef = map(s:ItemsDefs(a:args.files, 1), '{"filesargs": v:val, "files": [v:key]}')
+                call extend(filedefs, map(s:ItemsDefs(a:args.files, 1), '{"fileargs": v:val, "file": v:key}'))
             else
                 if has_key(a:args, 'path')
                     let dirs = tlib#string#SplitCommaList(a:args.path)
@@ -334,7 +342,6 @@ function! s:GetFiles(args) abort "{{{3
                     throw 'TTodo: Please set dirs via g:ttodo#dirs'
                 endif
                 let dirsdefs = s:ItemsDefs(dirs, 1)
-                let filesdef = []
                 for [dir, dirargs] in items(dirsdefs)
                     Tlibtrace 'ttodo', dir, keys(dirargs)
                     let pattern = get(a:args, 'pattern', s:GetOpt(dirargs, 'file_pattern'))
@@ -347,14 +354,28 @@ function! s:GetFiles(args) abort "{{{3
                     let file_exclude_rx = get(a:args, 'file_exclude_rx', s:GetOpt(a:args, 'file_exclude_rx'))
                     if !empty(file_exclude_rx)
                         let files = filter(files, 'v:val !~# file_exclude_rx')
-                        call add(filesdef, {'filesargs': dirargs, 'files': files})
+                        for file in files
+                            call add(filedefs, {'fileargs': dirargs, 'file': file})
+                        endfor
                     endif
                 endfor
             endif
         endif
     endif
-    Tlibtrace 'ttodo', len(filesdef)
-    return filesdef
+    Tlibtrace 'ttodo', len(filedefs)
+    let filedefs = map(filedefs, 's:EnrichWithFileargs(v:val)')
+    return filedefs
+endf
+
+
+function! s:EnrichWithFileargs(filedef) abort "{{{3
+    let filename = a:filedef.file
+    for [rx, fileargs] in items(g:ttodo#filesargs)
+        if filename =~# rx
+            let a:filedef.fileargs = tlib#eval#Extend(copy(a:filedef.fileargs), fileargs)
+        endif
+    endfor
+    return a:filedef
 endf
 
 
@@ -452,14 +473,11 @@ endf
 
 function! s:GetTasks(args) abort "{{{3
     let qfl = []
-    for filesdef in s:GetFiles(a:args)
-        let filesargs = get(filesdef, 'filesargs', {})
-        for filename in filesdef.files
-            let fqfl = ttodo#GetCachedFileTasks(a:args, filename, filesargs)
-            if !empty(fqfl)
-                let qfl = extend(qfl, fqfl)
-            endif
-        endfor
+    for filedef in s:GetFiles(a:args)
+        let fqfl = ttodo#GetCachedFileTasks(a:args, filedef.file, filedef.fileargs)
+        if !empty(fqfl)
+            let qfl = extend(qfl, fqfl)
+        endif
     endfor
     return qfl
 endf
