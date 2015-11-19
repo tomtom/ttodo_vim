@@ -3,7 +3,13 @@
 
 This plugin provides the |:Ttodo| command that allow easy filtering and viewing 
 of todo.txt files (see http://todotxt.com) via |tlib#input#List()|. The plugin 
-supports searching across multiple todo.txt files.
+supports:
+
+    - search across multiple todo.txt files
+    - filter tasks with specific tags, lists etc.
+    - subtasks (outlines of complex tasks)
+    - hide tasks until a threshold date
+    - recurring tasks.
 
 Examples: >
 
