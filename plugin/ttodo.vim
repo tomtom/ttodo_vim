@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-16
-" @Revision:    81
+" @Last Change: 2015-11-19
+" @Revision:    83
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -60,6 +60,10 @@ endif
 "   --sort=FIELDS .. default: |g:ttodo#sort|
 "   --has_subtasks . Show tasks with open subtasks (i.e. indented tasks 
 "                    below the parent task)
+"   --has_lists=LIST1,.. .......... Show tasks with at least one 
+"                                   matching list
+"   --has_tags=TAG1,.. ............ Show tasks with at least one 
+"                                   matching tag
 "   -A=RX, --file_include_rx=RX ... Default: |g:ttodo#file_include_rx|
 "   -R=RX, --file_exclude_rx=RX ... Default: |g:ttodo#file_exclude_rx|
 "   -i=RX, --task_include_rx=RX ... Default: |g:ttodo#task_include_rx|

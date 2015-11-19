@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-19
-" @Revision:    1007
+" @Revision:    1018
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 117
@@ -294,9 +294,11 @@ let s:ttodo_args = {
             \   'file_include_rx': {'type': 1},
             \   'hidden': {'type': -1},
             \   'has_subtasks': {'type': -1},
-            \   'files': {'type': 3, 'complete': 'files'},
+            \   'has_lists': {'type': 3},
+            \   'has_tags': {'type': 3},
             \   'lists': {'type': 3},
             \   'tags': {'type': 3},
+            \   'files': {'type': 3, 'complete': 'files'},
             \   'dirs': {'type': 3, 'complete': 'dirs'},
             \   'path': {'type': 1, 'complete': 'dirs'},
             \   'pref': {'type': 1, 'complete_customlist': 'keys(g:ttodo#prefs)'},
@@ -530,9 +532,10 @@ function! s:FilterTasks(args) abort "{{{3
         endif
     endif
     for lst in ['lists', 'tags']
-        if has_key(a:args, lst)
-            let vals = a:args[lst]
-            call filter(qfl, '!empty(filter(copy(v:val[lst]), "index(vals, v:val) != -1')
+        let key = 'has_'. lst
+        if has_key(a:args, key)
+            let vals = a:args[key]
+            call filter(qfl, 's:HasList(v:val.task[lst], vals)')
         endif
     endfor
     if !get(a:args, 'has_subtasks', 0)
@@ -552,6 +555,13 @@ function! s:FilterTasks(args) abort "{{{3
         call filter(qfl, 's:CheckThreshold(get(v:val.task, "t", ""), get(v:val.task, "due", ""), today)')
     endif
     return qfl
+endf
+
+
+function! s:HasList(tags, vals) abort "{{{3
+    let rv = !empty(filter(copy(a:tags), 'index(a:vals, v:val) != -1'))
+    " TLogVAR a:tags, a:vals, rv
+    return rv
 endf
 
 
