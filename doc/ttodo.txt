@@ -134,9 +134,7 @@ Contents~
         g:ttodo_enable_ftdetect ............... |g:ttodo_enable_ftdetect|
         :Ttodo ................................ |:Ttodo|
         :Ttodotask ............................ |:Ttodotask|
-        g:ttodo#dirs .......................... |g:ttodo#dirs|
         g:ttodo#file_pattern .................. |g:ttodo#file_pattern|
-        g:ttodo#default_file .................. |g:ttodo#default_file|
         g:ttodo#file_include_rx ............... |g:ttodo#file_include_rx|
         g:ttodo#file_exclude_rx ............... |g:ttodo#file_exclude_rx|
         g:ttodo#task_include_rx ............... |g:ttodo#task_include_rx|
@@ -148,9 +146,11 @@ Contents~
         g:ttodo#default_pri ................... |g:ttodo#default_pri|
         g:ttodo#default_due ................... |g:ttodo#default_due|
         g:ttodo#default_t ..................... |g:ttodo#default_t|
-        g:ttodo#mapleader ..................... |g:ttodo#mapleader|
         g:ttodo#new_task ...................... |g:ttodo#new_task|
+        g:ttodo#inbox ......................... |g:ttodo#inbox|
         g:ttodo#debug ......................... |g:ttodo#debug|
+        ttodo#GetDirs ......................... |ttodo#GetDirs()|
+        ttodo#GetCachedFileTasks .............. |ttodo#GetCachedFileTasks()|
         ttodo#ParseTask ....................... |ttodo#ParseTask()|
         ttodo#InitListBuffer .................. |ttodo#InitListBuffer()|
         ttodo#FiletypeDetect .................. |ttodo#FiletypeDetect()|
@@ -236,19 +236,9 @@ g:ttodo_enable_ftdetect        (default: 0)
 ========================================================================
 autoload/ttodo.vim~
 
-                                                    *g:ttodo#dirs*
-g:ttodo#dirs                   (default: [])
-    List of directories where your todo.txt files reside.
-
-    If the todotxt plugin is used, |g:todotxt#dir| is added to the 
-    list.
-
                                                     *g:ttodo#file_pattern*
 g:ttodo#file_pattern           (default: '*todo.txt')
-    A glob pattern matching todo.txt files in |g:ttodo#dirs|.
-
-                                                    *g:ttodo#default_file*
-g:ttodo#default_file           (default: tlib#file#Join([get(g:ttodo#dirs, 0, '.'), 'todo.txt']))
+    A glob pattern matching todo.txt files.
 
                                                     *g:ttodo#file_include_rx*
 g:ttodo#file_include_rx        (default: '')
@@ -300,18 +290,26 @@ g:ttodo#default_due            (default: strftime(g:tlib#date#date_format, local
 g:ttodo#default_t              (default: '-31d')
     If a task has no threshold date defined, assign this default threshold date.
 
-                                                    *g:ttodo#mapleader*
-g:ttodo#mapleader              (default: '<LocalLeader>t')
-
                                                     *g:ttodo#new_task*
 g:ttodo#new_task               (default: {'lists': ['inbox'], 'pri': 'B'})
     Defintion for tasks added via |:Ttodotask|.
 
+                                                    *g:ttodo#inbox*
+g:ttodo#inbox                  (default: 'todo.txt')
+    Tasks added by |:Ttodotask| will be added to this file in the 
+    default (i.e. the first) directory in |g:ttodo#dirs|.
+
                                                     *g:ttodo#debug*
 g:ttodo#debug                  (default: 0)
 
+                                                    *ttodo#GetDirs()*
+ttodo#GetDirs()
+
+                                                    *ttodo#GetCachedFileTasks()*
+ttodo#GetCachedFileTasks(args, filename, fileargs)
+
                                                     *ttodo#ParseTask()*
-ttodo#ParseTask(task)
+ttodo#ParseTask(task, file, ...)
 
                                                     *ttodo#InitListBuffer()*
 ttodo#InitListBuffer()

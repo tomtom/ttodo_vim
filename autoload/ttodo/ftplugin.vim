@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-16
-" @Revision:    160
+" @Last Change: 2015-11-19
+" @Revision:    185
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -67,7 +67,7 @@ endf
 
 function! ttodo#ftplugin#Note() abort "{{{3
     let line = getline('.')
-    let task = ttodo#ParseTask(line)
+    let task = ttodo#ParseTask(line, expand('%:p'))
     Tlibtrace 'ttodo', task
     let nname = get(task.lists, 0, 'misc')
     let nname = substitute(nname, '\W', '_', 'g')
@@ -104,7 +104,7 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
     elseif a:move == '>'
         return o ."\<c-t>"
     else
-        let task = a:0 >= 1 ? a:1 : ttodo#ParseTask(getline('.'))
+        let task = a:0 >= 1 ? a:1 : ttodo#ParseTask(getline('.'), expand('%:p'))
         let new = strftime(g:tlib#date#date_format)
         if a:copytags
             let new = ttodo#MaybeAppend(new, ttodo#FormatTags('@', task.lists))
@@ -132,7 +132,7 @@ function! ttodo#ftplugin#MarkDone(count) abort "{{{3
     for lnum in range(line('.'), line('.') + a:count)
         let line = getline(lnum)
         if !s:IsDone(line)
-            let task = ttodo#ParseTask(line)
+            let task = ttodo#ParseTask(line, expand('%:p'))
             let rec = get(task, 'rec', '')
             if !empty(rec)
                 let due = get(task, 'due', '')
@@ -149,8 +149,35 @@ function! ttodo#ftplugin#MarkDone(count) abort "{{{3
                 continue
             endif
         endif
+        if get(task, 'subtask', 0) && !has_key(task, 'parent')
+            let parent = s:GetParentId(lnum)
+            if !empty(parent)
+                call setline(lnum, line .' parent:'. parent)
+            endif
+        endif
         exec lnum .'s/^\s*\zs\C\%(x\s\+\%('. g:tlib#date#date_rx .'\s\+\)\?\)\?/x '. donedate .' /'
     endfor
+    exec line('.') + a:count
+endf
+
+
+function! s:GetParentId(lnum0) abort "{{{3
+    let indent0 = indent(a:lnum0)
+    let filename = expand('%:p')
+    for lnum in range(a:lnum0 - 1, 1, -1)
+        let indent = indent(lnum)
+        if indent < indent0
+            let line = getline(lnum)
+            let task = ttodo#ParseTask(line, filename)
+            if !has_key(task, 'id')
+                exec lnum
+                call ttodo#ftplugin#AddId(0)
+                let task = ttodo#ParseTask(getline(lnum), filename)
+            endif
+            return task.id
+        endif
+    endfor
+    return ''
 endf
 
 
@@ -218,8 +245,15 @@ endf
 
 
 function! ttodo#ftplugin#AddId(count) abort "{{{3
+    let filename = expand('%:p')
+    let fqfl = ttodo#GetCachedFileTasks({}, filename, {})
     for lnum in range(line('.'), line('.') + a:count)
-        let line = getline(lnum)
+        let qfe = get(filter(copy(fqfl), 'v:val.lnum == lnum'), 0, {})
+        if empty(qfe)
+            let line = getline(lnum)
+        else
+            let line = qfe.text
+        endif
         let id = tlib#hash#Adler32(line)
         let line .= ' id:'. id
         call setline(lnum, line)
