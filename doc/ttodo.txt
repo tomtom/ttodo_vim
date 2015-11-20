@@ -140,7 +140,7 @@ Contents~
         g:ttodo_enable_ftdetect ............... |g:ttodo_enable_ftdetect|
         :Ttodo ................................ |:Ttodo|
         :Ttodotask ............................ |:Ttodotask|
-        g:ttodo#filesargs ..................... |g:ttodo#filesargs|
+        g:ttodo#fileargs ...................... |g:ttodo#fileargs|
         g:ttodo#file_pattern .................. |g:ttodo#file_pattern|
         g:ttodo#file_include_rx ............... |g:ttodo#file_include_rx|
         g:ttodo#file_exclude_rx ............... |g:ttodo#file_exclude_rx|
@@ -247,9 +247,10 @@ g:ttodo_enable_ftdetect        (default: 0)
 ========================================================================
 autoload/ttodo.vim~
 
-                                                    *g:ttodo#filesargs*
-g:ttodo#filesargs              (default: {})
-    A dictionary of {filename regexp: {additional args}}.
+                                                    *g:ttodo#fileargs*
+g:ttodo#fileargs               (default: {})
+    A dictionary of {filename |regexp|: {additional args}} -- see 
+    |g:ttodo#dirs| for details on supported arguments.
 
                                                     *g:ttodo#file_pattern*
 g:ttodo#file_pattern           (default: '*todo.txt')
@@ -284,7 +285,7 @@ g:ttodo#viewer                 (default: 'tlib')
                   initial filter is a standard |regexp|.
 
                                                     *g:ttodo#sort*
-g:ttodo#sort                   (default: 'pri,due,done,lists,tags,idx')
+g:ttodo#sort                   (default: 'pri,due,done,lists,tags,lnum')
 
                                                     *g:ttodo#prefs*
 g:ttodo#prefs                  (default: {'default': {'hidden': 0, 'has_subtasks': 0, 'done': 0}, 'important': {'hidden': 0, 'has_subtasks': 0, 'done': 0, 'undated': 1, 'due': '2w', 'pri': 'A-C'}})
@@ -333,10 +334,10 @@ ttodo#InitListBuffer()
 ttodo#FiletypeDetect(...)
 
                                                     *ttodo#SortBuffer()*
-ttodo#SortBuffer(args)
+ttodo#SortBuffer(cmdargs)
 
                                                     *ttodo#NewTask()*
-ttodo#NewTask(args)
+ttodo#NewTask(cmdargs)
 
                                                     *ttodo#FormatTags()*
 ttodo#FormatTags(prefix, lists)

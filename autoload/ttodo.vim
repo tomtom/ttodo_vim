@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-19
-" @Revision:    1018
+" @Revision:    1025
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 117
@@ -30,6 +30,12 @@ if !exists('g:ttodo#dirs')
     "   file_pattern: GLOB ........ See |g:ttodo#file_pattern|
     "   file_include_rx: REGEXP ... See |g:ttodo#file_include_rx|
     "   file_exclude_rx: REGEXP ... See |g:ttodo#file_exclude_rx|
+    "   encoding: ENC ............. If ENC != 'enc', then the file 
+    "                               contents will be transcoded with 
+    "                               |iconv()|
+    "
+    " |g:ttodo#fileargs| provides an alternative way to define 
+    " file-specific options.
     "
     " If the todotxt plugin is used, |g:todotxt#dir| is added to the 
     " list.
@@ -39,9 +45,10 @@ if !exists('g:ttodo#dirs')
 endif
 
 
-if !exists('g:ttodo#filesargs')
-    " A dictionary of {filename regexp: {additional args}}.
-    let g:ttodo#filesargs = {}   "{{{2
+if !exists('g:ttodo#fileargs')
+    " A dictionary of {filename |regexp|: {additional args}} -- see 
+    " |g:ttodo#dirs| for details on supported arguments.
+    let g:ttodo#fileargs = {}   "{{{2
 endif
 
 
@@ -372,7 +379,7 @@ endf
 
 function! s:EnrichWithFileargs(filedef) abort "{{{3
     let filename = a:filedef.file
-    for [rx, fileargs] in items(g:ttodo#filesargs)
+    for [rx, fileargs] in items(g:ttodo#fileargs)
         if filename =~# rx
             let a:filedef.fileargs = tlib#eval#Extend(copy(a:filedef.fileargs), fileargs)
         endif
@@ -755,8 +762,8 @@ function! ttodo#FiletypeDetect(...) abort "{{{3
 endf
 
 
-function! ttodo#SortBuffer(args) abort "{{{3
-    let args = tlib#arg#GetOpts(a:args, {})
+function! ttodo#SortBuffer(cmdargs) abort "{{{3
+    let args = tlib#arg#GetOpts(a:cmdargs, {})
     let filename = expand('%:p')
     let qfl = ttodo#GetFileTasks(args, filename, {})
     let qfl = s:SortTasks(args, qfl)
@@ -772,10 +779,10 @@ function! ttodo#SortBuffer(args) abort "{{{3
 endf
 
 
-function! ttodo#NewTask(args) abort "{{{3
+function! ttodo#NewTask(cmdargs) abort "{{{3
     let dirdef = s:GetDefaultDirDef('.')
     let filename = tlib#file#Join([dirdef.__name__, get(dirdef, 'inbox', g:ttodo#inbox)])
-    let args = extend(copy(g:ttodo#new_task), tlib#arg#GetOpts(a:args, s:ttodo_args))
+    let args = extend(copy(g:ttodo#new_task), tlib#arg#GetOpts(a:cmdargs, s:ttodo_args))
     let text = join(args.__rest__)
     let text = ttodo#MaybeAppend(text, get(args, 'suffix', ''))
     let text = ttodo#MaybeAppend(text, ttodo#FormatTags('@', get(args, 'lists', [])))
