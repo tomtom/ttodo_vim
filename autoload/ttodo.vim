@@ -92,7 +92,7 @@ endif
 
 
 if !exists('g:ttodo#sort')
-    let g:ttodo#sort = 'pri,due,done,lists,tags,idx'   "{{{2
+    let g:ttodo#sort = 'pri,due,done,lists,tags,lnum'   "{{{2
 endif
 
 
