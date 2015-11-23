@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-19
-" @Revision:    185
+" @Last Change: 2015-11-23
+" @Revision:    203
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -99,13 +99,13 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
     else
         let o = "o"
     endif
+    let new = strftime(g:tlib#date#date_format)
     if indent('.') > 0 && empty(a:move)
-        return o
+        return o . new .' '
     elseif a:move == '>'
-        return o ."\<c-t>"
+        return o ."\<c-t>" . new .' '
     else
         let task = a:0 >= 1 ? a:1 : ttodo#ParseTask(getline('.'), expand('%:p'))
-        let new = strftime(g:tlib#date#date_format)
         if a:copytags
             let new = ttodo#MaybeAppend(new, ttodo#FormatTags('@', task.lists))
             let new = ttodo#MaybeAppend(new, ttodo#FormatTags('+', task.tags))
@@ -146,6 +146,16 @@ function! ttodo#ftplugin#MarkDone(count) abort "{{{3
                 endwh
                 exec lnum
                 call s:MarkDueDate(ndue)
+                if has_key(task, 't') && task.t =~# g:tlib#date#date_rx
+                    let t0 = task.t
+                    let t0s = tlib#date#SecondsSince1970(t0)
+                    let dues = tlib#date#SecondsSince1970(due)
+                    let t0diff = dues - t0s
+                    let ndues = tlib#date#SecondsSince1970(ndue)
+                    let t1s = ndues - t0diff
+                    let t1 = tlib#date#Format(t1s)
+                    call s:SetTag('t', g:tlib#date#date_rx, t1)
+                endif
                 continue
             endif
         endif
@@ -209,7 +219,13 @@ endf
 
 
 function! s:MarkDueDate(date) abort "{{{3
-    exec 's/\C\%(\s\+due:'. g:tlib#date#date_rx .'\|$\)/ due:'. a:date .'/'
+    call s:SetTag('due', g:tlib#date#date_rx, a:date)
+    " exec 's/\C\%(\s\+due:'. g:tlib#date#date_rx .'\|$\)/ due:'. a:date .'/'
+endf
+
+
+function! s:SetTag(name, rx, value) abort "{{{3
+    exec 's/\C\%(\s\+'. a:name .':'. escape(a:rx, '/') .'\|$\)/ '. a:name .':'. escape(a:value, '/') .'/'
 endf
 
 
@@ -248,15 +264,15 @@ function! ttodo#ftplugin#AddId(count) abort "{{{3
     let filename = expand('%:p')
     let fqfl = ttodo#GetCachedFileTasks({}, filename, {})
     for lnum in range(line('.'), line('.') + a:count)
-        let qfe = get(filter(copy(fqfl), 'v:val.lnum == lnum'), 0, {})
-        if empty(qfe)
-            let line = getline(lnum)
-        else
-            let line = qfe.text
+        let line = getline(lnum)
+        let task = ttodo#ParseTask(line, filename)
+        if !has_key(task, 'id')
+            let qfe = get(filter(copy(fqfl), 'v:val.lnum == lnum'), 0, {})
+            let tline = empty(qfe) ? line : qfe.text
+            let id = tlib#hash#Adler32(tline)
+            let line .= ' id:'. id
+            call setline(lnum, line)
         endif
-        let id = tlib#hash#Adler32(line)
-        let line .= ' id:'. id
-        call setline(lnum, line)
     endfor
 endf
 
