@@ -558,7 +558,7 @@ function! s:FilterTasks(args) abort "{{{3
         call filter(qfl, 'empty(get(v:val.task, "hidden", ""))')
     endif
     if has_key(a:args, 'pri')
-        call filter(qfl, 'get(v:val.task, "pri", g:ttodo#default_pri) =~# ''^['. a:args.pri .']$''')
+        call filter(qfl, 'get(v:val.task, "pri", "") =~# ''^['. a:args.pri .']$''')
     endif
     if get(a:args, 'threshold', 1)
         let today = strftime(g:tlib#date#date_format)
