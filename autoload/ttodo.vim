@@ -327,7 +327,7 @@ function! s:GetFiles(args) abort "{{{3
     let bufname = get(a:args, 'bufname', '')
     let filedefs = []
     if !empty(bufname)
-        call add(filedefs, [{'fileargs': {}, 'file': bufname(bufname)}])
+        call add(filedefs, {'fileargs': {}, 'file': bufname(bufname)})
     else
         let bufnr = get(a:args, 'bufnr', '')
         if !empty(bufnr)
@@ -371,13 +371,16 @@ function! s:GetFiles(args) abort "{{{3
             endif
         endif
     endif
-    Tlibtrace 'ttodo', len(filedefs)
     let filedefs = map(filedefs, 's:EnrichWithFileargs(v:val)')
+    Tlibtrace 'ttodo', len(filedefs)
+    Tlibassert tlib#type#Are(copy(filedefs), 'dict')
+    Tlibassert tlib#type#Have(copy(filedefs), ['fileargs', 'file'])
     return filedefs
 endf
 
 
 function! s:EnrichWithFileargs(filedef) abort "{{{3
+    " TLogVAR a:filedef
     let filename = a:filedef.file
     for [rx, fileargs] in items(g:ttodo#fileargs)
         if filename =~# rx
