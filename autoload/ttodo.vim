@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-19
-" @Revision:    1025
+" @Last Change: 2015-11-23
+" @Revision:    1085
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 117
@@ -115,15 +115,12 @@ if !exists('g:ttodo#prefs')
 endif
 
 
-if !exists('g:ttodo#default_pri')
-    " If a task has no priortiy defined, assign this default priortiy.
-    let g:ttodo#default_pri = 'T'   "{{{2
-endif
-
-
-if !exists('g:ttodo#default_due')
-    " If a task has no due date defined, assign this default due date.
-    let g:ttodo#default_due = strftime(g:tlib#date#date_format, localtime() + g:tlib#date#dayshift * 28)   "{{{2
+if !exists('g:ttodo#sort_defaults')
+    " :nodoc:
+    let g:ttodo#sort_defaults = {
+                \ 'pri': 'T',
+                \ 'due': strftime(g:tlib#date#date_format, localtime() + g:tlib#date#dayshift * 28),
+                \ }
 endif
 
 
@@ -172,13 +169,13 @@ endif
 
 
 if !exists('g:ttodo#new_task')
-    " Defintion for tasks added via |:Ttodotask|.
+    " Defintion for tasks added via |:Ttodonew|.
     let g:ttodo#new_task = {'lists': ['inbox'], 'pri': 'B'}   "{{{2
 endif
 
 
 if !exists('g:ttodo#inbox')
-    " Tasks added by |:Ttodotask| will be added to this file in the 
+    " Tasks added by |:Ttodonew| will be added to this file in the 
     " default (i.e. the first) directory in |g:ttodo#dirs|.
     let g:ttodo#inbox = 'todo.txt'  "{{{2
 endif
@@ -305,6 +302,7 @@ let s:ttodo_args = {
             \   'has_tags': {'type': 3},
             \   'lists': {'type': 3},
             \   'tags': {'type': 3},
+            \   'sortseps': {'type': 3, 'complete_customlist': '["lists", "tags"]'},
             \   'files': {'type': 3, 'complete': 'files'},
             \   'dirs': {'type': 3, 'complete': 'dirs'},
             \   'path': {'type': 1, 'complete': 'dirs'},
@@ -607,33 +605,37 @@ endf
 
 function! s:SortTasks(args, qfl) abort "{{{3
     " TLogVAR a:qfl
-    let s:sort_fields = split(get(a:args, 'sort', g:ttodo#sort), ',')
-    let qfl = sort(a:qfl, 's:SortTask')
+    let params = {'fields': tlib#string#SplitCommaList(get(a:args, 'sort', g:ttodo#sort))}
+    let qfl = sort(a:qfl, 's:SortTask', params)
     return qfl
 endf
 
 
-function! s:SortTask(a, b) abort "{{{3
+function! s:SortTask(a, b) dict abort "{{{3
     let a = a:a.task
     let b = a:b.task
-    for item in s:sort_fields
-        let default = exists('g:ttodo#default_'. item) ? g:ttodo#default_{item} : ''
-        let aa = get(a, item, default)
-        if type(aa) > 1
-            unlet aa
-            let aa = string(get(a, item, default))
-        endif
-        let bb = get(b, item, default)
-        if type(bb) > 1
-            unlet bb
-            let bb = string(get(b, item, default))
-        endif
+    for item in self.fields
+        let default = get(g:ttodo#sort_defaults, item, '')
+        let aa = s:GetSortItem(a:a, a, item, default)
+        let bb = s:GetSortItem(a:b, b, item, default)
         if aa != bb
             return aa > bb ? 1 : -1
         endif
-        unlet! aa bb default
+        unlet aa bb default
     endfor
     return 0
+endf
+
+
+function! s:GetSortItem(qfe, task, item, default) abort "{{{3
+    let val = get(a:task, a:item, get(a:qfe, a:item, a:default))
+    if type(val) > 1
+        let tmp = val
+        unlet val
+        let val = string(tmp)
+        unlet tmp
+    endif
+    return val
 endf
 
 
@@ -765,12 +767,32 @@ function! ttodo#FiletypeDetect(...) abort "{{{3
 endf
 
 
+" If called with --sortseps=tags,lists, an empty line is inserted after 
+" each main (i.e. first) list or tag.
 function! ttodo#SortBuffer(cmdargs) abort "{{{3
-    let args = tlib#arg#GetOpts(a:cmdargs, {})
+    let args = tlib#arg#GetOpts(a:cmdargs, s:ttodo_args)
     let filename = expand('%:p')
     let qfl = ttodo#GetFileTasks(args, filename, {})
     let qfl = s:SortTasks(args, qfl)
-    let tasks = map(qfl, 'v:val.task.text')
+    let seps = get(args, 'sortseps', []) 
+    " TLogVAR seps
+    if empty(seps)
+        let tasks = map(qfl, 'v:val.task.text')
+    else
+        let tasks = []
+        let last = {}
+        for qfe in qfl
+            for sep in seps
+                if !empty(last) && get(get(last.task, sep, []), 0, '') != get(get(qfe.task, sep, []), 0, '')
+                    " TLogVAR last, qfe
+                    call add(tasks, '')
+                    break
+                endif
+            endfor
+            call add(tasks, qfe.task.text)
+            let last = qfe
+        endfor
+    endif
     let pos = getpos('.')
     try
         1,$delete
