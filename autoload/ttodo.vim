@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-23
-" @Revision:    1093
+" @Revision:    1095
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 117
@@ -424,6 +424,11 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
                 let parent.task.has_subtasks = 1
                 " TLogVAR parent, parent_idx, pred_idx
                 let qfl[parent_idx] = parent
+            endif
+            if has_key(task, 'due') && task.due > get(parent.task, 'due', task.due)
+                echohl WarningMsg
+                echom 'WARN ttodo#GetFileTasks: subtask has due date after the parent''s task due date: '. line
+                echohl NONE
             endif
             let task0 = task
             let task = tlib#eval#Extend(copy(parent.task), task)
