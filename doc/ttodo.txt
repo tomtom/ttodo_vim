@@ -282,7 +282,7 @@ g:ttodo#viewer                 (default: 'tlib')
                   initial filter is a standard |regexp|.
 
                                                     *g:ttodo#sort*
-g:ttodo#sort                   (default: 'pri,due,done,lists,tags,lnum')
+g:ttodo#sort                   (default: 'pri,due,done,lists,tags,idx')
 
                                                     *g:ttodo#prefs*
 g:ttodo#prefs                  (default: {'default': {'hidden': 0, 'has_subtasks': 0, 'done': 0}, 'important': {'hidden': 0, 'has_subtasks': 0, 'done': 0, 'undated': 1, 'due': '2w', 'pri': 'A-C'}})
@@ -322,6 +322,8 @@ ttodo#FiletypeDetect(...)
 ttodo#SortBuffer(cmdargs)
     If called with --sortseps=tags,lists, an empty line is inserted after 
     each main (i.e. first) list or tag.
+
+    Sorting doesn't work for outlines, i.e. tasks with subtasks.
 
                                                     *ttodo#NewTask()*
 ttodo#NewTask(cmdargs)

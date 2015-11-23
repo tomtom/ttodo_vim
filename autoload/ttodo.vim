@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-23
-" @Revision:    1085
+" @Revision:    1093
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 117
@@ -99,7 +99,7 @@ endif
 
 
 if !exists('g:ttodo#sort')
-    let g:ttodo#sort = 'pri,due,done,lists,tags,lnum'   "{{{2
+    let g:ttodo#sort = 'pri,due,done,lists,tags,idx'   "{{{2
 endif
 
 
@@ -769,10 +769,15 @@ endf
 
 " If called with --sortseps=tags,lists, an empty line is inserted after 
 " each main (i.e. first) list or tag.
+"
+" Sorting doesn't work for outlines, i.e. tasks with subtasks.
 function! ttodo#SortBuffer(cmdargs) abort "{{{3
     let args = tlib#arg#GetOpts(a:cmdargs, s:ttodo_args)
     let filename = expand('%:p')
     let qfl = ttodo#GetFileTasks(args, filename, {})
+    if !empty(filter(copy(qfl), 'get(v:val.task, "subtask", 0)'))
+        throw 'ttodo#SortBuffer: Cannot sort task outlines!'
+    endif
     let qfl = s:SortTasks(args, qfl)
     let seps = get(args, 'sortseps', []) 
     " TLogVAR seps
