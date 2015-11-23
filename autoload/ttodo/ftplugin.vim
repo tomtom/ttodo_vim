@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-23
-" @Revision:    203
+" @Revision:    205
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -105,6 +105,7 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
     elseif a:move == '>'
         return o ."\<c-t>" . new .' '
     else
+        let o .= "\<home>"
         let task = a:0 >= 1 ? a:1 : ttodo#ParseTask(getline('.'), expand('%:p'))
         if a:copytags
             let new = ttodo#MaybeAppend(new, ttodo#FormatTags('@', task.lists))
