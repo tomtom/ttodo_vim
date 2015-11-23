@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-19
-" @Revision:    83
+" @Last Change: 2015-11-23
+" @Revision:    84
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -78,7 +78,7 @@ endif
 command! -bang -nargs=* -complete=customlist,ttodo#CComplete Ttodo call ttodo#Show(!empty("<bang>"), [<f-args>])
 
 
-command! -nargs=+ Ttodotask call ttodo#NewTask([<f-args>])
+command! -nargs=+ Ttodonew call ttodo#NewTask([<f-args>])
 
 
 if !empty(g:ttodo_nmap)
