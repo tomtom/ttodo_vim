@@ -10,3 +10,32 @@ version: "0.02"
   - version 0.01-151109
   MD5 checksum: e6b8be03504c4a9d948ca4a38de683f3
 
+version: "0.03"
+  - ttodo#Show: copy(s:list_env)
+  - NEW :Ttodosort command
+  - Support for indented subtasks similar to the outline add-on; misc enhancements
+  - Support for tcomment
+  - Fix handling of subtasks; <s-cr> map for inserting subtasks; g:ttodo#viewer is a list
+  - NEW --encoding command-line option
+  - NEW --bufnr, --bufname command-line options
+  - Remove dependency on vikitasks plugin
+  - Use autocmd BufNewFile,BufRead done.txt
+  - Use <c-1>, <ll>t1 for setting the priority
+  - ttodo#GetFileTasks: Use tlib#eval#Extend(copy(parent.task), task)
+  - g:ttodo#viewer is a string; removed last traces of vikitasks
+  - Configure "hidden" tasks via g:ttodo#task_hide_rx
+  - NEW :Ttodotask; use y for SetPriority; misc enhancements
+  - Properly support file-specific args; improved support for subtasks; misc enh.s
+  - NEW g:ttodo#filesargs: A dictionary of {filename regexp: {additional args}}
+  - NEW --has_lists=, --has_tags= command-line options
+  - g:ttodo#sort: s/idx/lnum/
+  - s/Ttodotask/Ttodonew/
+  - Misc improvements to ftplugin
+  - s:GetFiles(): FIX type error
+  - s:FilterTasks(): Don't use g:ttodo#default_pri
+  - FIX Ttodosort
+  - Stop when sorting task outlines
+  - Warn if subtask has a due date after the parent's task due date
+  - ttodo#ftplugin#New(): FIX indentation
+  MD5 checksum: f3cbe1572df17ba026f84166d3857a4b
+
