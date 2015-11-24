@@ -181,14 +181,7 @@ if !exists('g:ttodo#inbox')
 endif
 
 
-if !exists('g:ttodo#debug')
-    let g:ttodo#debug = 0   "{{{2
-endif
-
-
-if g:ttodo#debug
-    call tlib#debug#Init()
-endif
+call tlib#type#DefSchema('ttodo_type_itemdef_opts', {'__name__': 's', '__rx__': 's'})
 
 
 let s:list_env = {
@@ -248,8 +241,9 @@ function! s:ItemDef(item, first) abort "{{{3
     if a:first
         let opts.default = 1
     endif
-    let opts.__name__ = a:item
+    let opts.__name__ = item
     let opts.__rx__ = '\V\^'. join(map(split(item, '[\/]', 1), 'tlib#rx#Escape(v:val, "V")'), '[\\/]')
+    Tlibassert tlib#type#Has(opts, 'ttodo_type_itemdef_opts')
     return {item : opts}
 endf
 
@@ -275,8 +269,11 @@ if exists('g:todotxt#dir')
 endif
 
 
-function! s:GetDefaultDirDef(default) abort "{{{3
-    let default_dirs = filter(copy(s:ttodo_dirs), 'get(v:val, "default", 0)')
+function! s:GetDefaultDirDef(args, default) abort "{{{3
+    let dirsdefs = s:GetDirsDefs(a:args)
+    " TLogVAR dirsdefs
+    let default_dirs = filter(copy(dirsdefs), 'get(v:val, "default", 0)')
+    " TLogVAR keys(default_dirs)
     if empty(default_dirs)
         return {'__name__': a:default}
     else
@@ -338,17 +335,7 @@ function! s:GetFiles(args) abort "{{{3
             if has_key(a:args, 'files')
                 call extend(filedefs, map(s:ItemsDefs(a:args.files, 1), '{"fileargs": v:val, "file": v:key}'))
             else
-                if has_key(a:args, 'path')
-                    let dirs = tlib#string#SplitCommaList(a:args.path)
-                elseif has_key(a:args, 'dirs')
-                    let dirs = a:args.dirs
-                else
-                    let dirs = keys(s:ttodo_dirs)
-                endif
-                if empty(dirs)
-                    throw 'TTodo: Please set dirs via g:ttodo#dirs'
-                endif
-                let dirsdefs = s:ItemsDefs(dirs, 1)
+                let dirsdefs = s:GetDirsDefs(a:args)
                 for [dir, dirargs] in items(dirsdefs)
                     Tlibtrace 'ttodo', dir, keys(dirargs)
                     let pattern = get(a:args, 'pattern', s:GetOpt(dirargs, 'file_pattern'))
@@ -374,6 +361,28 @@ function! s:GetFiles(args) abort "{{{3
     Tlibassert tlib#type#Are(copy(filedefs), 'dict')
     Tlibassert tlib#type#Have(copy(filedefs), ['fileargs', 'file'])
     return filedefs
+endf
+
+
+function! s:GetDirsDefs(args) abort "{{{3
+    let dirs = s:GetDirs(a:args)
+    if empty(dirs)
+        throw 'TTodo: Please set dirs via g:ttodo#dirs'
+    endif
+    let dirsdefs = s:ItemsDefs(dirs, 1)
+    return dirsdefs
+endf
+
+
+function! s:GetDirs(args) abort "{{{3
+    if has_key(a:args, 'path')
+        let dirs = tlib#string#SplitCommaList(a:args.path)
+    elseif has_key(a:args, 'dirs')
+        let dirs = a:args.dirs
+    else
+        let dirs = keys(s:ttodo_dirs)
+    endif
+    return dirs
 endf
 
 
@@ -661,19 +670,25 @@ function! s:FormatTask(args, qfe, maybe_iconv) abort "{{{3
 endf
 
 
+function! ttodo#GetOpts(bang, cmdargs) abort "{{{3
+    let args = tlib#arg#GetOpts(a:cmdargs, s:ttodo_args)
+    let pref = get(args, 'pref', a:bang ? 'important' : 'default')
+    Tlibtrace 'ttodo', pref
+    let args = tlib#eval#Extend(copy(g:ttodo#prefs[pref]), args)
+    Tlibtrace 'ttodo', keys(args)
+    return args
+endf
+
+
 ":nodoc:
 function! ttodo#Show(bang, cmdargs) abort "{{{3
-    let args = tlib#arg#GetOpts(a:cmdargs, s:ttodo_args)
+    let args = ttodo#GetOpts(a:bang, a:cmdargs)
     Tlibtrace 'ttodo', args
     " TLogVAR args
     if args.__exit__
         return
     else
         " TLogVAR args
-        let pref = get(args, 'pref', a:bang ? 'important' : 'default')
-        Tlibtrace 'ttodo', pref
-        let args = tlib#eval#Extend(copy(g:ttodo#prefs[pref]), args)
-        Tlibtrace 'ttodo', keys(args)
         let qfl = copy(s:FilterTasks(args))
         let qfl = s:SortTasks(args, qfl)
         let qfl = map(qfl, 's:FormatTask(args, v:val, 1)')
@@ -800,7 +815,7 @@ endf
 "
 " Sorting doesn't work for outlines, i.e. tasks with subtasks.
 function! ttodo#SortBuffer(cmdargs) abort "{{{3
-    let args = tlib#arg#GetOpts(a:cmdargs, s:ttodo_args)
+    let args = ttodo#GetOpts(0, a:cmdargs)
     let filename = expand('%:p')
     let qfl = ttodo#GetFileTasks(args, filename, {})
     if !empty(filter(copy(qfl), 'get(v:val.task, "subtask", 0)'))
@@ -838,9 +853,10 @@ endf
 
 
 function! ttodo#NewTask(cmdargs) abort "{{{3
-    let dirdef = s:GetDefaultDirDef('.')
+    let args = extend(copy(g:ttodo#new_task), ttodo#GetOpts(0, a:cmdargs))
+    let dirdef = s:GetDefaultDirDef(args, '.')
+    " TLogVAR keys(dirdef), dirdef.__name__
     let filename = tlib#file#Join([dirdef.__name__, get(dirdef, 'inbox', g:ttodo#inbox)])
-    let args = extend(copy(g:ttodo#new_task), tlib#arg#GetOpts(a:cmdargs, s:ttodo_args))
     let text = join(args.__rest__)
     let text = ttodo#MaybeAppend(text, get(args, 'suffix', ''))
     let text = ttodo#MaybeAppend(text, ttodo#FormatTags('@', get(args, 'lists', [])))
