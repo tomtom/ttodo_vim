@@ -60,6 +60,13 @@ If filetype is ttodo, the following default keymaps are enabled:
     <LocalLeader>tn ...... Add a note (the filename uses the first @list tag)
     <LocalLeader>ti ...... Add a hopefully unique ID (an Adler32 hash)
 
+If filetype is ttodo, the following commands are supported:
+
+    |:Ttodoarchive| ...... Archive completed tasks in the current buffer
+    |:Ttodobuffer| ....... Show tasks in the current buffer only
+    |:Ttodonote| ......... Add a new note to the task at the cursor
+    |:Ttodosort| ......... Sort the tasks in the current buffer
+
 As a ftplugin, ttodo supports the following syntax/extensions to todo.txt (see 
 also https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):
 
@@ -175,6 +182,16 @@ Contents~
         ttodo#ftplugin#SetPriority ............ |ttodo#ftplugin#SetPriority()|
         ttodo#ftplugin#Agent .................. |ttodo#ftplugin#Agent()|
         ttodo#ftplugin#AddId .................. |ttodo#ftplugin#AddId()|
+        n_<expr> .............................. |n_<expr>|
+        n_<expr> .............................. |n_<expr>|
+        n_<expr> .............................. |n_<expr>|
+        i_<expr> .............................. |i_<expr>|
+        i_<expr> .............................. |i_<expr>|
+        i_<expr> .............................. |i_<expr>|
+        :Ttodosort ............................ |:Ttodosort|
+        :Ttodoarchive ......................... |:Ttodoarchive|
+        :Ttodobuffer .......................... |:Ttodobuffer|
+        :Ttodonote ............................ |:Ttodonote|
 
 
 ========================================================================
@@ -380,6 +397,46 @@ ttodo#ftplugin#Agent(world, selected, fn, ...)
 
                                                     *ttodo#ftplugin#AddId()*
 ttodo#ftplugin#AddId(count)
+
+
+========================================================================
+ftplugin/ttodo.vim~
+
+                                                    *n_<expr>*
+n_<expr> ... <cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 0, "n")
+
+                                                    *n_<expr>*
+n_<expr> ... <c-cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 1, "n")
+
+                                                    *n_<expr>*
+n_<expr> ... <s-cr> ttodo#ftplugin#New(">", 1, "n")
+
+                                                    *i_<expr>*
+i_<expr> ... <cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 0, "i")
+
+                                                    *i_<expr>*
+i_<expr> ... <c-cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 1, "i")
+
+                                                    *i_<expr>*
+i_<expr> ... <s-cr> ttodo#ftplugin#New(">", 1, "i")
+
+                                                    *:Ttodosort*
+:Ttodosort
+    Sort the tasks in the current buffer.
+
+    Sorting task outlines (i.e. subtasks) is not supported.
+
+                                                    *:Ttodoarchive*
+:Ttodoarchive
+    Archive completed tasks in the current buffer.
+
+                                                    *:Ttodobuffer*
+:Ttodobuffer
+    View the tasks in the current buffer.
+
+                                                    *:Ttodonote*
+:Ttodonote
+    Add a new task to the task at the cursor.
 
 
 

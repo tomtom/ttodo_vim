@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-16.
-" @Revision:    83
+" @Last Change: 2015-11-24.
+" @Revision:    88
 
 if exists("b:did_ftplugin")
     finish
@@ -32,10 +32,21 @@ inoremap <buffer> <expr> <cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "
 inoremap <buffer> <expr> <c-cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 1, "i")
 inoremap <buffer> <expr> <s-cr> ttodo#ftplugin#New(">", 1, "i")
 
+
+" Sort the tasks in the current buffer.
+"
+" Sorting task outlines (i.e. subtasks) is not supported.
 command! -buffer -bar -nargs=* -complete=customlist,ttodo#CComplete Ttodosort call ttodo#SortBuffer([<f-args>])
+
+" Archive completed tasks in the current buffer.
 command! -buffer -bar Ttodoarchive call ttodo#ftplugin#ArchiveCurrentBuffer()
-command! -buffer -bar Ttodobuffer Ttodo --bufname=%
+
+" View the tasks in the current buffer.
+command! -buffer -bar -nargs=* Ttodobuffer Ttodo --bufname=% <args>
+
+" Add a new task to the task at the cursor.
 command! -buffer -bar Ttodonote call ttodo#ftplugin#Note()
+
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

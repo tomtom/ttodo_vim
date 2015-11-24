@@ -60,6 +60,13 @@ If filetype is ttodo, the following default keymaps are enabled:
     <LocalLeader>tn ...... Add a note (the filename uses the first @list tag)
     <LocalLeader>ti ...... Add a hopefully unique ID (an Adler32 hash)
 
+If filetype is ttodo, the following commands are supported:
+
+    |:Ttodoarchive| ...... Archive completed tasks in the current buffer
+    |:Ttodobuffer| ....... Show tasks in the current buffer only
+    |:Ttodonote| ......... Add a new note to the task at the cursor
+    |:Ttodosort| ......... Sort the tasks in the current buffer
+
 As a ftplugin, ttodo supports the following syntax/extensions to todo.txt (see 
 also https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):
 
