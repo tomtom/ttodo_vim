@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-24.
-" @Revision:    88
+" @Revision:    91
 
 if exists("b:did_ftplugin")
     finish
@@ -23,6 +23,7 @@ exec 'nnoremap <buffer>' g:ttodo#mapleader .'a :<C-U>call ttodo#ftplugin#Archive
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'n :<C-U>call ttodo#ftplugin#Note()<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'i :<C-U>call ttodo#ftplugin#AddId(v:count)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'b :<C-U>Ttodo --bufname=%<cr>'
+exec 'nnoremap <buffer>' g:ttodo#mapleader .'* :<C-U>Ttodo --bufname=% <c-r><c-w><cr>'
 
 nnoremap <buffer> <expr> <cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 0, "n")
 nnoremap <buffer> <expr> <c-cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 1, "n")
