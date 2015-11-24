@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-24
-" @Revision:    85
+" @Revision:    86
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -27,7 +27,7 @@ endif
 if !exists('g:ttodo_enable_ftdetect')
     " Set this variable to 1 in |vimrc| in order to enable the ttodo 
     " filetype for todo.txt files.
-    let g:ttodo_enable_ftdetect = 0   "{{{2
+    let g:ttodo_enable_ftdetect = 1   "{{{2
 endif
 
 
