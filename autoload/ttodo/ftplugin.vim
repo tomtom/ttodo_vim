@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-23
-" @Revision:    205
+" @Last Change: 2015-11-24
+" @Revision:    206
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -25,7 +25,7 @@ if !exists('g:ttodo#ftplugin#add_at_eof')
     " the end of the file. Otherwise the task will be added below the 
     " current line.
     " Subtasks will always be added below the current line.
-    let g:ttodo#ftplugin#add_at_eof = 0   "{{{2
+    let g:ttodo#ftplugin#add_at_eof = 1   "{{{2
 endif
 
 
