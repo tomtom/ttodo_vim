@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-24.
-" @Revision:    91
+" @Revision:    95
 
 if exists("b:did_ftplugin")
     finish
@@ -11,8 +11,10 @@ let b:did_ftplugin = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
-setl tw=0
-setl commentstring=x\ %s
+setlocal textwidth=0
+setlocal linebreak
+setlocal commentstring=x\ %s
+setlocal formatoptions=cql
 
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'x :<C-U>call ttodo#ftplugin#MarkDone(v:count)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'d :<C-U>call ttodo#ftplugin#MarkDue("d", v:count)<cr>'
