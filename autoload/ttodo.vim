@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-23
-" @Revision:    1095
+" @Last Change: 2015-11-24
+" @Revision:    1105
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 117
@@ -298,10 +298,10 @@ let s:ttodo_args = {
             \   'file_include_rx': {'type': 1},
             \   'hidden': {'type': -1},
             \   'has_subtasks': {'type': -1},
-            \   'has_lists': {'type': 3},
-            \   'has_tags': {'type': 3},
-            \   'lists': {'type': 3},
-            \   'tags': {'type': 3},
+            \   'has_lists': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("lists")'},
+            \   'has_tags': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("tags")'},
+            \   'lists': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("lists")'},
+            \   'tags': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("tags")'},
             \   'sortseps': {'type': 3, 'complete_customlist': '["lists", "tags"]'},
             \   'files': {'type': 3, 'complete': 'files'},
             \   'dirs': {'type': 3, 'complete': 'dirs'},
@@ -741,6 +741,14 @@ function! ttodo#CComplete(ArgLead, CmdLine, CursorPos) abort "{{{3
                 call filter(words, 'strpart(v:val, 0, nchar) ==# apref')
             endif
             let words = map(words, '"--pref=". v:val')
+        elseif a:ArgLead =~# '^@'
+            let words = map(ttodo#CollectTags("lists"), '"@". v:val')
+            let nchar = len(a:ArgLead)
+            call filter(words, 'strpart(v:val, 0, nchar) ==# a:ArgLead')
+        elseif a:ArgLead =~# '^+'
+            let words = map(ttodo#CollectTags("tags"), '"+". v:val')
+            let nchar = len(a:ArgLead)
+            call filter(words, 'strpart(v:val, 0, nchar) ==# a:ArgLead')
         else
             let nchar = len(a:ArgLead)
             let texts = {}
@@ -755,6 +763,21 @@ function! ttodo#CComplete(ArgLead, CmdLine, CursorPos) abort "{{{3
         endif
     endif
     return words
+endf
+
+
+function! ttodo#CollectTags(type) abort "{{{3
+    let args = {}
+    if &ft == 'ttodo'
+        let args.bufname = '%'
+    endif
+    let tasks = s:GetTasks(args)
+    let tags = map(copy(tasks), 'v:val.task[a:type]')
+    let tags = tlib#list#Flatten(tags)
+    let tags = filter(tags, '!empty(v:val)')
+    let tags = tlib#list#Uniq(tags)
+    let tags = sort(tags)
+    return tags
 endf
 
 
