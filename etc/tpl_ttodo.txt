@@ -95,7 +95,7 @@ A TASK may contain the following tags:
     t:-Nd ............ Hide the tasks until N days before the due date
 
 Other ftplugin for todo.txt files, which can be used in conjunction with the 
-ttodo plugin, include:
+ttodo plugin (if you don't want to use it's |ftplugin|), include:
 
     - https://github.com/freitass/todo.txt-vim
         - todo-txt.vim : Vim plugin for Todo.txt 
