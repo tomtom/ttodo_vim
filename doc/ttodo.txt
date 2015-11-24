@@ -206,7 +206,7 @@ g:ttodo_nmap                   (default: '<Leader>1')
 g:ttodo_nmap_important         (default: '<Leader>!')
 
                                                     *g:ttodo_enable_ftdetect*
-g:ttodo_enable_ftdetect        (default: 0)
+g:ttodo_enable_ftdetect        (default: 1)
     Set this variable to 1 in |vimrc| in order to enable the ttodo 
     filetype for todo.txt files.
 
