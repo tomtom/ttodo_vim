@@ -50,13 +50,15 @@ If filetype is ttodo, the following default keymaps are enabled:
                            if |g:ttodo#ftplugin#add_at_eof| is true, add the 
                            task at the end of file
     <s-cr> ............... Add a new subtask
-    <LocalLeader>tx ...... Mark "done"
-    <LocalLeader>td ...... Mark due in N days
-    <LocalLeader>tw ...... Mark due in N weeks
-    <LocalLeader>tm ...... Mark due in N months
-    <LocalLeader>ty ...... Set priority
-    <LocalLeader>ta ...... Archive completed items
-    <LocalLeader>tb ...... View, filter items in the current buffer
+    <LocalLeader>tx ...... Mark the current task as "done"
+    <LocalLeader>td ...... Mark the current task as due in N days
+    <LocalLeader>tw ...... Mark the current task as due in N weeks
+    <LocalLeader>tm ...... Mark the current task as due in N months
+    <LocalLeader>ty ...... Set the current task's priority
+    <LocalLeader>ta ...... Archive completed tasks
+    <LocalLeader>tb ...... View, filter tasks in the current buffer
+    <LocalLeader>t* ...... View tasks in the current buffer that match the word 
+                           under the cursor
     <LocalLeader>tn ...... Add a note (the filename uses the first @list tag)
     <LocalLeader>ti ...... Add a hopefully unique ID (an Adler32 hash)
 
