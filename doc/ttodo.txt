@@ -1,4 +1,4 @@
-*ttodo.txt*         View, sort, and filter todo.txt files
+*ttodo.txt*         Edit, view, sort, and filter todo.txt files
                     Author: Tom Link, micathom at gmail com
 
 This plugin provides the |:Ttodo| command that allow easy filtering and viewing 

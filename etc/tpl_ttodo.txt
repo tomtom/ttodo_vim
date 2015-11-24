@@ -1,4 +1,4 @@
-*ttodo.txt*         View, sort, and filter todo.txt files
+*ttodo.txt*         Edit, view, sort, and filter todo.txt files
                     Author: Tom Link, micathom at gmail com
 
 This plugin provides the |:Ttodo| command that allow easy filtering and viewing 
@@ -31,7 +31,7 @@ Examples: >
     " By default, |:Ttodo| scans the todo.txt files in |g:ttodo#dirs|. Users 
     " can also scan loaded buffers.
     " Show tasks in the current buffer
-    :Ttodo --bufname=%
+    :Ttodo --bufname=%%
 
     " Command-line options can be collected in preference sets (see 
     " |g:ttodo#prefs|)
