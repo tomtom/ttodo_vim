@@ -263,14 +263,14 @@ endf
 
 function! ttodo#ftplugin#AddId(count) abort "{{{3
     let filename = expand('%:p')
-    let fqfl = ttodo#GetCachedFileTasks({}, filename, {})
+    let fqfl = ttodo#GetFileTasks({}, filename, {})
     for lnum in range(line('.'), line('.') + a:count)
         let line = getline(lnum)
         let task = ttodo#ParseTask(line, filename)
         if !has_key(task, 'id')
             let qfe = get(filter(copy(fqfl), 'v:val.lnum == lnum'), 0, {})
-            let tline = empty(qfe) ? line : qfe.text
-            let id = tlib#hash#Adler32(tline)
+            let ttask = string(empty(qfe) ? task : qfe)
+            let id = tlib#hash#Adler32(ttask)
             let line .= ' id:'. id
             call setline(lnum, line)
         endif

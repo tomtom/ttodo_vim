@@ -487,18 +487,18 @@ function! s:GetLines(filename, fileargs) abort "{{{3
 endf
 
 
-function! ttodo#GetCachedFileTasks(args, filename, fileargs) abort "{{{3
-    let cfile = tlib#cache#Filename('ttodo_tasks', a:filename, 1)
-    let fqfl = tlib#cache#Value(cfile, 'ttodo#GetFileTasks', getftime(a:filename), [a:args, a:filename, a:fileargs], {'in_memory': 1})
-    let fqfl = filter(fqfl, '!empty(v:val.text)')
-    return fqfl
-endf
+" function! ttodo#GetCachedFileTasks(args, filename, fileargs) abort "{{{3
+"     let cfile = tlib#cache#Filename('ttodo_tasks', a:filename, 1)
+"     let fqfl = tlib#cache#Value(cfile, 'ttodo#GetFileTasks', getftime(a:filename), [a:args, a:filename, a:fileargs], {'in_memory': 1})
+"     let fqfl = filter(fqfl, '!empty(v:val.text)')
+"     return fqfl
+" endf
 
 
 function! s:GetTasks(args) abort "{{{3
     let qfl = []
     for filedef in s:GetFiles(a:args)
-        let fqfl = ttodo#GetCachedFileTasks(a:args, filedef.file, filedef.fileargs)
+        let fqfl = ttodo#GetFileTasks(a:args, filedef.file, filedef.fileargs)
         if !empty(fqfl)
             let qfl = extend(qfl, fqfl)
         endif
@@ -507,26 +507,36 @@ function! s:GetTasks(args) abort "{{{3
 endf
 
 
+let s:parsed_tasks = {}
+
+
 function! ttodo#ParseTask(task, file, ...) abort "{{{3
     TVarArg ['args', {}]
-    let task = {'text': a:task}
-    for [key, rx] in items(g:ttodo#parse_rx)
-        let val = matchstr(a:task, rx)
-        if key =~ '?$'
-            let key = substitute(key, '?$', '', '')
-            let task[key] = !empty(val)
-        elseif !empty(val)
-            let task[key] = val
+    let cid = join([a:task, a:file, get(args, 'lists', []), get(args, 'tags', [])], "\n")
+    if has_key(s:parsed_tasks, cid)
+        " TLogVAR cid
+        let task = deepcopy(s:parsed_tasks[cid])
+    else
+        let task = {'text': a:task}
+        for [key, rx] in items(g:ttodo#parse_rx)
+            let val = matchstr(a:task, rx)
+            if key =~ '?$'
+                let key = substitute(key, '?$', '', '')
+                let task[key] = !empty(val)
+            elseif !empty(val)
+                let task[key] = val
+            endif
+        endfor
+        if has_key(task, 'due')
+            if task.due < strftime(g:tlib#date#date_format)
+                let task.overdue = 1
+            endif
         endif
-    endfor
-    if has_key(task, 'due')
-        if task.due < strftime(g:tlib#date#date_format)
-            let task.overdue = 1
-        endif
+        let task.lists = filter(map(split(a:task, '\ze@'), 'matchstr(v:val, ''^@\zs\S\+'')'), '!empty(v:val)') + get(args, 'lists', [])
+        let task.tags = filter(map(split(a:task, '\ze+'), 'matchstr(v:val, ''^+\zs\S\+'')'), '!empty(v:val)') + get(args, 'tags', [])
+        let task.file = a:file
+        let s:parsed_tasks[cid] = deepcopy(task)
     endif
-    let task.lists = filter(map(split(a:task, '\ze@'), 'matchstr(v:val, ''^@\zs\S\+'')'), '!empty(v:val)') + get(args, 'lists', [])
-    let task.tags = filter(map(split(a:task, '\ze+'), 'matchstr(v:val, ''^+\zs\S\+'')'), '!empty(v:val)') + get(args, 'tags', [])
-    let task.file = a:file
     return task
 endf
 
