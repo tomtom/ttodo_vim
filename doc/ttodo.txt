@@ -161,11 +161,12 @@ Contents~
         g:ttodo#prefs ......................... |g:ttodo#prefs|
         g:ttodo#new_task ...................... |g:ttodo#new_task|
         g:ttodo#inbox ......................... |g:ttodo#inbox|
-        g:ttodo#debug ......................... |g:ttodo#debug|
         ttodo#GetDirs ......................... |ttodo#GetDirs()|
-        ttodo#GetCachedFileTasks .............. |ttodo#GetCachedFileTasks()|
         ttodo#ParseTask ....................... |ttodo#ParseTask()|
+        ttodo#GetOpts ......................... |ttodo#GetOpts()|
+        ttodo#GetOverdueRx .................... |ttodo#GetOverdueRx()|
         ttodo#InitListBuffer .................. |ttodo#InitListBuffer()|
+        ttodo#CollectTags ..................... |ttodo#CollectTags()|
         ttodo#FiletypeDetect .................. |ttodo#FiletypeDetect()|
         ttodo#SortBuffer ...................... |ttodo#SortBuffer()|
         ttodo#NewTask ......................... |ttodo#NewTask()|
@@ -184,6 +185,7 @@ Contents~
         ttodo#ftplugin#SetPriority ............ |ttodo#ftplugin#SetPriority()|
         ttodo#ftplugin#Agent .................. |ttodo#ftplugin#Agent()|
         ttodo#ftplugin#AddId .................. |ttodo#ftplugin#AddId()|
+        ttodo#ftplugin#SetOverdueSyntax ....... |ttodo#ftplugin#SetOverdueSyntax()|
         n_<expr> .............................. |n_<expr>|
         n_<expr> .............................. |n_<expr>|
         n_<expr> .............................. |n_<expr>|
@@ -319,20 +321,23 @@ g:ttodo#inbox                  (default: 'todo.txt')
     Tasks added by |:Ttodonew| will be added to this file in the 
     default (i.e. the first) directory in |g:ttodo#dirs|.
 
-                                                    *g:ttodo#debug*
-g:ttodo#debug                  (default: 0)
-
                                                     *ttodo#GetDirs()*
 ttodo#GetDirs()
-
-                                                    *ttodo#GetCachedFileTasks()*
-ttodo#GetCachedFileTasks(args, filename, fileargs)
 
                                                     *ttodo#ParseTask()*
 ttodo#ParseTask(task, file, ...)
 
+                                                    *ttodo#GetOpts()*
+ttodo#GetOpts(bang, cmdargs)
+
+                                                    *ttodo#GetOverdueRx()*
+ttodo#GetOverdueRx(args)
+
                                                     *ttodo#InitListBuffer()*
 ttodo#InitListBuffer()
+
+                                                    *ttodo#CollectTags()*
+ttodo#CollectTags(type)
 
                                                     *ttodo#FiletypeDetect()*
 ttodo#FiletypeDetect(...)
@@ -399,6 +404,9 @@ ttodo#ftplugin#Agent(world, selected, fn, ...)
 
                                                     *ttodo#ftplugin#AddId()*
 ttodo#ftplugin#AddId(count)
+
+                                                    *ttodo#ftplugin#SetOverdueSyntax()*
+ttodo#ftplugin#SetOverdueSyntax()
 
 
 ========================================================================
