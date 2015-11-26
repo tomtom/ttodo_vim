@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-24
-" @Revision:    206
+" @Last Change: 2015-11-26
+" @Revision:    209
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -277,3 +277,10 @@ function! ttodo#ftplugin#AddId(count) abort "{{{3
     endfor
 endf
 
+
+function! ttodo#ftplugin#SetOverdueSyntax() abort "{{{3
+    let overdue_rx = ttodo#GetOverdueRx({'bufname': '%'})
+    if !empty(overdue_rx)
+        exec 'syntax match TtodoOverdue /'. escape(overdue_rx, '/') .'/'
+    endif
+endf

@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-24
-" @Revision:    1133
+" @Last Change: 2015-11-26
+" @Revision:    1154
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 118
@@ -710,9 +710,9 @@ function! ttodo#Show(bang, cmdargs) abort "{{{3
                     Tlibtrace 'ttodo', flt
                     let w.initial_filter = [[""], flt]
                 endif
-                let overdue = filter(copy(qfl), 'get(v:val.task, "overdue", 0)')
-                if !empty(overdue)
-                    let w.overdue_rx = '\V\<due:\%('. join(map(overdue, 'v:val.task.due'), '\|') .'\)\>'
+                let overdue_rx = s:QflOverdueRx(qfl)
+                if !empty(overdue_rx)
+                    let w.overdue_rx = overdue_rx
                 endif
                 call tlib#qfl#QflList(qfl, w)
             elseif g:ttodo#viewer =~# '^:'
@@ -727,6 +727,22 @@ function! ttodo#Show(bang, cmdargs) abort "{{{3
                 throw 'TTodo: Unsupported value for g:ttodo#viewer: '. string(g:ttodo#viewer)
             endif
         endif
+    endif
+endf
+
+
+function! ttodo#GetOverdueRx(args) abort "{{{3
+    let qfl = s:GetTasks(a:args)
+    return s:QflOverdueRx(qfl)
+endf
+
+
+function! s:QflOverdueRx(qfl) abort "{{{3
+    let overdue = filter(copy(a:qfl), 'get(v:val.task, "overdue", 0)')
+    if !empty(overdue)
+        return '\V\<due:\%('. join(map(overdue, 'v:val.task.due'), '\|') .'\)\>'
+    else
+        return ''
     endif
 endf
 
