@@ -95,6 +95,11 @@ A TASK may contain the following tags:
                        Android app handles `rec` tags
     t:YYYY-MM-DD ..... Hide the tasks until the given date
     t:-Nd ............ Hide the tasks until N days before the due date
+    id:ID ............ Define a tasks ID string
+    dep:ID ........... Depends on task with ID (if the other task is not 
+                       completed yet, mark the current task as pending)
+    parent:ID ........ In outlines: the current task is the child of 
+                       task with ID
 
 Other ftplugin for todo.txt files, which can be used in conjunction with the 
 ttodo plugin (if you don't want to use it's |ftplugin|), include:
@@ -185,7 +190,7 @@ Contents~
         ttodo#ftplugin#SetPriority ............ |ttodo#ftplugin#SetPriority()|
         ttodo#ftplugin#Agent .................. |ttodo#ftplugin#Agent()|
         ttodo#ftplugin#AddId .................. |ttodo#ftplugin#AddId()|
-        ttodo#ftplugin#SetOverdueSyntax ....... |ttodo#ftplugin#SetOverdueSyntax()|
+        ttodo#ftplugin#SyntaxDue .............. |ttodo#ftplugin#SyntaxDue()|
         n_<expr> .............................. |n_<expr>|
         n_<expr> .............................. |n_<expr>|
         n_<expr> .............................. |n_<expr>|
@@ -228,6 +233,7 @@ g:ttodo_enable_ftdetect        (default: 1)
       --undated ...... Show tasks with no due dates when using the due 
                        argument
       --done ......... Show completed tasks
+      --pending ...... Show tasks with open dependencies
       --hidden ....... Show hidden tasks, i.e. tasks with a "h:1" tag or 
                        tasks matching |g:ttodo#task_hide_rx|
       --bufnr=BUFNR .. A comma-separated list of buffer numbers (must be 
@@ -306,7 +312,7 @@ g:ttodo#viewer                 (default: 'tlib')
 g:ttodo#sort                   (default: 'pri,due,done,lists,tags,idx')
 
                                                     *g:ttodo#prefs*
-g:ttodo#prefs                  (default: {'default': {'hidden': 0, 'has_subtasks': 0, 'done': 0}, 'important': {'hidden': 0, 'has_subtasks': 0, 'done': 0, 'undated': 1, 'due': '2w', 'pri': 'A-C'}})
+g:ttodo#prefs                  (default: {'default': {'hidden': 0, 'pending': 0, 'has_subtasks': 0, 'done': 0}, 'important': {'hidden': 0, 'pending': 0, 'has_subtasks': 0, 'done': 0, 'undated': 1, 'due': '2w', 'pri': 'A-C'}})
     A dictionary of configurations that can be invoked with the 
     `--pref=NAME` command line option from |:Ttodo|.
 
@@ -405,8 +411,8 @@ ttodo#ftplugin#Agent(world, selected, fn, ...)
                                                     *ttodo#ftplugin#AddId()*
 ttodo#ftplugin#AddId(count)
 
-                                                    *ttodo#ftplugin#SetOverdueSyntax()*
-ttodo#ftplugin#SetOverdueSyntax()
+                                                    *ttodo#ftplugin#SyntaxDue()*
+ttodo#ftplugin#SyntaxDue()
 
 
 ========================================================================

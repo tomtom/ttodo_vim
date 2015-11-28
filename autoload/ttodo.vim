@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-26
-" @Revision:    1154
+" @Last Change: 2015-11-28
+" @Revision:    1196
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 118
@@ -108,7 +108,7 @@ if !exists('g:ttodo#prefs')
     " `--pref=NAME` command line option from |:Ttodo|.
     "
     " If no preference is given, "default" is used.
-    let g:ttodo#prefs = {'default': {'hidden': 0, 'has_subtasks': 0, 'done': 0}, 'important': {'hidden': 0, 'has_subtasks': 0, 'done': 0, 'undated': 1, 'due': '2w', 'pri': 'A-C'}}   "{{{2
+    let g:ttodo#prefs = {'default': {'hidden': 0, 'pending': 0, 'has_subtasks': 0, 'done': 0}, 'important': {'hidden': 0, 'pending': 0, 'has_subtasks': 0, 'done': 0, 'undated': 1, 'due': '2w', 'pri': 'A-C'}}   "{{{2
     if exists('g:ttodo#prefs_user')
         let g:ttodo#prefs = tlib#eval#Extend(g:ttodo#prefs, g:ttodo#prefs_user)
     endif
@@ -135,6 +135,7 @@ if !exists('g:ttodo#parse_rx')
     let g:ttodo#parse_rx = {
                 \ 'id': '\<id:\zs\w\+',
                 \ 'parent': '\<parent:\zs\w\+',
+                \ 'dep': '\<dep:\zs\w\+',
                 \ 'subtask?': '^\s\+',
                 \ 'created': '^\C\%(x\s\+'. g:tlib#date#date_rx .'\s\+\)\?\%((\u)\s\+\)\?\zs'. g:tlib#date#date_rx,
                 \ 'due': '\<due:\zs'. g:tlib#date#date_rx .'\>',
@@ -294,6 +295,7 @@ let s:ttodo_args = {
             \   'file_exclude_rx': {'type': 1},
             \   'file_include_rx': {'type': 1},
             \   'hidden': {'type': -1},
+            \   'pending': {'type': -1},
             \   'has_subtasks': {'type': -1},
             \   'has_lists': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("lists")'},
             \   'has_tags': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("tags")'},
@@ -402,6 +404,8 @@ endf
 function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
     " TLogVAR a:file, keys(a:fileargs)
     let qfl = []
+    let by_id = {}
+    let children = {}
     let lnum = 0
     let pred_idx = -1
     let filelines = s:GetLines(a:file, a:fileargs)
@@ -409,6 +413,7 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
     for line in filelines.lines
         let lnum += 1
         let task = ttodo#ParseTask(line, a:file, a:args)
+        let id = get(task, 'id', '')
         let task.__source__ = source
         " TLogVAR task
         if get(task, 'subtask', 0) && pred_idx >= 0
@@ -442,8 +447,13 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
             let task0 = task
             let task = tlib#eval#Extend(copy(parent.task), task)
             let task.has_subtasks = 0
+            let task.__level__ = get(parent.task, '__level__', 0) + 1
             let task.__indent__ = indent
             let task.__parent_idx__ = parent_idx
+            if !has_key(children, parent_idx)
+                let children[parent_idx] = {}
+            endif
+            let children[parent_idx][pred_idx + 1] = 1
             " TLogVAR task, qfl[parent_idx]
             let line .= ' | '. substitute(s:FormatTask(a:args, copy(parent), 0).text, '^\C\s*\%(x\s\+\)\?\%((\u)\s\+\)\?', '', '')
             if has_key(parent.task, 'pri') && !has_key(task0, 'pri')
@@ -463,8 +473,24 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
         let pred_idx += 1
         let task.idx = pred_idx
         call add(qfl, {"filename": a:file, "lnum": lnum, "text": line, "task": task})
+        if !empty(id)
+            let by_id[id] = task
+        endif
     endfor
-    return qfl
+    let qfl = map(qfl, 's:SetPending(v:key, v:val, by_id)')
+    let filetasks = {'qfl': qfl, 'by_id': by_id}
+    return filetasks
+endf
+
+
+function! s:SetPending(idx, qfe, by_id) abort "{{{3
+    let dep = get(a:qfe.task, 'dep', '')
+    if !empty(dep) && has_key(a:by_id, dep)
+        let done = get(a:by_id[dep], 'done', 1)
+        let a:qfe.task.pending = !done
+        " TLogVAR a:idx, done
+    endif
+    return a:qfe
 endf
 
 
@@ -498,9 +524,9 @@ endf
 function! s:GetTasks(args) abort "{{{3
     let qfl = []
     for filedef in s:GetFiles(a:args)
-        let fqfl = ttodo#GetFileTasks(a:args, filedef.file, filedef.fileargs)
-        if !empty(fqfl)
-            let qfl = extend(qfl, fqfl)
+        let filetasks = ttodo#GetFileTasks(a:args, filedef.file, filedef.fileargs)
+        if !empty(filetasks)
+            let qfl = extend(qfl, filetasks.qfl)
         endif
     endfor
     return qfl
@@ -579,6 +605,9 @@ function! s:FilterTasks(args) abort "{{{3
     if !get(a:args, 'hidden', 0)
         call filter(qfl, 'empty(get(v:val.task, "hidden", ""))')
     endif
+    if !get(a:args, 'pending', 0)
+        call filter(qfl, '!get(v:val.task, "pending", 0)')
+    endif
     if has_key(a:args, 'pri')
         call filter(qfl, 'get(v:val.task, "pri", "") =~# ''^['. a:args.pri .']$''')
     endif
@@ -627,9 +656,36 @@ function! s:CheckThreshold(t, due, today) abort "{{{3
 endf
 
 
+let s:sort_params = {}
+
+
+function! s:sort_params.GetSortItem(qfe, task, item, default) abort dict "{{{3
+    let val = get(a:task, a:item, get(a:qfe, a:item, a:default))
+    if type(val) > 1
+        let tmp = val
+        unlet val
+        let val = string(tmp)
+        unlet tmp
+    endif
+    return val
+endf
+
+
+" function! s:sort_params.GetSortTasks(a, b) abort dict "{{{3
+"     let api = get(a:a, '__parent_idx__', -1)
+"     let bpi = get(a:b, '__parent_idx__', -1)
+"     while api != bpi
+"         " let al = get(a:a, '__level__', 0)
+"         " let bl = get(a:b, '__level__', 0)
+"     endwh
+"     return 
+" endf
+
+
 function! s:SortTasks(args, qfl) abort "{{{3
     " TLogVAR a:qfl
-    let params = {'fields': tlib#string#SplitCommaList(get(a:args, 'sort', g:ttodo#sort))}
+    let params = {'qfl': a:qfl, 'fields': tlib#string#SplitCommaList(get(a:args, 'sort', g:ttodo#sort))}
+    let params = extend(params, s:sort_params, 'keep')
     let qfl = sort(a:qfl, 's:SortTask', params)
     return qfl
 endf
@@ -640,26 +696,14 @@ function! s:SortTask(a, b) dict abort "{{{3
     let b = a:b.task
     for item in self.fields
         let default = get(g:ttodo#sort_defaults, item, '')
-        let aa = s:GetSortItem(a:a, a, item, default)
-        let bb = s:GetSortItem(a:b, b, item, default)
+        let aa = self.GetSortItem(a:a, a, item, default)
+        let bb = self.GetSortItem(a:b, b, item, default)
         if aa != bb
             return aa > bb ? 1 : -1
         endif
         unlet aa bb default
     endfor
     return 0
-endf
-
-
-function! s:GetSortItem(qfe, task, item, default) abort "{{{3
-    let val = get(a:task, a:item, get(a:qfe, a:item, a:default))
-    if type(val) > 1
-        let tmp = val
-        unlet val
-        let val = string(tmp)
-        unlet tmp
-    endif
-    return val
 endf
 
 
@@ -843,7 +887,8 @@ endf
 function! ttodo#SortBuffer(cmdargs) abort "{{{3
     let args = ttodo#GetOpts(0, a:cmdargs)
     let filename = expand('%:p')
-    let qfl = ttodo#GetFileTasks(args, filename, {})
+    let filetasks = ttodo#GetFileTasks(args, filename, {})
+    let qfl = filetasks.qfl
     if !empty(filter(copy(qfl), 'get(v:val.task, "subtask", 0)'))
         throw 'ttodo#SortBuffer: Cannot sort task outlines!'
     endif

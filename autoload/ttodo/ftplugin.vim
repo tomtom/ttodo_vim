@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-26
-" @Revision:    209
+" @Last Change: 2015-11-28
+" @Revision:    216
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -30,6 +30,7 @@ endif
 
 
 function! ttodo#ftplugin#Archive(filename) abort "{{{3
+    let basename = fnamemodify(a:filename, ':t')
     let arc = fnamemodify(a:filename, ':p:h') .'/done.txt'
     if filereadable(arc) && !filewritable(arc)
         throw 'TTodo: Cannot write: '. arc
@@ -43,6 +44,7 @@ function! ttodo#ftplugin#Archive(filename) abort "{{{3
     for line in readfile(a:filename)
         if line =~# '^x\s'
             let line .= ' archive:'. today
+            let line .= ' source:'. basename
             call add(done, line)
         else
             call add(undone, line)
@@ -263,7 +265,8 @@ endf
 
 function! ttodo#ftplugin#AddId(count) abort "{{{3
     let filename = expand('%:p')
-    let fqfl = ttodo#GetFileTasks({}, filename, {})
+    let filetasks = ttodo#GetFileTasks({}, filename, {})
+    let fqfl = filetasks.qfl
     for lnum in range(line('.'), line('.') + a:count)
         let line = getline(lnum)
         let task = ttodo#ParseTask(line, filename)
@@ -278,9 +281,11 @@ function! ttodo#ftplugin#AddId(count) abort "{{{3
 endf
 
 
-function! ttodo#ftplugin#SetOverdueSyntax() abort "{{{3
+function! ttodo#ftplugin#SyntaxDue() abort "{{{3
     let overdue_rx = ttodo#GetOverdueRx({'bufname': '%'})
     if !empty(overdue_rx)
         exec 'syntax match TtodoOverdue /'. escape(overdue_rx, '/') .'/'
     endif
+    exec 'syntax match TtodoDue /\<due:'. strftime(g:tlib#date#date_format) .'\>/'
 endf
+
