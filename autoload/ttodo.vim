@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-28
-" @Revision:    1196
+" @Last Change: 2015-11-30
+" @Revision:    1213
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 118
@@ -99,7 +99,21 @@ endif
 
 
 if !exists('g:ttodo#sort')
-    let g:ttodo#sort = 'pri,due,done,lists,tags,idx'   "{{{2
+    " A comma-separated list of fields that determine the sort order for 
+    " |:Ttodo| and |:Ttodosort|.
+    "
+    " A "-" as prefix reverses the sort order.
+    let g:ttodo#sort = '-overdue,pri,due,done,lists,tags,idx'   "{{{2
+endif
+
+
+if !exists('g:ttodo#sort_defaults')
+    " :nodoc:
+    let g:ttodo#sort_defaults = {
+                \ 'pri': 'T',
+                \ 'overdue': 0,
+                \ 'due': strftime(g:tlib#date#date_format, localtime() + g:tlib#date#dayshift * 28),
+                \ }
 endif
 
 
@@ -112,15 +126,6 @@ if !exists('g:ttodo#prefs')
     if exists('g:ttodo#prefs_user')
         let g:ttodo#prefs = tlib#eval#Extend(g:ttodo#prefs, g:ttodo#prefs_user)
     endif
-endif
-
-
-if !exists('g:ttodo#sort_defaults')
-    " :nodoc:
-    let g:ttodo#sort_defaults = {
-                \ 'pri': 'T',
-                \ 'due': strftime(g:tlib#date#date_format, localtime() + g:tlib#date#dayshift * 28),
-                \ }
 endif
 
 
@@ -520,14 +525,6 @@ function! s:GetLines(filename, fileargs) abort "{{{3
 endf
 
 
-" function! ttodo#GetCachedFileTasks(args, filename, fileargs) abort "{{{3
-"     let cfile = tlib#cache#Filename('ttodo_tasks', a:filename, 1)
-"     let fqfl = tlib#cache#Value(cfile, 'ttodo#GetFileTasks', getftime(a:filename), [a:args, a:filename, a:fileargs], {'in_memory': 1})
-"     let fqfl = filter(fqfl, '!empty(v:val.text)')
-"     return fqfl
-" endf
-
-
 function! s:GetTasks(args) abort "{{{3
     let qfl = []
     for filedef in s:GetFiles(a:args)
@@ -702,11 +699,20 @@ function! s:SortTask(a, b) dict abort "{{{3
     let a = a:a.task
     let b = a:b.task
     for item in self.fields
+        if item =~# '^-\S\+$'
+            let mul = -1
+            let item = substitute(item, '^-', '', '')
+        else
+            let mul = 1
+        endif
         let default = get(g:ttodo#sort_defaults, item, '')
         let aa = self.GetSortItem(a:a, a, item, default)
         let bb = self.GetSortItem(a:b, b, item, default)
+        if item == 'overdue'
+            " TLogVAR aa, bb, default, a, b
+        endif
         if aa != bb
-            return aa > bb ? 1 : -1
+            return mul * (aa > bb ? 1 : -1)
         endif
         unlet aa bb default
     endfor
