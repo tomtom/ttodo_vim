@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-28
-" @Revision:    216
+" @Last Change: 2015-11-30
+" @Revision:    228
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -287,5 +287,22 @@ function! ttodo#ftplugin#SyntaxDue() abort "{{{3
         exec 'syntax match TtodoOverdue /'. escape(overdue_rx, '/') .'/'
     endif
     exec 'syntax match TtodoDue /\<due:'. strftime(g:tlib#date#date_format) .'\>/'
+endf
+
+
+function! ttodo#ftplugin#AddDep() abort "{{{3
+    let filename = expand('%:p')
+    let filetasks = ttodo#GetFileTasks({}, filename, {})
+    " TLogVAR len(filetasks.qfl), len(filetasks.by_id)
+    let with_id = values(map(copy(filetasks.by_id), 'v:key ."\t". v:val.text'))
+    if empty(with_id)
+        echom 'ttodo#ftplugin#AddDep: No IDs'
+    else
+        let dep = tlib#input#List('s', 'Select dependency:', with_id)
+        if !empty(dep)
+            let id = matchstr(dep, '^[^\t]\+\ze\t')
+            call setline('.', getline('.') .' dep:'. id)
+        endif
+    endif
 endf
 
