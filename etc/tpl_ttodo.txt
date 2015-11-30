@@ -61,6 +61,7 @@ If filetype is ttodo, the following default keymaps are enabled:
                            under the cursor
     <LocalLeader>tn ...... Add a note (the filename uses the first @list tag)
     <LocalLeader>ti ...... Add a hopefully unique ID (an Adler32 hash)
+    <LocalLeader>tD ...... Add a dependency
 
 If filetype is ttodo, the following commands are supported:
 
@@ -72,15 +73,15 @@ If filetype is ttodo, the following commands are supported:
 As a ftplugin, ttodo supports the following syntax/extensions to todo.txt (see 
 also https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):
 
-    (A) DATE TASK .... A priority as upper case letter (at the beginning of the 
-                       line)
-    DATE TASK ........ A pending task
-    x DATE DATE TASK . A completed task (with completion date)
-    indented tasks ... A indented task is a subtask of the parent task; unless 
-                       `has_subtasks` is true, |:Ttodo| will only show tasks 
-                       with no open subtasks; this is similar to how the 
-                       outline addon handles subtasks (see also 
-                       https://github.com/samuelsnyder/outline-todo.txt)
+    (A) DATE TASK ........ A priority as upper case letter (at the beginning of the 
+                           line)
+    DATE TASK ............ An open task
+    x DATE DATE TASK ..... A completed task (with completion date)
+      indented tasks ..... A indented task is a subtask of the parent task; unless 
+                           `has_subtasks` is true, |:Ttodo| will only show tasks 
+                           with no open subtasks; this is similar to how the 
+                           outline addon handles subtasks (see also 
+                           https://github.com/samuelsnyder/outline-todo.txt)
 
 A TASK may contain the following tags:
 
@@ -95,9 +96,11 @@ A TASK may contain the following tags:
                        Android app handles `rec` tags
     t:YYYY-MM-DD ..... Hide the tasks until the given date
     t:-Nd ............ Hide the tasks until N days before the due date
-    id:ID ............ Define a tasks ID string
-    dep:ID ........... Depends on task with ID (if the other task is not 
-                       completed yet, mark the current task as pending)
+    id:ID ............ Define a tasks ID string (an ID should consist 
+                       of alphanumeric characters only)
+    dep:IDs .......... Depends on task with ID (if the other task is not 
+                       completed yet, mark the current task as pending);
+                       IDs is a comma-separated list of IDs
     parent:ID ........ In outlines: the current task is the child of 
                        task with ID
 
