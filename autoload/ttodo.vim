@@ -484,11 +484,18 @@ endf
 
 
 function! s:SetPending(idx, qfe, by_id) abort "{{{3
-    let dep = get(a:qfe.task, 'dep', '')
-    if !empty(dep) && has_key(a:by_id, dep)
-        let done = get(a:by_id[dep], 'done', 1)
-        let a:qfe.task.pending = !done
-        " TLogVAR a:idx, done
+    let deps = get(a:qfe.task, 'dep', '')
+    if !empty(deps)
+        for dep in tlib#string#SplitCommaList(deps)
+            if has_key(a:by_id, dep)
+                let done = get(a:by_id[dep], 'done', 1)
+                if !done
+                    let a:qfe.task.pending = 1
+                    " TLogVAR a:idx, done
+                    break
+                endif
+            endif
+        endfor
     endif
     return a:qfe
 endf
