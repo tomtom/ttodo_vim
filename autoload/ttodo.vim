@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2015-11-30
-" @Revision:    1213
+" @Revision:    1223
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 118
@@ -397,8 +397,11 @@ function! s:EnrichWithFileargs(filedef) abort "{{{3
     " TLogVAR a:filedef
     let filename = a:filedef.file
     for [rx, fileargs] in items(g:ttodo#fileargs)
+        " TLogVAR rx
         if filename =~# rx
+            " TLogVAR fileargs
             let a:filedef.fileargs = tlib#eval#Extend(copy(a:filedef.fileargs), fileargs)
+            " TLogVAR a:filedef.fileargs
         endif
     endfor
     return a:filedef
@@ -467,6 +470,7 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
             endif
             " TLogVAR line
         else
+            " TLogVAR a:file, a:fileargs, line
             for [prefix, key] in [['@', 'lists'], ['+', 'tags']]
                 if has_key(a:fileargs, key)
                     let vals = a:fileargs[key]
@@ -474,6 +478,7 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
                     let line = ttodo#MaybeAppend(line, ttodo#FormatTags(prefix, vals))
                 endif
             endfor
+            " TLogVAR line
         endif
         let pred_idx += 1
         let task.idx = pred_idx
@@ -597,7 +602,7 @@ function! s:FilterTasks(args) abort "{{{3
         let key = 'has_'. lst
         if has_key(a:args, key)
             let vals = a:args[key]
-            call filter(qfl, 's:HasList(v:val.task[lst], vals)')
+            call filter(qfl, 's:HasAnyList(v:val.task[lst], vals)')
         endif
     endfor
     if !get(a:args, 'has_subtasks', 0)
@@ -623,7 +628,7 @@ function! s:FilterTasks(args) abort "{{{3
 endf
 
 
-function! s:HasList(tags, vals) abort "{{{3
+function! s:HasAnyList(tags, vals) abort "{{{3
     let rv = !empty(filter(copy(a:tags), 'index(a:vals, v:val) != -1'))
     " TLogVAR a:tags, a:vals, rv
     return rv
