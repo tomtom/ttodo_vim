@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-30
-" @Revision:    228
+" @Last Change: 2015-12-04
+" @Revision:    245
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -41,8 +41,16 @@ function! ttodo#ftplugin#Archive(filename) abort "{{{3
     let done = []
     let undone = []
     let today = strftime(g:tlib#date#date_format)
-    for line in readfile(a:filename)
-        if line =~# '^x\s'
+    let filetasks = ttodo#GetFileTasks({}, a:filename, {})
+    let lines = readfile(a:filename)
+    for lnum0 in range(len(lines))
+        let task = filetasks.GetQfeByLnum(lnum0 + 1).task
+        " let line = lines[lnum0]
+        let line = task.text
+        if line != lines[lnum0]
+            throw 'Ttodo: Internal error: Lines differ: '. string(line) .' != '. string(lines[lnum0])
+        endif
+        if get(task, 'done', 0) && !get(task, 'has_subtasks', 0) && !get(task, 'pending', 0)
             let line .= ' archive:'. today
             let line .= ' source:'. basename
             call add(done, line)
@@ -271,7 +279,7 @@ function! ttodo#ftplugin#AddId(count) abort "{{{3
         let line = getline(lnum)
         let task = ttodo#ParseTask(line, filename)
         if !has_key(task, 'id')
-            let qfe = get(filter(copy(fqfl), 'v:val.lnum == lnum'), 0, {})
+            let qfe = filetasks.GetQfeByLnum(lnum)
             let ttask = string(empty(qfe) ? task : qfe)
             let id = tlib#hash#Adler32(ttask)
             let line .= ' id:'. id
@@ -293,8 +301,8 @@ endf
 function! ttodo#ftplugin#AddDep() abort "{{{3
     let filename = expand('%:p')
     let filetasks = ttodo#GetFileTasks({}, filename, {})
-    " TLogVAR len(filetasks.qfl), len(filetasks.by_id)
-    let with_id = values(map(copy(filetasks.by_id), 'v:key ."\t". v:val.text'))
+    " TLogVAR len(filetasks.qfl), len(filetasks.task_by_id)
+    let with_id = values(map(copy(filetasks.task_by_id), 'v:key ."\t". v:val.text'))
     if empty(with_id)
         echom 'ttodo#ftplugin#AddDep: No IDs'
     else

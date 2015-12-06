@@ -408,11 +408,25 @@ function! s:EnrichWithFileargs(filedef) abort "{{{3
 endf
 
 
+let s:filetasks = {}
+
+function! s:filetasks.GetQfeByLnum(lnum) abort dict "{{{3
+    return get(self.qfe_by_lnum, ''. a:lnum, {})
+    " for qfe in self.qfl
+    "     if qfe.lnum == a:lnum
+    "         return qfe
+    "     endif
+    " endfor
+    " return {}
+endf
+
+
 ":nodoc:
 function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
     " TLogVAR a:file, keys(a:fileargs)
     let qfl = []
-    let by_id = {}
+    let task_by_id = {}
+    let qfe_by_lnum = {}
     let children = {}
     let lnum = 0
     let pred_idx = -1
@@ -482,23 +496,25 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
         endif
         let pred_idx += 1
         let task.idx = pred_idx
-        call add(qfl, {"filename": a:file, "lnum": lnum, "text": line, "task": task})
+        let qfe = {"filename": a:file, "lnum": lnum, "text": line, "task": task}
+        call add(qfl, qfe)
         if !empty(id)
-            let by_id[id] = task
+            let task_by_id[id] = task
         endif
+        let qfe_by_lnum[lnum] = qfe
     endfor
-    let qfl = map(qfl, 's:SetPending(v:key, v:val, by_id)')
-    let filetasks = {'qfl': qfl, 'by_id': by_id}
+    let qfl = map(qfl, 's:SetPending(v:key, v:val, task_by_id)')
+    let filetasks = extend({'qfl': qfl, 'task_by_id': task_by_id, 'qfe_by_lnum': qfe_by_lnum}, s:filetasks)
     return filetasks
 endf
 
 
-function! s:SetPending(idx, qfe, by_id) abort "{{{3
+function! s:SetPending(idx, qfe, task_by_id) abort "{{{3
     let deps = get(a:qfe.task, 'dep', '')
     if !empty(deps)
         for dep in tlib#string#SplitCommaList(deps)
-            if has_key(a:by_id, dep)
-                let done = get(a:by_id[dep], 'done', 1)
+            if has_key(a:task_by_id, dep)
+                let done = get(a:task_by_id[dep], 'done', 1)
                 if !done
                     let a:qfe.task.pending = 1
                     " TLogVAR a:idx, done
