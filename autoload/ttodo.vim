@@ -1,14 +1,14 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-30
-" @Revision:    1223
+" @Last Change: 2015-12-06
+" @Revision:    1235
 
 
-if !exists('g:loaded_tlib') || g:loaded_tlib < 118
+if !exists('g:loaded_tlib') || g:loaded_tlib < 119
     runtime plugin/tlib.vim
-    if !exists('g:loaded_tlib') || g:loaded_tlib < 118
-        echoerr 'tlib >= 1.18 is required'
+    if !exists('g:loaded_tlib') || g:loaded_tlib < 119
+        echoerr 'tlib >= 1.19 is required'
         finish
     endif
 endif
@@ -187,7 +187,7 @@ if !exists('g:ttodo#inbox')
 endif
 
 
-call tlib#type#DefSchema('ttodo_type_itemdef_opts', {'__name__': 's', '__rx__': 's'})
+call tlib#type#Define('ttodo_type_itemdef_opts', {'__name__': 's', '__rx__': 's'})
 
 
 let s:list_env = {
