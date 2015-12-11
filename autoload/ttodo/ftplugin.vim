@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-12-04
-" @Revision:    245
+" @Last Change: 2015-12-10
+" @Revision:    249
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -264,10 +264,21 @@ endf
 
 function! ttodo#ftplugin#Agent(world, selected, fn, ...) abort "{{{3
     " TLogVAR a:fn, a:000
-    let cmd = printf('call call(%s, %s)', string(a:fn), string(a:000))
+    let cmd = printf('call call(%s, %s)', string(a:fn), string(map(copy(a:000), 's:AgentEvalArg(v:val)')))
     Tlibtrace 'ttodo', cmd
     let world = tlib#qfl#RunCmdOnSelected(a:world, a:selected, cmd)
     return world
+endf
+
+
+function! s:AgentEvalArg(arg) abort "{{{3
+    if type(a:arg) == 1 && a:arg =~ '^\\='
+        return eval(substitute(a:arg, '^\\=', '', ''))
+    elseif type(a:arg) == 1 && a:arg =~ '^".\{-}"$'
+        return matchstr(a:arg, '^"\zs.\{-}\ze"$')
+    else
+        return a:arg
+    endif
 endf
 
 

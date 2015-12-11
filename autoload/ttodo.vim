@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-12-06
-" @Revision:    1235
+" @Last Change: 2015-12-10
+" @Revision:    1239
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 119
@@ -201,8 +201,8 @@ let s:list_env = {
 let s:list_env['key_map'] = {
             \     'default': {
             \             24 : {'key': 24, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDone', 0], 'key_name': '<c-x>', 'help': 'Mark done'},
-            \             4 : {'key': 4, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'd', 'Number of days: '], 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
-            \             23 : {'key': 23, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'w', 'Number of weeks: '], 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
+            \             4 : {'key': 4, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'd', '\=str2nr(tlib#string#Input("Number of days: "))'], 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
+            \             23 : {'key': 23, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'w', '\=str2nr(tlib#string#Input("Number of weeks: "))'], 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
             \             25 : {'key': 25, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#SetPriority', 0], 'key_name': '<c-y>', 'help': 'Change task category'},
             \     }
             \ }
