@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-12-10
-" @Revision:    1239
+" @Last Change: 2015-12-11
+" @Revision:    1244
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 119
@@ -161,7 +161,7 @@ if !exists('g:ttodo#rewrite_gsub')
     ":nodoc:
     let g:ttodo#rewrite_gsub = [
                 \ ['^\C\%((\u)\s\+\)\?\zs'. g:tlib#date#date_rx .'\s*', ''],
-                \ ['\s+\<\%(id\|parent\|t\):\S\+', ''],
+                \ ['\%(^\|\s\+\)\%(id\|parent\|t\):\S\+', ''],
                 \ ]
 endif
 if exists('g:ttodo#rewrite_gsub_user')
@@ -745,8 +745,10 @@ function! s:FormatTask(args, qfe, maybe_iconv) abort "{{{3
     " TLogVAR a:qfe
     let text = a:qfe.text
     let text0 = text
+    " TLogVAR text0
     for [rx, subst] in g:ttodo#rewrite_gsub
         let text = substitute(text, rx, subst, 'g')
+        " TLogVAR rx, subst, text
     endfor
     if text !=# text0
         let qfe = copy(a:qfe)
