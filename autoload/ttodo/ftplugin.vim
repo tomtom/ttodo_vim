@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-12-10
-" @Revision:    249
+" @Last Change: 2015-12-15
+" @Revision:    263
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -28,6 +28,12 @@ if !exists('g:ttodo#ftplugin#add_at_eof')
     let g:ttodo#ftplugin#add_at_eof = 1   "{{{2
 endif
 
+
+if !exists('g:ttodo#ftplugin#rec_copy')
+    " If true, marking a recurring task as "done" will mark the old task 
+    " as completed and will then create a new updated task.
+    let g:ttodo#ftplugin#rec_copy = 1   "{{{2
+endif
 
 function! ttodo#ftplugin#Archive(filename) abort "{{{3
     let basename = fnamemodify(a:filename, ':t')
@@ -138,36 +144,49 @@ function! s:IsDone(line) abort "{{{3
 endf
 
 
-function! ttodo#ftplugin#MarkDone(count) abort "{{{3
+function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
+    TVarArg ['ignore_rec', 0]
     let donedate = strftime(g:tlib#date#date_format)
-    for lnum in range(line('.'), line('.') + a:count)
+    let inum = 0
+    while inum <= a:count
+        let lnum = line('.') + inum
+        let inum += 1
         let line = getline(lnum)
-        if !s:IsDone(line)
-            let task = ttodo#ParseTask(line, expand('%:p'))
-            let rec = get(task, 'rec', '')
-            if !empty(rec)
-                let due = get(task, 'due', '')
-                let shift = matchstr(rec, '\d\+\a$')
-                let refdate = rec =~ '^+' && !empty(due) ? due : donedate
-                let ndue = empty(due) ? donedate : due
-                " TLogVAR rec, due, shift, refdate
-                while ndue <= refdate
-                    let ndue = tlib#date#Shift(ndue, shift)
-                    " TLogVAR ndue
-                endwh
-                exec lnum
-                call s:MarkDueDate(ndue)
-                if has_key(task, 't') && task.t =~# g:tlib#date#date_rx
-                    let t0 = task.t
-                    let t0s = tlib#date#SecondsSince1970(t0)
-                    let dues = tlib#date#SecondsSince1970(due)
-                    let t0diff = dues - t0s
-                    let ndues = tlib#date#SecondsSince1970(ndue)
-                    let t1s = ndues - t0diff
-                    let t1 = tlib#date#Format(t1s)
-                    call s:SetTag('t', g:tlib#date#date_rx, t1)
+        let task = ttodo#ParseTask(line, expand('%:p'))
+        if !get(task, 'done', 0)
+            if !ignore_rec
+                let rec = get(task, 'rec', '')
+                if !empty(rec)
+                    if g:ttodo#ftplugin#rec_copy
+                        call append(lnum, getline(lnum))
+                        exec lnum
+                        call ttodo#ftplugin#MarkDone(0, 1)
+                        let inum += 1
+                        let lnum += 1
+                    endif
+                    let due = get(task, 'due', '')
+                    let shift = matchstr(rec, '\d\+\a$')
+                    let refdate = rec =~ '^+' && !empty(due) ? due : donedate
+                    let ndue = empty(due) ? donedate : due
+                    " TLogVAR rec, due, shift, refdate
+                    while ndue <= refdate
+                        let ndue = tlib#date#Shift(ndue, shift)
+                        " TLogVAR ndue
+                    endwh
+                    exec lnum
+                    call s:MarkDueDate(ndue)
+                    if has_key(task, 't') && task.t =~# g:tlib#date#date_rx
+                        let t0 = task.t
+                        let t0s = tlib#date#SecondsSince1970(t0)
+                        let dues = tlib#date#SecondsSince1970(due)
+                        let t0diff = dues - t0s
+                        let ndues = tlib#date#SecondsSince1970(ndue)
+                        let t1s = ndues - t0diff
+                        let t1 = tlib#date#Format(t1s)
+                        call s:SetTag('t', g:tlib#date#date_rx, t1)
+                    endif
+                    continue
                 endif
-                continue
             endif
         endif
         if get(task, 'subtask', 0) && !has_key(task, 'parent')
@@ -177,7 +196,7 @@ function! ttodo#ftplugin#MarkDone(count) abort "{{{3
             endif
         endif
         exec lnum .'s/^\s*\zs\C\%(x\s\+\%('. g:tlib#date#date_rx .'\s\+\)\?\)\?/x '. donedate .' /'
-    endfor
+    endwh
     exec line('.') + a:count
 endf
 
