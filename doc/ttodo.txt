@@ -184,6 +184,7 @@ Contents~
         g:ttodo#ftplugin#note_prefix .......... |g:ttodo#ftplugin#note_prefix|
         g:ttodo#ftplugin#edit_note ............ |g:ttodo#ftplugin#edit_note|
         g:ttodo#ftplugin#add_at_eof ........... |g:ttodo#ftplugin#add_at_eof|
+        g:ttodo#ftplugin#rec_copy ............. |g:ttodo#ftplugin#rec_copy|
         ttodo#ftplugin#Archive ................ |ttodo#ftplugin#Archive()|
         ttodo#ftplugin#ArchiveCurrentBuffer ... |ttodo#ftplugin#ArchiveCurrentBuffer()|
         ttodo#ftplugin#Note ................... |ttodo#ftplugin#Note()|
@@ -389,6 +390,11 @@ g:ttodo#ftplugin#add_at_eof    (default: 1)
     current line.
     Subtasks will always be added below the current line.
 
+                                                    *g:ttodo#ftplugin#rec_copy*
+g:ttodo#ftplugin#rec_copy      (default: 1)
+    If true, marking a recurring task as "done" will mark the old task 
+    as completed and will then create a new updated task.
+
                                                     *ttodo#ftplugin#Archive()*
 ttodo#ftplugin#Archive(filename)
 
@@ -402,7 +408,7 @@ ttodo#ftplugin#Note()
 ttodo#ftplugin#New(move, copytags, mode, ...)
 
                                                     *ttodo#ftplugin#MarkDone()*
-ttodo#ftplugin#MarkDone(count)
+ttodo#ftplugin#MarkDone(count, ...)
 
                                                     *ttodo#ftplugin#MarkDue()*
 ttodo#ftplugin#MarkDue(unit, count)
