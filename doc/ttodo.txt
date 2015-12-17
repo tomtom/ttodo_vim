@@ -157,6 +157,7 @@ Contents~
         g:ttodo_enable_ftdetect ............... |g:ttodo_enable_ftdetect|
         :Ttodo ................................ |:Ttodo|
         :Ttodonew ............................. |:Ttodonew|
+        :Ttodogrep ............................ |:Ttodogrep|
         g:ttodo#fileargs ...................... |g:ttodo#fileargs|
         g:ttodo#file_pattern .................. |g:ttodo#file_pattern|
         g:ttodo#file_include_rx ............... |g:ttodo#file_include_rx|
@@ -180,6 +181,7 @@ Contents~
         ttodo#NewTask ......................... |ttodo#NewTask()|
         ttodo#FormatTags ...................... |ttodo#FormatTags()|
         ttodo#MaybeAppend ..................... |ttodo#MaybeAppend()|
+        ttodo#FileSources ..................... |ttodo#FileSources()|
         g:ttodo#ftplugin#notef ................ |g:ttodo#ftplugin#notef|
         g:ttodo#ftplugin#note_prefix .......... |g:ttodo#ftplugin#note_prefix|
         g:ttodo#ftplugin#edit_note ............ |g:ttodo#ftplugin#edit_note|
@@ -271,6 +273,9 @@ g:ttodo_enable_ftdetect        (default: 1)
 
                                                     *:Ttodonew*
 :Ttodonew
+
+                                                    *:Ttodogrep*
+:Ttodogrep
 
 
 ========================================================================
@@ -369,6 +374,9 @@ ttodo#FormatTags(prefix, lists)
 
                                                     *ttodo#MaybeAppend()*
 ttodo#MaybeAppend(text, suffix)
+
+                                                    *ttodo#FileSources()*
+ttodo#FileSources(args)
 
 
 ========================================================================
