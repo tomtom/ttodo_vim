@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-12-11
-" @Revision:    1244
+" @Last Change: 2015-12-16
+" @Revision:    1271
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 119
@@ -987,5 +987,23 @@ function! ttodo#MaybeAppend(text, suffix) abort "{{{3
     else
         return a:text .' '. a:suffix
     endif
+endf
+
+
+function! ttodo#FileSources(args) abort "{{{3
+    Tlibtrace 'ttodo', a:args
+    let args = a:args
+    let pref = get(args, 'pref', 'default')
+    Tlibtrace 'ttodo', pref
+    let args = tlib#eval#Extend(copy(g:ttodo#prefs[pref]), args)
+    let pattern = get(args, 'glob', get(args, 'deep', 1) ? '**' : '*')
+    let globs = {}
+    let dirsdefs = s:GetDirsDefs(args)
+    for [dir, dirargs] in items(dirsdefs)
+        let glob = tlib#file#Join([dir, pattern])
+        Tlibtrace 'ttodo', glob
+        let globs[glob] = 1
+    endfor
+    return keys(globs)
 endf
 

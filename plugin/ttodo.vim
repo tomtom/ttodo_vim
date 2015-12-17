@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-28
-" @Revision:    88
+" @Last Change: 2015-12-16
+" @Revision:    92
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -80,6 +80,9 @@ command! -bang -nargs=* -complete=customlist,ttodo#CComplete Ttodo call ttodo#Sh
 
 
 command! -nargs=+ -complete=customlist,ttodo#CComplete Ttodonew call ttodo#NewTask([<f-args>])
+
+
+command! -bang -nargs=+ Ttodogrep if exists(':Trag') == 2 | Trag<bang> --file_sources=*ttodo#FileSources <args> | else | echom ':Ttodogrep requires the trag_vim plugin to be installed!' | endif
 
 
 if !empty(g:ttodo_nmap)
