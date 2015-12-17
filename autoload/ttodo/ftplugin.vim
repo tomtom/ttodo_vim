@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-12-15
-" @Revision:    263
+" @Last Change: 2015-12-16
+" @Revision:    264
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -169,9 +169,12 @@ function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
                     let refdate = rec =~ '^+' && !empty(due) ? due : donedate
                     let ndue = empty(due) ? donedate : due
                     " TLogVAR rec, due, shift, refdate
-                    while ndue <= refdate
+                    while 1
                         let ndue = tlib#date#Shift(ndue, shift)
                         " TLogVAR ndue
+                        if ndue > refdate
+                            break
+                        endif
                     endwh
                     exec lnum
                     call s:MarkDueDate(ndue)
