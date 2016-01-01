@@ -335,6 +335,8 @@ g:ttodo#new_task               (default: {'lists': ['inbox'], 'pri': 'B'})
 
                                                     *g:ttodo#inbox*
 g:ttodo#inbox                  (default: 'todo.txt')
+    A file basename (no directory).
+
     Tasks added by |:Ttodonew| will be added to this file in the 
     default (i.e. the first) directory in |g:ttodo#dirs|.
 

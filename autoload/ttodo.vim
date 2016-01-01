@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-12-16
-" @Revision:    1271
+" @Last Change: 2016-01-01
+" @Revision:    1280
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 119
@@ -25,8 +25,9 @@ if !exists('g:ttodo#dirs')
     "
     "   lists: LIST OF STRINGS .... Additional lists
     "   tags: LIST OF STRINGS ..... Additional tags
-    "   inbox: FILENAME ........... Filename for new tasks (see 
+    "   inbox: BASENAME ........... Basename for new tasks (see 
     "                               |g:ttodo#inbox|)
+    "   inboxfile: FILENAME ....... Full filename for new tasks
     "   file_pattern: GLOB ........ See |g:ttodo#file_pattern|
     "   file_include_rx: REGEXP ... See |g:ttodo#file_include_rx|
     "   file_exclude_rx: REGEXP ... See |g:ttodo#file_exclude_rx|
@@ -181,6 +182,8 @@ endif
 
 
 if !exists('g:ttodo#inbox')
+    " A file basename (no directory).
+    "
     " Tasks added by |:Ttodonew| will be added to this file in the 
     " default (i.e. the first) directory in |g:ttodo#dirs|.
     let g:ttodo#inbox = 'todo.txt'  "{{{2
@@ -300,6 +303,7 @@ let s:ttodo_args = {
             \   'file_exclude_rx': {'type': 1},
             \   'file_include_rx': {'type': 1},
             \   'hidden': {'type': -1},
+            \   'inbox': {'type': 1},
             \   'pending': {'type': -1},
             \   'has_subtasks': {'type': -1},
             \   'has_lists': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("lists")'},
