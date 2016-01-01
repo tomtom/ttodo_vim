@@ -961,9 +961,12 @@ endf
 
 function! ttodo#NewTask(cmdargs) abort "{{{3
     let args = extend(copy(g:ttodo#new_task), ttodo#GetOpts(0, a:cmdargs))
-    let dirdef = s:GetDefaultDirDef(args, '.')
-    " TLogVAR keys(dirdef), dirdef.__name__
-    let filename = tlib#file#Join([dirdef.__name__, get(dirdef, 'inbox', g:ttodo#inbox)])
+    let filename = get(args, 'inboxfile', '')
+    if empty(filename)
+        let dirdef = s:GetDefaultDirDef(args, '.')
+        " TLogVAR keys(dirdef), dirdef.__name__
+        let filename = tlib#file#Join([dirdef.__name__, get(args, 'inbox', get(dirdef, 'inbox', g:ttodo#inbox))])
+    endif
     let text = join(args.__rest__)
     let text = ttodo#MaybeAppend(text, get(args, 'suffix', ''))
     let text = ttodo#MaybeAppend(text, ttodo#FormatTags('@', get(args, 'lists', [])))
