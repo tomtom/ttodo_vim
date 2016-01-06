@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-01-01
-" @Revision:    1280
+" @Last Change: 2016-01-06
+" @Revision:    1292
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 119
@@ -123,7 +123,7 @@ if !exists('g:ttodo#prefs')
     " `--pref=NAME` command line option from |:Ttodo|.
     "
     " If no preference is given, "default" is used.
-    let g:ttodo#prefs = {'default': {'hidden': 0, 'pending': 0, 'has_subtasks': 0, 'done': 0}, 'important': {'hidden': 0, 'pending': 0, 'has_subtasks': 0, 'done': 0, 'undated': 1, 'due': '2w', 'pri': 'A-C'}}   "{{{2
+    let g:ttodo#prefs = {'default': {'ignore_pri': 'X-Z'}, 'important': {'undated': 1, 'due': '2w', 'pri': 'A-C'}}   "{{{2
     if exists('g:ttodo#prefs_user')
         let g:ttodo#prefs = tlib#eval#Extend(g:ttodo#prefs, g:ttodo#prefs_user)
     endif
