@@ -307,7 +307,9 @@ let s:ttodo_args = {
             \   'pending': {'type': -1},
             \   'has_subtasks': {'type': -1},
             \   'has_lists': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("lists")'},
+            \   'ignore_lists': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("lists")'},
             \   'has_tags': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("tags")'},
+            \   'ignore_tags': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("tags")'},
             \   'lists': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("lists")'},
             \   'tags': {'type': 3, 'complete_customlist': 'ttodo#CollectTags("tags")'},
             \   'sortseps': {'type': 3, 'complete_customlist': '["lists", "tags"]'},
@@ -315,7 +317,8 @@ let s:ttodo_args = {
             \   'dirs': {'type': 3, 'complete': 'dirs'},
             \   'path': {'type': 1, 'complete': 'dirs'},
             \   'pref': {'type': 1, 'complete_customlist': 'keys(g:ttodo#prefs)'},
-            \   'pri': {'type': 1, 'complete_customlist': '["", "A-", "A-C", "W", "X-Z"]'},
+            \   'pri': {'type': 1, 'complete_customlist': '["", "A-", "A-C", "A-Z", "X-Z"]'},
+            \   'ignore_pri': {'type': 1, 'complete_customlist': '["", "X-Z"]'},
             \   'sort': {'type': 1, 'complete_customlist': 'map(keys(g:ttodo#parse_rx), "substitute(v:val, ''\\W$'', '''', ''g'')")'},
             \   'task_exclude_rx': {'type': 1},
             \   'task_include_rx': {'type': 1},
@@ -624,6 +627,11 @@ function! s:FilterTasks(args) abort "{{{3
             let vals = a:args[key]
             call filter(qfl, 's:HasAnyList(v:val.task[lst], vals)')
         endif
+        let ikey = 'ignore_'. lst
+        if has_key(a:args, ikey)
+            let vals = a:args[ikey]
+            call filter(qfl, '!s:HasAnyList(v:val.task[lst], vals)')
+        endif
     endfor
     if !get(a:args, 'has_subtasks', 0)
         call filter(qfl, 'get(v:val.task, "has_subtasks", 0) == 0')
@@ -639,6 +647,9 @@ function! s:FilterTasks(args) abort "{{{3
     endif
     if has_key(a:args, 'pri')
         call filter(qfl, 'get(v:val.task, "pri", "") =~# ''^['. a:args.pri .']$''')
+    endif
+    if has_key(a:args, 'ignore_pri')
+        call filter(qfl, 'empty(get(v:val.task, "pri", "")) || get(v:val.task, "pri", "") !~# ''^['. a:args.ignore_pri .']$''')
     endif
     if get(a:args, 'threshold', 1)
         let today = strftime(g:tlib#date#date_format)
