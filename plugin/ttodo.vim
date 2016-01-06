@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-12-16
-" @Revision:    92
+" @Last Change: 2016-01-06
+" @Revision:    94
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -41,8 +41,6 @@ endif
 "                    - a number of days or
 "                    - a number of weeks as in "4w"
 "                    (default: |g:ttodo#default_due|)
-"   --pri=PRI ...... Show tasks with a priority matching [PRI] (see 
-"                    |/[]|)
 "   --undated ...... Show tasks with no due dates when using the due 
 "                    argument
 "   --done ......... Show completed tasks
@@ -61,10 +59,14 @@ endif
 "   --sort=FIELDS .. default: |g:ttodo#sort|
 "   --has_subtasks . Show tasks with open subtasks (i.e. indented tasks 
 "                    below the parent task)
-"   --has_lists=LIST1,.. .......... Show tasks with at least one 
-"                                   matching list
-"   --has_tags=TAG1,.. ............ Show tasks with at least one 
-"                                   matching tag
+"   --pri=PRI ..................... Show tasks with a priority matching 
+"                                   [PRI] (see |/[]|)
+"   --ignore_pri=PRI .............. Ignore tasks with a priority 
+"                                   matching [PRI] (see |/[]|)
+"   --has_lists=LIST1,.. .......... Show tasks with matching lists
+"   --ignore_lists=LIST1,.. ....... Ignore tasks with matching lista
+"   --has_tags=TAG1,.. ............ Show tasks with matching taga
+"   --ignore_tags=TAG1,.. ......... Ignore tasks with matching tags
 "   -A=RX, --file_include_rx=RX ... Default: |g:ttodo#file_include_rx|
 "   -R=RX, --file_exclude_rx=RX ... Default: |g:ttodo#file_exclude_rx|
 "   -i=RX, --task_include_rx=RX ... Default: |g:ttodo#task_include_rx|
