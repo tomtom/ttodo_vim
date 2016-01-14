@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-01-06
-" @Revision:    1292
+" @Last Change: 2016-01-12
+" @Revision:    1296
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 119
@@ -111,7 +111,7 @@ endif
 if !exists('g:ttodo#sort_defaults')
     " :nodoc:
     let g:ttodo#sort_defaults = {
-                \ 'pri': 'T',
+                \ 'pri': 'I',
                 \ 'overdue': 0,
                 \ 'due': strftime(g:tlib#date#date_format, localtime() + g:tlib#date#dayshift * 28),
                 \ }
