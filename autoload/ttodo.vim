@@ -617,7 +617,7 @@ function! s:FilterTasks(args) abort "{{{3
             endif
             call filter(qfl, 'empty(get(v:val.task, "due", "")) || tlib#date#DiffInDays(v:val.task.due) <= '. due)
         endif
-        if !get(a:args, 'undated', 0)
+        if get(a:args, 'undated', 0)
             call filter(qfl, '!empty(get(v:val.task, "due", ""))')
         endif
     endif
