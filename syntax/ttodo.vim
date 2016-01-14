@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2015-11-27.
+" @Last Change: 2016-01-14.
 
 if version < 600
     syntax clear
@@ -44,8 +44,9 @@ syntax match TtodoDate /\<\d\{4}-\d\d-\d\d\>/
 syntax match TtodoTime /\<\d\d:\d\d\>/
 " syntax match TtodoDone /\<x \d\{4}-\d\d-\d\d\s.*$/
 syntax match TtodoDone /^\s*x\s.*$/
+syntax match TtodoHidden /^.\{-}\<h:1\>.*$/
 call ttodo#ftplugin#SyntaxDue()
-syntax cluster TtodoTask contains=TtodoPri,TtodoPriA,TtodoPriB,TtodoPriC,TtodoList,TtodoKeyword,TtodoTag,TtodoDate,TtodoTime,TtodoDone,TtodoOverdue
+syntax cluster TtodoTask contains=TtodoPri,TtodoPriA,TtodoPriB,TtodoPriC,TtodoList,TtodoKeyword,TtodoTag,TtodoDate,TtodoTime,TtodoDone,TtodoHidden,TtodoOverdue
 
 hi def link TtodoPri Special
 hi def TtodoPriA term=bold,underline cterm=bold gui=bold guifg=Black ctermfg=Black ctermbg=Red guibg=Red
@@ -58,6 +59,7 @@ hi def link TtodoTag Type
 hi def link TtodoDate Statement
 hi def link TtodoTime Statement
 hi def link TtodoDone Comment
+hi def link TtodoHidden Comment
 hi def link TtodoOverdue ErrorMsg
 hi def link TtodoDue WarningMsg
 
