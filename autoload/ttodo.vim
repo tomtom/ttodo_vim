@@ -204,8 +204,8 @@ let s:list_env = {
 let s:list_env['key_map'] = {
             \     'default': {
             \             24 : {'key': 24, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDone', 0], 'key_name': '<c-x>', 'help': 'Mark done'},
-            \             4 : {'key': 4, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'd', '\=str2nr(tlib#string#Input("Number of days: "))'], 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
-            \             23 : {'key': 23, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'w', '\=str2nr(tlib#string#Input("Number of weeks: "))'], 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
+            \             4 : {'key': 4, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'd', '\=ttodo#InputNumber("Number of days: ")'], 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
+            \             23 : {'key': 23, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'w', '\=ttodo#InputNumber("Number of weeks: ")'], 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
             \             25 : {'key': 25, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#SetPriority', 0], 'key_name': '<c-y>', 'help': 'Change task category'},
             \     }
             \ }
@@ -1023,5 +1023,11 @@ function! ttodo#FileSources(args) abort "{{{3
         let globs[glob] = 1
     endfor
     return keys(globs)
+endf
+
+
+function! ttodo#InputNumber(prompt) abort "{{{3
+    let s = tlib#string#Input(a:prompt)
+    return empty(s) ? -1 : str2nr(s)
 endf
 
