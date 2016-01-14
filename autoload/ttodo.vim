@@ -123,7 +123,7 @@ if !exists('g:ttodo#prefs')
     " `--pref=NAME` command line option from |:Ttodo|.
     "
     " If no preference is given, "default" is used.
-    let g:ttodo#prefs = {'default': {'ignore_pri': 'X-Z'}, 'important': {'undated': 1, 'due': '2w', 'pri': 'A-C'}}   "{{{2
+    let g:ttodo#prefs = {'default': {'ignore_pri': 'X-Z'}, 'important': {'undated': 1, 'due': '1w', 'pri': 'A-C', 'ignore_lists': ['someday', 'maybe']}}   "{{{2
     if exists('g:ttodo#prefs_user')
         let g:ttodo#prefs = tlib#eval#Extend(g:ttodo#prefs, g:ttodo#prefs_user)
     endif
