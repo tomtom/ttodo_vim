@@ -5,6 +5,7 @@ This plugin provides the |:Ttodo| command that allow easy filtering and viewing
 of todo.txt files (see http://todotxt.com) via |tlib#input#List()|. The plugin 
 supports:
 
+    - syntax highlighting for todo.txt files
     - search across multiple todo.txt files
     - filter tasks with specific tags, lists etc.
     - subtasks (outlines of complex tasks)
@@ -37,10 +38,12 @@ Examples: >
     " |g:ttodo#prefs|)
     :Ttodo --pref=work
 
-In order to use this plugin as a ftplugin, users might also want to set 
-|g:ttodo_enable_ftdetect| to 1 in their |vimrc| file.
+Global maps:
 
-If filetype is ttodo, the following default keymaps are enabled:
+    <Leader>1 ............ Show tasks (:Ttodo)
+    <Leader>! ............ Show important tasks (:Ttodo --pref=important)
+
+If filetype is ttodo, the following buffer-local keymaps are enabled:
 
     <cr> ................. Add a new task;
                            if |g:ttodo#ftplugin#add_at_eof| is true, add the 
@@ -63,7 +66,7 @@ If filetype is ttodo, the following default keymaps are enabled:
     <LocalLeader>ti ...... Add a hopefully unique ID (an Adler32 hash)
     <LocalLeader>tD ...... Add a dependency
 
-If filetype is ttodo, the following commands are supported:
+If filetype is ttodo, the following buffer-local commands are enabled:
 
     |:Ttodoarchive| ...... Archive completed tasks in the current buffer
     |:Ttodobuffer| ....... Show tasks in the current buffer only
@@ -104,8 +107,8 @@ A TASK may contain the following tags:
     parent:ID ........ In outlines: the current task is the child of 
                        task with ID
 
-Other ftplugin for todo.txt files, which can be used in conjunction with the 
-ttodo plugin (if you don't want to use it's |ftplugin|), include:
+If you set |g:ttodo_enable_ftdetect| to 0, you can use the |:Ttodo| command in 
+conjunction with other syntax files/ftplugins such as:
 
     - https://github.com/freitass/todo.txt-vim
         - todo-txt.vim : Vim plugin for Todo.txt 
@@ -157,6 +160,7 @@ Contents~
         g:ttodo_enable_ftdetect ............... |g:ttodo_enable_ftdetect|
         :Ttodo ................................ |:Ttodo|
         :Ttodonew ............................. |:Ttodonew|
+        :Ttodoinbox ........................... |:Ttodoinbox|
         :Ttodogrep ............................ |:Ttodogrep|
         g:ttodo#fileargs ...................... |g:ttodo#fileargs|
         g:ttodo#file_pattern .................. |g:ttodo#file_pattern|
@@ -182,6 +186,7 @@ Contents~
         ttodo#FormatTags ...................... |ttodo#FormatTags()|
         ttodo#MaybeAppend ..................... |ttodo#MaybeAppend()|
         ttodo#FileSources ..................... |ttodo#FileSources()|
+        ttodo#InputNumber ..................... |ttodo#InputNumber()|
         g:ttodo#ftplugin#notef ................ |g:ttodo#ftplugin#notef|
         g:ttodo#ftplugin#note_prefix .......... |g:ttodo#ftplugin#note_prefix|
         g:ttodo#ftplugin#edit_note ............ |g:ttodo#ftplugin#edit_note|
@@ -275,6 +280,9 @@ g:ttodo_enable_ftdetect        (default: 1)
 
                                                     *:Ttodonew*
 :Ttodonew
+
+                                                    *:Ttodoinbox*
+:Ttodoinbox
 
                                                     *:Ttodogrep*
 :Ttodogrep
@@ -381,6 +389,9 @@ ttodo#MaybeAppend(text, suffix)
 
                                                     *ttodo#FileSources()*
 ttodo#FileSources(args)
+
+                                                    *ttodo#InputNumber()*
+ttodo#InputNumber(prompt)
 
 
 ========================================================================
