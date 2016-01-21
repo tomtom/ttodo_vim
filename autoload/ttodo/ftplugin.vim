@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-01-12
-" @Revision:    265
+" @Last Change: 2016-01-21
+" @Revision:    282
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -147,48 +147,55 @@ endf
 function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
     TVarArg ['ignore_rec', 0]
     let donedate = strftime(g:tlib#date#date_format)
-    let inum = 0
-    while inum <= a:count
-        let lnum = line('.') + inum
-        let inum += 1
+    let lnum0 = line('.')
+    for lnum in range(lnum0, lnum0 + a:count)
         let line = getline(lnum)
         let task = ttodo#ParseTask(line, expand('%:p'))
         if !get(task, 'done', 0)
             if !ignore_rec
                 let rec = get(task, 'rec', '')
                 if !empty(rec)
-                    if g:ttodo#ftplugin#rec_copy
-                        call append(lnum, getline(lnum))
-                        exec lnum
-                        call ttodo#ftplugin#MarkDone(0, 1)
-                        let inum += 1
-                        let lnum += 1
-                    endif
-                    let due = get(task, 'due', '')
-                    let shift = matchstr(rec, '\d\+\a$')
-                    let refdate = rec =~ '^+' && !empty(due) ? due : donedate
-                    let ndue = empty(due) ? donedate : due
-                    " TLogVAR rec, due, shift, refdate
-                    while 1
-                        let ndue = tlib#date#Shift(ndue, shift)
-                        " TLogVAR ndue
-                        if ndue > refdate
-                            break
+                    if get(task, 'subtask', 0)
+                        echohl Error
+                        echom "TTodo: Cannot complete subtasks with a 'rec:' tag:" line
+                        continue
+                    elseif get(task, 'has_subtask', 0)
+                        " TODO: Must copy the whole tree
+                        echohl Error
+                        echom "TTodo: Cannot complete top tasks with a 'rec:' tag:" line
+                        continue
+                    else
+                        if g:ttodo#ftplugin#rec_copy
+                            call ttodo#ftplugin#MarkDone(0, 1)
+                            call append('$', line)
+                            let lnum = line('$')
                         endif
-                    endwh
-                    exec lnum
-                    call s:MarkDueDate(ndue)
-                    if has_key(task, 't') && task.t =~# g:tlib#date#date_rx
-                        let t0 = task.t
-                        let t0s = tlib#date#SecondsSince1970(t0)
-                        let dues = tlib#date#SecondsSince1970(due)
-                        let t0diff = dues - t0s
-                        let ndues = tlib#date#SecondsSince1970(ndue)
-                        let t1s = ndues - t0diff
-                        let t1 = tlib#date#Format(t1s)
-                        call s:SetTag('t', g:tlib#date#date_rx, t1)
+                        let due = get(task, 'due', '')
+                        let shift = matchstr(rec, '\d\+\a$')
+                        let refdate = rec =~ '^+' && !empty(due) ? due : donedate
+                        let ndue = empty(due) ? donedate : due
+                        " TLogVAR rec, due, shift, refdate
+                        while 1
+                            let ndue = tlib#date#Shift(ndue, shift)
+                            " TLogVAR ndue
+                            if ndue > refdate
+                                break
+                            endif
+                        endwh
+                        exec lnum
+                        call s:MarkDueDate(ndue)
+                        if has_key(task, 't') && task.t =~# g:tlib#date#date_rx
+                            let t0 = task.t
+                            let t0s = tlib#date#SecondsSince1970(t0)
+                            let dues = tlib#date#SecondsSince1970(due)
+                            let t0diff = dues - t0s
+                            let ndues = tlib#date#SecondsSince1970(ndue)
+                            let t1s = ndues - t0diff
+                            let t1 = tlib#date#Format(t1s)
+                            call s:SetTag('t', g:tlib#date#date_rx, t1)
+                        endif
+                        continue
                     endif
-                    continue
                 endif
             endif
         endif
@@ -199,8 +206,8 @@ function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
             endif
         endif
         exec lnum .'s/^\s*\zs\C\%(x\s\+\%('. g:tlib#date#date_rx .'\s\+\)\?\)\?/x '. donedate .' /'
-    endwh
-    exec line('.') + a:count
+    endfor
+    exec lnum0 + a:count
 endf
 
 
