@@ -39,3 +39,40 @@ version: "0.03"
   - ttodo#ftplugin#New(): FIX indentation
   MD5 checksum: f3cbe1572df17ba026f84166d3857a4b
 
+  - g:ttodo#ftplugin#add_at_eof defaults to 1
+  - NEW map <localleader>t*
+  - g:ttodo_enable_ftdetect defaults to 1
+  - Completion for lists and tags
+  - Require tlib 1.18
+  - Command-line completion for Ttodonew
+  - :Ttodonew respects --pref argument
+  - ftplugin: lb fo=cql
+  - Cache each parsed tasks not tasks per file
+  - Highlight overdue due dates
+  - Task dependencies, --pending command-line option
+  - dep:IDs is a comma-separated list
+  - Sort moves overdue items to the top
+  - NEW ttodo#ftplugin#AddDep(), map: <LL>tD
+  - Fix has_lists/tags command-line flag
+  - s/tlib#type#DefSchema/tlib#type#Define/; require tlib >= 1.19
+  - ttodo#ftplugin#Archive(): Don't archive tasks with pending sub/tasks
+  - ttodo#ftplugin#Agent: Allow for "once" expressions as arguments
+  - g:ttodo#rewrite_gsub: FIX regexp
+  - NEW g:ttodo#ftplugin#rec_copy: copy recurring tasks when marking them as "done"
+  - ttodo#ftplugin#MarkDone(): Make sure to inc due date once
+  - NEW :Ttodogrep
+  - ttodo#NewTask: FIX handling of inboxfile arg
+  - Simplify g:ttodo#prefs
+  - g:ttodo#new_task: pri = C
+  - NEW ignore_lists, ignore_tags, ignore_pri arguments
+  - g:ttodo#prefs: important.due = 1w
+  - g:ttodo#sort_defaults.pri = I
+  - s:FilterTasks: FIX handling of undated
+  - NEW ttodo#InputNumber()
+  - ttodo#ftplugin#MarkDue: Accept count == -1
+  - NEW Ttodoinbox
+  - TtodoHidden syntax
+  - ttodo#ftplugin#MarkDone(): temporarily disallow for outlines with rec: tags; g:ttodo#ftplugin#rec_copy appends new task at the eof
+  MD5 checksum: a7a364b97ca3e05540974d05a42a797e
+version: "1.00"
+
