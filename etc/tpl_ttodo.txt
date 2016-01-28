@@ -1,13 +1,13 @@
 *ttodo.txt*         Edit, view, sort, and filter todo.txt files
                     Author: Tom Link, micathom at gmail com
 
-This plugin provides the |:Ttodo| command that allow easy filtering and viewing 
-of todo.txt files (see http://todotxt.com) via |tlib#input#List()|. The plugin 
-supports:
+This plugin provides the |:Ttodo| command that allow easy editing,
+viewing, and filtering of todo.txt files (see http://todotxt.com) via
+|tlib#input#List()|. The plugin supports:
 
     - syntax highlighting for todo.txt files
-    - search across multiple todo.txt files
-    - filter tasks with specific tags, lists etc.
+    - search across multiple todo.txt files (see |:Ttodo|)
+    - filter tasks with specific tags, lists etc. (see |:Ttodo|)
     - subtasks (outlines of complex tasks)
     - hide tasks until a threshold date
     - recurring tasks.
