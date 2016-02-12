@@ -144,7 +144,7 @@ if !exists('g:ttodo#parse_rx')
                 \ 'dep': '\<dep:\zs\w\+',
                 \ 'subtask?': '^\s\+',
                 \ 'created': '^\C\%(x\s\+'. g:tlib#date#date_rx .'\s\+\)\?\%((\u)\s\+\)\?\zs'. g:tlib#date#date_rx,
-                \ 'due': '\<due:\zs'. g:tlib#date#date_rx .'\>',
+                \ 'due': '\<due:\zs\%(today\|'. g:tlib#date#date_rx .'\)\>',
                 \ 't': '\<t:\zs\%(-\d\+[d]\|'. g:tlib#date#date_rx .'\)\>',
                 \ 'pri': '^\s*(\zs\u\ze)',
                 \ 'hidden?': '\%(\<h:1\>\|'. g:ttodo#task_hide_rx .'\)',
@@ -568,16 +568,16 @@ endf
 let s:parsed_tasks = {}
 
 
-function! ttodo#ParseTask(task, file, ...) abort "{{{3
+function! ttodo#ParseTask(line, file, ...) abort "{{{3
     TVarArg ['args', {}]
-    let cid = join([a:task, a:file, get(args, 'lists', []), get(args, 'tags', [])], "\n")
+    let cid = join([a:line, a:file, get(args, 'lists', []), get(args, 'tags', [])], "\n")
     if has_key(s:parsed_tasks, cid)
         " TLogVAR cid
         let task = deepcopy(s:parsed_tasks[cid])
     else
-        let task = {'text': a:task}
+        let task = {'text': a:line}
         for [key, rx] in items(g:ttodo#parse_rx)
-            let val = matchstr(a:task, rx)
+            let val = matchstr(a:line, rx)
             if key =~ '?$'
                 let key = substitute(key, '?$', '', '')
                 let task[key] = !empty(val)
@@ -586,12 +586,17 @@ function! ttodo#ParseTask(task, file, ...) abort "{{{3
             endif
         endfor
         if has_key(task, 'due')
+            " TLogVAR task
+            if task.due ==# 'today'
+                let task.due = strftime(g:tlib#date#date_format)
+                " TLogVAR task
+            endif
             if task.due < strftime(g:tlib#date#date_format)
                 let task.overdue = 1
             endif
         endif
-        let task.lists = filter(map(split(a:task, '\ze@'), 'matchstr(v:val, ''^@\zs\S\+'')'), '!empty(v:val)') + get(args, 'lists', [])
-        let task.tags = filter(map(split(a:task, '\ze+'), 'matchstr(v:val, ''^+\zs\S\+'')'), '!empty(v:val)') + get(args, 'tags', [])
+        let task.lists = filter(map(split(a:line, '\ze@'), 'matchstr(v:val, ''^@\zs\S\+'')'), '!empty(v:val)') + get(args, 'lists', [])
+        let task.tags = filter(map(split(a:line, '\ze+'), 'matchstr(v:val, ''^+\zs\S\+'')'), '!empty(v:val)') + get(args, 'tags', [])
         let task.file = a:file
         let s:parsed_tasks[cid] = deepcopy(task)
     endif
