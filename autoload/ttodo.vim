@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-01-12
-" @Revision:    1296
+" @Last Change: 2016-02-04
+" @Revision:    1313
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 119
@@ -206,7 +206,7 @@ let s:list_env['key_map'] = {
             \             24 : {'key': 24, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDone', 0], 'key_name': '<c-x>', 'help': 'Mark done'},
             \             4 : {'key': 4, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'd', '\=ttodo#InputNumber("Number of days: ")'], 'key_name': '<c-d>', 'help': 'Mark as due in N days'},
             \             23 : {'key': 23, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#MarkDue', 'w', '\=ttodo#InputNumber("Number of weeks: ")'], 'key_name': '<c-w>', 'help': 'Mark as due in N weeks'},
-            \             25 : {'key': 25, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#SetPriority', 0], 'key_name': '<c-y>', 'help': 'Change task category'},
+            \             25 : {'key': 25, 'agent': 'ttodo#ftplugin#Agent', 'args': ['ttodo#ftplugin#SetPriority', 0, '\=tlib#string#Input("New task category [A-Z]: ")'], 'key_name': '<c-y>', 'help': 'Change task category'},
             \     }
             \ }
 
@@ -1031,8 +1031,9 @@ function! ttodo#FileSources(args) abort "{{{3
 endf
 
 
-function! ttodo#InputNumber(prompt) abort "{{{3
+function! ttodo#InputNumber(prompt, ...) abort "{{{3
+    let default = a:0 >= 1 ? a:1 : -1
     let s = tlib#string#Input(a:prompt)
-    return empty(s) ? -1 : str2nr(s)
+    return empty(s) ? default : str2nr(s)
 endf
 

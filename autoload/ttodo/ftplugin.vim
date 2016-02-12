@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-01-21
-" @Revision:    282
+" @Last Change: 2016-02-04
+" @Revision:    288
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -241,13 +241,9 @@ function! ttodo#ftplugin#MarkDue(unit, count) abort "{{{3
         if type(a:count) == 0
             let n = a:count
         elseif type(a:count) == 1
-            call inputsave()
-            let counts = input(a:count)
-            call inputrestore()
-            if empty(counts)
+            let n = ttodo#InputNumber(a:count)
+            if n < 0
                 return
-            else
-                let n = str2nr(counts)
             endif
         else
             throw 'ttodo#ftplugin#MarkDue: count must be a number or a string'
@@ -270,16 +266,14 @@ function! s:SetTag(name, rx, value) abort "{{{3
 endf
 
 
-function! ttodo#ftplugin#SetPriority(count) abort "{{{3
+function! ttodo#ftplugin#SetPriority(count, ...) abort "{{{3
     " TLogVAR a:count
     if s:IsDone(getline('.'))
         echohl WarningMsg
         throw 'Ttodo: Cannot change finshed task'
         echohl NONE
     else
-        call inputsave()
-        let category = input('New task category [A-Z]: ')
-        call inputrestore()
+        let category = a:0 >= 1 ? a:1 : tlib#string#Input('New task category [A-Z]: ')
         let category = toupper(category)
         if category =~ '\C^[A-Z]$'
             exec 's/^\s*\zs\C\%((\u)\s\+\)\?/('. category .') /'
@@ -335,7 +329,7 @@ function! ttodo#ftplugin#SyntaxDue() abort "{{{3
     if !empty(overdue_rx)
         exec 'syntax match TtodoOverdue /'. escape(overdue_rx, '/') .'/'
     endif
-    exec 'syntax match TtodoDue /\<due:'. strftime(g:tlib#date#date_format) .'\>/'
+    exec 'syntax match TtodoDue /\<due:\%(today\|'. strftime(g:tlib#date#date_format) .'\)\>/'
 endf
 
 
