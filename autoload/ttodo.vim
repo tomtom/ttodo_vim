@@ -177,7 +177,7 @@ endif
 
 if !exists('g:ttodo#new_task')
     " Defintion for tasks added via |:Ttodonew|.
-    let g:ttodo#new_task = {'lists': ['inbox'], 'pri': 'C'}   "{{{2
+    let g:ttodo#new_task = {'lists': ['Inbox'], 'pri': 'C'}   "{{{2
 endif
 
 
