@@ -16,7 +16,13 @@ endif
 
 
 if !exists('g:ttodo#ftplugin#edit_note')
-    let g:ttodo#ftplugin#edit_note = 'split'   "{{{2
+    " If non-empty, edit a newly added reference to a note right away.
+    "
+    " Possible (potentially useful) values:
+    "   - split
+    "   - hide edit
+    "   - tabedit
+    let g:ttodo#ftplugin#edit_note = ''   "{{{2
 endif
 
 
@@ -104,7 +110,9 @@ function! ttodo#ftplugin#Note() abort "{{{3
     Tlibtrace 'ttodo', filename
     call setline('.', join([line, notename]))
     call tlib#dir#Ensure(fnamemodify(filename, ':p:h'))
-    exec g:ttodo#ftplugin#edit_note fnameescape(filename)
+    if !empty(g:ttodo#ftplugin#edit_note)
+        exec g:ttodo#ftplugin#edit_note fnameescape(filename)
+    endif
 endf
 
 
