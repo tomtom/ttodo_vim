@@ -1,13 +1,13 @@
 *ttodo.txt*         Edit, view, sort, and filter todo.txt files
                     Author: Tom Link, micathom at gmail com
 
-This plugin provides the |:Ttodo| command that allow easy filtering and viewing 
-of todo.txt files (see http://todotxt.com) via |tlib#input#List()|. The plugin 
-supports:
+This plugin provides the |:Ttodo| command that allow easy editing,
+viewing, and filtering of todo.txt files (see http://todotxt.com) via
+|tlib#input#List()|. The plugin supports:
 
     - syntax highlighting for todo.txt files
-    - search across multiple todo.txt files
-    - filter tasks with specific tags, lists etc.
+    - search across multiple todo.txt files (see |:Ttodo|)
+    - filter tasks with specific tags, lists etc. (see |:Ttodo|)
     - subtasks (outlines of complex tasks)
     - hide tasks until a threshold date
     - recurring tasks.
@@ -340,7 +340,7 @@ g:ttodo#default_t              (default: '-31d')
     If a task has no threshold date defined, assign this default threshold date.
 
                                                     *g:ttodo#new_task*
-g:ttodo#new_task               (default: {'lists': ['inbox'], 'pri': 'C'})
+g:ttodo#new_task               (default: {'lists': ['Inbox'], 'pri': 'C'})
     Defintion for tasks added via |:Ttodonew|.
 
                                                     *g:ttodo#inbox*
@@ -354,7 +354,7 @@ g:ttodo#inbox                  (default: 'todo.txt')
 ttodo#GetDirs()
 
                                                     *ttodo#ParseTask()*
-ttodo#ParseTask(task, file, ...)
+ttodo#ParseTask(line, file, ...)
 
                                                     *ttodo#GetOpts()*
 ttodo#GetOpts(bang, cmdargs)
@@ -391,7 +391,7 @@ ttodo#MaybeAppend(text, suffix)
 ttodo#FileSources(args)
 
                                                     *ttodo#InputNumber()*
-ttodo#InputNumber(prompt)
+ttodo#InputNumber(prompt, ...)
 
 
 ========================================================================
@@ -402,9 +402,20 @@ g:ttodo#ftplugin#notef         (default: 'notes/%s/%s-%s.md')
 
                                                     *g:ttodo#ftplugin#note_prefix*
 g:ttodo#ftplugin#note_prefix   (default: 'file://')
+    Prefix for references to notes.
+
+    Possible (potentially useful) values:
+      - file://
+      - todo:// (opens the file in SimpleTask)
 
                                                     *g:ttodo#ftplugin#edit_note*
-g:ttodo#ftplugin#edit_note     (default: 'split')
+g:ttodo#ftplugin#edit_note     (default: '')
+    If non-empty, edit a newly added reference to a note right away.
+
+    Possible (potentially useful) values:
+      - split
+      - hide edit
+      - tabedit
 
                                                     *g:ttodo#ftplugin#add_at_eof*
 g:ttodo#ftplugin#add_at_eof    (default: 1)
@@ -437,7 +448,7 @@ ttodo#ftplugin#MarkDone(count, ...)
 ttodo#ftplugin#MarkDue(unit, count)
 
                                                     *ttodo#ftplugin#SetPriority()*
-ttodo#ftplugin#SetPriority(count)
+ttodo#ftplugin#SetPriority(count, ...)
 
                                                     *ttodo#ftplugin#Agent()*
 ttodo#ftplugin#Agent(world, selected, fn, ...)

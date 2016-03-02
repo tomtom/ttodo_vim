@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-02-04
-" @Revision:    288
+" @Last Change: 2016-03-01
+" @Revision:    293
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -11,6 +11,11 @@ endif
 
 
 if !exists('g:ttodo#ftplugin#note_prefix')
+    " Prefix for references to notes.
+    "
+    " Possible (potentially useful) values:
+    "   - file://
+    "   - todo:// (opens the file in SimpleTask)
     let g:ttodo#ftplugin#note_prefix = 'file://'   "{{{2
 endif
 
