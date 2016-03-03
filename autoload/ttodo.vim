@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-02-04
-" @Revision:    1313
+" @Last Change: 2016-03-02
+" @Revision:    1314
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 119
@@ -56,6 +56,17 @@ endif
 if !exists('g:ttodo#file_pattern')
     " A glob pattern matching todo.txt files.
     let g:ttodo#file_pattern = '*todo.txt'   "{{{2
+endif
+
+
+if !exists('g:ttodo#force_filetype')
+    " By default, |ttodo#FiletypeDetect()| uses |:setf| to set the 
+    " filetype. This only works, if there isn't already a filetype 
+    " assigned to the buffer.
+    "
+    " If true, ttodo will make sure the filetype is `ttodo` by using 
+    " |:set| to set 'filetype'.
+    let g:ttodo#force_filetype = 0   "{{{2
 endif
 
 
@@ -930,7 +941,11 @@ function! ttodo#FiletypeDetect(...) abort "{{{3
     let dirs = map(keys(s:ttodo_dirs), 'substitute(resolve(fnamemodify(v:val, ":p:h")), ''\\'', ''/'', ''g'')')
     " TLogVAR bdir, dirs
     if index(dirs, bdir, 0, !has('fname_case')) != -1
-        setf ttodo
+        if g:ttodo#force_filetype
+            setl ft=ttodo
+        else
+            setf ttodo
+        endif
         " TLogVAR &ft
     endif
 endf
