@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-03-01
-" @Revision:    293
+" @Last Change: 2016-03-02
+" @Revision:    296
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -46,6 +46,7 @@ if !exists('g:ttodo#ftplugin#rec_copy')
     let g:ttodo#ftplugin#rec_copy = 1   "{{{2
 endif
 
+
 function! ttodo#ftplugin#Archive(filename) abort "{{{3
     let basename = fnamemodify(a:filename, ':t')
     let arc = fnamemodify(a:filename, ':p:h') .'/done.txt'
@@ -68,9 +69,10 @@ function! ttodo#ftplugin#Archive(filename) abort "{{{3
             throw 'Ttodo: Internal error: Lines differ: '. string(line) .' != '. string(lines[lnum0])
         endif
         if get(task, 'done', 0) && !get(task, 'has_subtasks', 0) && !get(task, 'pending', 0)
-            let line .= ' archive:'. today
-            let line .= ' source:'. basename
-            call add(done, line)
+            let dline = tlib#string#TrimLeft(line)
+            let dline .= ' archive:'. today
+            let dline .= ' source:'. basename
+            call add(done, dline)
         else
             call add(undone, line)
         endif
