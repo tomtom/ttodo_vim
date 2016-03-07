@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-03-02
-" @Revision:    1314
+" @Last Change: 2016-03-07
+" @Revision:    1320
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 119
@@ -155,7 +155,7 @@ if !exists('g:ttodo#parse_rx')
                 \ 'dep': '\<dep:\zs\w\+',
                 \ 'subtask?': '^\s\+',
                 \ 'created': '^\C\%(x\s\+'. g:tlib#date#date_rx .'\s\+\)\?\%((\u)\s\+\)\?\zs'. g:tlib#date#date_rx,
-                \ 'due': '\<due:\zs\%(today\|'. g:tlib#date#date_rx .'\)\>',
+                \ 'due': '\<due:\zs\%(today\|'. g:tlib#date#date_rx .'\|[0-9]\+[dwmy]\)\>',
                 \ 't': '\<t:\zs\%(-\d\+[d]\|'. g:tlib#date#date_rx .'\)\>',
                 \ 'pri': '^\s*(\zs\u\ze)',
                 \ 'hidden?': '\%(\<h:1\>\|'. g:ttodo#task_hide_rx .'\)',
@@ -309,7 +309,7 @@ let s:ttodo_args = {
             \   'bufname': {'type': 1},
             \   'bufnr': {'type': 1},
             \   'done': {'type': -1},
-            \   'due': {'type': 1, 'validate': 'tlib#date#IsDate'},
+            \   'due': {'type': 1, 'validate': 'ttodo#IsValidDue'},
             \   'encoding': {'type': 1},
             \   'file_exclude_rx': {'type': 1},
             \   'file_include_rx': {'type': 1},
@@ -1050,5 +1050,10 @@ function! ttodo#InputNumber(prompt, ...) abort "{{{3
     let default = a:0 >= 1 ? a:1 : -1
     let s = tlib#string#Input(a:prompt)
     return empty(s) ? default : str2nr(s)
+endf
+
+
+function! ttodo#IsValidDue(due) abort "{{{3
+    return a:due =~ '^\%(today\|[0-9]\+[dwmy]\)$' || tlib#date#IsDate(a:due)
 endf
 
