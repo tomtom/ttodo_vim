@@ -2,7 +2,7 @@
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
 " @Last Change: 2016-03-07
-" @Revision:    1320
+" @Revision:    1321
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 119
@@ -1053,6 +1053,7 @@ function! ttodo#InputNumber(prompt, ...) abort "{{{3
 endf
 
 
+" :nodoc:
 function! ttodo#IsValidDue(due) abort "{{{3
     return a:due =~ '^\%(today\|[0-9]\+[dwmy]\)$' || tlib#date#IsDate(a:due)
 endf
