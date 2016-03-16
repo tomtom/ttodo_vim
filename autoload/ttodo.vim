@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-03-07
-" @Revision:    1321
+" @Last Change: 2016-03-16
+" @Revision:    1322
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 119
@@ -161,7 +161,7 @@ if !exists('g:ttodo#parse_rx')
                 \ 'hidden?': '\%(\<h:1\>\|'. g:ttodo#task_hide_rx .'\)',
                 \ 'done?': '^\C\s*x\ze\s',
                 \ 'donedate': '^\Cx\s\+\zs'. g:tlib#date#date_rx,
-                \ 'rec': '\<rec:\zs+\?\d\+[dwmy]\ze\>',
+                \ 'rec': '\<rec:\zs+\?\d\+[dwmyb]\ze\>',
                 \ }
 endif
 if exists('g:ttodo#parse_rx_user')
