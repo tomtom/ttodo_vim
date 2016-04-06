@@ -1,7 +1,7 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-03-02.
+" @Last Change: 2016-03-22.
 
 if version < 600
     syntax clear
@@ -39,7 +39,7 @@ syntax match TtodoPriB /(B)/
 syntax match TtodoPriC /(C)/
 syntax match TtodoList /\%(^\|\s\)\zs@\S\+/
 syntax match TtodoKeyword /\%(^\|\s\)\zs+\S\+/
-syntax match TtodoTag /\%(^\|\s\)\zs\<\a\+:\S\+/
+exec 'syntax match TtodoTag /\%(^\|\s\)\zs\<\%('. join(map(keys(g:ttodo#parse_rx), 'matchstr(v:val, ''^\w\+'')'), '\|') .'\):\S\+/'
 syntax match TtodoDate /\<\d\{4}-\d\d-\d\d\>/
 syntax match TtodoTime /\<\d\d:\d\d\>/
 " syntax match TtodoDone /\<x \d\{4}-\d\d-\d\d\s.*$/
