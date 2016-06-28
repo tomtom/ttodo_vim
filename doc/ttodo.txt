@@ -188,6 +188,7 @@ Contents~
         ttodo#MaybeAppend ..................... |ttodo#MaybeAppend()|
         ttodo#FileSources ..................... |ttodo#FileSources()|
         ttodo#InputNumber ..................... |ttodo#InputNumber()|
+        ttodo#SetCreateDate ................... |ttodo#SetCreateDate()|
         g:ttodo#ftplugin#notef ................ |g:ttodo#ftplugin#notef|
         g:ttodo#ftplugin#note_prefix .......... |g:ttodo#ftplugin#note_prefix|
         g:ttodo#ftplugin#edit_note ............ |g:ttodo#ftplugin#edit_note|
@@ -403,6 +404,9 @@ ttodo#FileSources(args)
                                                     *ttodo#InputNumber()*
 ttodo#InputNumber(prompt, ...)
 
+                                                    *ttodo#SetCreateDate()*
+ttodo#SetCreateDate(line, ...)
+
 
 ========================================================================
 autoload/ttodo/ftplugin.vim~
@@ -411,12 +415,13 @@ autoload/ttodo/ftplugin.vim~
 g:ttodo#ftplugin#notef         (default: 'notes/%s/%s-%s.md')
 
                                                     *g:ttodo#ftplugin#note_prefix*
-g:ttodo#ftplugin#note_prefix   (default: 'file://')
+g:ttodo#ftplugin#note_prefix   (default: 'root://')
     Prefix for references to notes.
 
     Possible (potentially useful) values:
-      - file://
       - todo:// (opens the file in SimpleTask)
+      - root:// (SimpleTask: path relative to todo.txt file)
+      - file:// (less useful since it would require an absolute path)
 
                                                     *g:ttodo#ftplugin#edit_note*
 g:ttodo#ftplugin#edit_note     (default: '')
