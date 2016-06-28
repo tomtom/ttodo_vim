@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-04-06
-" @Revision:    300
+" @Last Change: 2016-06-06
+" @Revision:    304
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -183,6 +183,7 @@ function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
                     else
                         if g:ttodo#ftplugin#rec_copy
                             call ttodo#ftplugin#MarkDone(0, 1)
+                            let line = ttodo#SetCreateDate(line)
                             call append('$', line)
                             let lnum = line('$')
                         endif

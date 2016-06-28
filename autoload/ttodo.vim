@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-03-16
-" @Revision:    1322
+" @Last Change: 2016-06-08
+" @Revision:    1327
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 119
@@ -1056,5 +1056,13 @@ endf
 " :nodoc:
 function! ttodo#IsValidDue(due) abort "{{{3
     return a:due =~ '^\%(today\|[0-9]\+[dwmy]\)$' || tlib#date#IsDate(a:due)
+endf
+
+
+function! ttodo#SetCreateDate(line, ...) abort "{{{3
+    let cdate = a:0 >= 1 ? a:1 : tlib#date#Format()
+    let line = substitute(a:line, '^\s*\%((\u)\s\+\)\zs'. g:tlib#date#date_rx, cdate, '')
+    Tlibtrace 'ttodo', cdate, a:line, line
+    return line
 endf
 
