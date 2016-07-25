@@ -161,6 +161,7 @@ if !exists('g:ttodo#parse_rx')
                 \ 'hidden?': '\%(\<h:1\>\|'. g:ttodo#task_hide_rx .'\)',
                 \ 'done?': '^\C\s*x\ze\s',
                 \ 'donedate': '^\Cx\s\+\zs'. g:tlib#date#date_rx,
+                \ 'notes+': '\<root:\f\+',
                 \ 'rec': '\<rec:\zs+\?\d\+[dwmyb]\ze\>',
                 \ }
 endif
@@ -588,13 +589,24 @@ function! ttodo#ParseTask(line, file, ...) abort "{{{3
     else
         let task = {'text': a:line}
         for [key, rx] in items(g:ttodo#parse_rx)
-            let val = matchstr(a:line, rx)
-            if key =~ '?$'
-                let key = substitute(key, '?$', '', '')
-                let task[key] = !empty(val)
-            elseif !empty(val)
+            if key =~ '+$'
+                let key = substitute(key, '+$', '', '')
+                if tlib#type#IsList(rx)
+                    let val = call('tlib#string#MatchAll', [a:line] + rx)
+                else
+                    let val = tlib#string#MatchAll(a:line, rx)
+                endif
                 let task[key] = val
+            else
+                let val = matchstr(a:line, rx)
+                if key =~ '?$'
+                    let key = substitute(key, '?$', '', '')
+                    let task[key] = !empty(val)
+                elseif !empty(val)
+                    let task[key] = val
+                endif
             endif
+            unlet val
         endfor
         if has_key(task, 'due')
             " TLogVAR task

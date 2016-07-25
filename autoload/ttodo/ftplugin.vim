@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-06-06
-" @Revision:    304
+" @Last Change: 2016-07-25
+" @Revision:    305
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -142,6 +142,7 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
         if a:copytags
             let new = ttodo#MaybeAppend(new, ttodo#FormatTags('@', task.lists))
             let new = ttodo#MaybeAppend(new, ttodo#FormatTags('+', task.tags))
+            let new = ttodo#MaybeAppend(new, join(task.notes))
         endif
         if has_key(task, 'pri')
             let new = '('. task.pri .') '. new
