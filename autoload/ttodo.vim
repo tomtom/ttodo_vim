@@ -1,14 +1,14 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-06-08
-" @Revision:    1327
+" @Last Change: 2016-07-25
+" @Revision:    1336
 
 
-if !exists('g:loaded_tlib') || g:loaded_tlib < 119
+if !exists('g:loaded_tlib') || g:loaded_tlib < 122
     runtime plugin/tlib.vim
-    if !exists('g:loaded_tlib') || g:loaded_tlib < 119
-        echoerr 'tlib >= 1.19 is required'
+    if !exists('g:loaded_tlib') || g:loaded_tlib < 122
+        echoerr 'tlib >= 1.22 is required'
         finish
     endif
 endif
