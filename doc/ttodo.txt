@@ -48,8 +48,8 @@ If filetype is ttodo, the following buffer-local keymaps are enabled:
     <cr> ................. Add a new task;
                            if |g:ttodo#ftplugin#add_at_eof| is true, add the 
                            task at the end of file
-    <c-cr> ............... Add a new task; copy any list and tags from the 
-                           current task;
+    <c-cr> ............... Add a new task; copy any list, tags, and notes from 
+                           the current task;
                            if |g:ttodo#ftplugin#add_at_eof| is true, add the 
                            task at the end of file
     <s-cr> ............... Add a new subtask
@@ -205,12 +205,12 @@ Contents~
         ttodo#ftplugin#AddId .................. |ttodo#ftplugin#AddId()|
         ttodo#ftplugin#SyntaxDue .............. |ttodo#ftplugin#SyntaxDue()|
         ttodo#ftplugin#AddDep ................. |ttodo#ftplugin#AddDep()|
-        n_<expr> .............................. |n_<expr>|
-        n_<expr> .............................. |n_<expr>|
-        n_<expr> .............................. |n_<expr>|
-        i_<expr> .............................. |i_<expr>|
-        i_<expr> .............................. |i_<expr>|
-        i_<expr> .............................. |i_<expr>|
+        n_<cr> ................................ |n_<cr>|
+        n_<c-cr> .............................. |n_<c-cr>|
+        n_<s-cr> .............................. |n_<s-cr>|
+        i_<cr> ................................ |i_<cr>|
+        i_<c-cr> .............................. |i_<c-cr>|
+        i_<s-cr> .............................. |i_<s-cr>|
         :Ttodosort ............................ |:Ttodosort|
         :Ttodoarchive ......................... |:Ttodoarchive|
         :Ttodobuffer .......................... |:Ttodobuffer|
@@ -481,23 +481,23 @@ ttodo#ftplugin#AddDep()
 ========================================================================
 ftplugin/ttodo.vim~
 
-                                                    *n_<expr>*
-n_<expr> ... <cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 0, "n")
+                                                    *n_<cr>*
+n_<cr> ... ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 0, "n")
 
-                                                    *n_<expr>*
-n_<expr> ... <c-cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 1, "n")
+                                                    *n_<c-cr>*
+n_<c-cr> ... ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 1, "n")
 
-                                                    *n_<expr>*
-n_<expr> ... <s-cr> ttodo#ftplugin#New(">", 1, "n")
+                                                    *n_<s-cr>*
+n_<s-cr> ... ttodo#ftplugin#New(">", 1, "n")
 
-                                                    *i_<expr>*
-i_<expr> ... <cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 0, "i")
+                                                    *i_<cr>*
+i_<cr> ... ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 0, "i")
 
-                                                    *i_<expr>*
-i_<expr> ... <c-cr> ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 1, "i")
+                                                    *i_<c-cr>*
+i_<c-cr> ... ttodo#ftplugin#New(g:ttodo#ftplugin#add_at_eof ? "G" : "", 1, "i")
 
-                                                    *i_<expr>*
-i_<expr> ... <s-cr> ttodo#ftplugin#New(">", 1, "i")
+                                                    *i_<s-cr>*
+i_<s-cr> ... ttodo#ftplugin#New(">", 1, "i")
 
                                                     *:Ttodosort*
 :Ttodosort
