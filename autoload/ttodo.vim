@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-07-25
-" @Revision:    1336
+" @Last Change: 2016-10-17
+" @Revision:    1339
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 122
@@ -1036,6 +1036,15 @@ function! ttodo#MaybeAppend(text, suffix) abort "{{{3
         return a:text
     else
         return a:text .' '. a:suffix
+    endif
+endf
+
+
+function! ttodo#MaybeSetPriority(text, priority) abort "{{{3
+    if empty(a:priority)
+        return a:text
+    else
+        return substitute(a:text, '^\s*\zs\((\u)\s\+\)\?', '('. a:priority .') ', '')
     endif
 endf
 

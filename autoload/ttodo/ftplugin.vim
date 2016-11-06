@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-07-25
-" @Revision:    305
+" @Last Change: 2016-11-03
+" @Revision:    357
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -45,6 +45,12 @@ if !exists('g:ttodo#ftplugin#rec_copy')
     " If true, marking a recurring task as "done" will mark the old task 
     " as completed and will then create a new updated task.
     let g:ttodo#ftplugin#rec_copy = 1   "{{{2
+endif
+
+
+if !exists('g:ttodo#ftplugin#new_subtask_copy_pri')
+    " If true, copy the parent task's priority when creating subtasks.
+    let g:ttodo#ftplugin#new_subtask_copy_pri = 1   "{{{2
 endif
 
 
@@ -132,26 +138,56 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
         let o = "o"
     endif
     let new = strftime(g:tlib#date#date_format)
-    if indent('.') > 0 && empty(a:move)
+    let i0 = indent('.')
+    if i0 > 0 && empty(a:move)
         return o . new .' '
-    elseif a:move == '>'
-        return o ."\<c-t>" . new .' '
     else
-        let o .= "\<home>"
         let task = a:0 >= 1 ? a:1 : ttodo#ParseTask(getline('.'), expand('%:p'))
-        if a:copytags
-            let new = ttodo#MaybeAppend(new, ttodo#FormatTags('@', task.lists))
-            let new = ttodo#MaybeAppend(new, ttodo#FormatTags('+', task.tags))
-            let new = ttodo#MaybeAppend(new, join(task.notes))
+        if a:move == '>'
+            let new = new .' '
+            if g:ttodo#ftplugin#new_subtask_copy_pri
+                let new = s:MaybeCopyPriority(task, new)
+            endif
+            let prefix = matchstr(getline('.'), '^\s\+')
+            if g:ttodo#ftplugin#add_at_eof
+                for lnum in range(line('.'), line('$') - 1)
+                    let i1 = indent(lnum + 1)
+                    Tlibtrace 'ttodo', lnum, i0, i1
+                    if i1 == 0 || i1 <= i0
+                        let expr = lnum .'gg'. o ."\<Esc>I". prefix ."\<c-t>". new
+                        Tlibtrace 'ttodo', expr
+                        return expr
+                    endif
+                endfor
+            endif
+            return o ."\<c-t>" . new
+        else
+            let o .= "\<home>"
+            if a:copytags
+                let new = ttodo#MaybeAppend(new, ttodo#FormatTags('@', task.lists))
+                let new = ttodo#MaybeAppend(new, ttodo#FormatTags('+', task.tags))
+                let new = ttodo#MaybeAppend(new, join(task.notes))
+            endif
+            let new = s:MaybeCopyPriority(task, new)
+            let move = a:move
+            if empty(move) && i0 == 0
+                let move = g:ttodo#ftplugin#add_at_eof ? 'G' : ''
+                " else " TODO: find last line with same indent
+            endif
+            if a:mode == 'i' && !empty(move)
+                let move = "\<c-\>\<c-o>"
+            endif
+            return move . o . new .' '
         endif
-        if has_key(task, 'pri')
-            let new = '('. task.pri .') '. new
-        endif
-        let move = a:move
-        if a:mode == 'i' && !empty(move)
-            let move = "\<c-\>\<c-o>"
-        endif
-        return move . o . new .' '
+    endif
+endf
+
+
+function! s:MaybeCopyPriority(task, text) abort "{{{3
+    if has_key(a:task, 'pri')
+        return ttodo#MaybeSetPriority(a:text, a:task.pri)
+    else
+        return a:text
     endif
 endf
 
@@ -274,7 +310,7 @@ endf
 
 
 function! s:MarkDueDate(date) abort "{{{3
-    call s:SetTag('due', g:tlib#date#date_rx, a:date)
+    call s:SetTag('due', '\%(\<today\>\|'. g:tlib#date#date_rx .'\)', a:date)
     " exec 's/\C\%(\s\+due:'. g:tlib#date#date_rx .'\|$\)/ due:'. a:date .'/'
 endf
 
@@ -365,5 +401,31 @@ function! ttodo#ftplugin#AddDep() abort "{{{3
             call setline('.', getline('.') .' dep:'. id)
         endif
     endif
+endf
+
+
+function! ttodo#ftplugin#Duplicate(count, markdone) abort "{{{3
+    " let pos = getpos('.')
+    Tlibtrace 'ttodo', a:count, a:markdone
+    for lnum in range(line('.'), line('.') + a:count - 1)
+        Tlibtrace 'ttodo', lnum
+        exec lnum
+        if indent('.') > 0
+            norm! yy
+            if a:count > 0
+                exec lnum + a:count - 1
+            endif
+            norm! p
+        else
+            norm! yyGp
+        endif
+        if a:markdone
+            let p1 = getpos('.')
+            exec lnum
+            " call setpos('.', pos)
+            call ttodo#ftplugin#MarkDone(0)
+            call setpos('.', p1)
+        endif
+    endfor
 endf
 
