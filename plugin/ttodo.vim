@@ -25,6 +25,12 @@ if !exists('g:ttodo_nmap_important')
 endif
 
 
+if !exists('g:ttodo_localmap')
+    " Call |:Ttodo| with `%:p:h/TODO.TXT`.
+    let g:ttodo_localmap = '<Localleader>1'   "{{{2
+endif
+
+
 if !exists('g:ttodo_enable_ftdetect')
     " Set this variable to 1 in |vimrc| in order to enable the ttodo 
     " filetype for todo.txt files.
@@ -106,6 +112,8 @@ if !empty(g:ttodo_nmap_important)
 endif
 
 
+if !empty(g:ttodo_localmap)
+    exec 'noremap' g:ttodo_localmap ':Ttodo --path=.<cr>'
 endif
 
 
