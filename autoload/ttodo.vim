@@ -359,7 +359,9 @@ function! s:GetFiles(args) abort "{{{3
             endfor
         else
             if has_key(a:args, 'files')
-                call extend(filedefs, map(s:ItemsDefs(a:args.files, 1), '{"fileargs": v:val, "file": v:key}'))
+                let files0 = filter(copy(a:args.files), {i,v -> filereadable(v)})
+                let files = s:ItemsDefs(files0, 1)
+                call extend(filedefs, map(items(files), {i, kv -> {"fileargs": kv[1], "file": kv[0]}}))
             else
                 let dirsdefs = s:GetDirsDefs(a:args)
                 for [dir, dirargs] in items(dirsdefs)
@@ -552,13 +554,18 @@ endf
 function! s:GetLines(filename, fileargs) abort "{{{3
     let bufnr = bufnr(a:filename)
     if bufnr == -1 || !bufloaded(bufnr)
-        let lines = readfile(a:filename)
-        if has('iconv')
-            " TLogVAR keys(a:fileargs)
-            let tenc = get(a:fileargs, 'encoding', &enc)
-            " TLogVAR tenc, &enc
-            if tenc != &enc
-                let lines = map(lines, 'iconv(v:val, tenc, &enc)')
+        if !filereadable(a:filename)
+            echoerr 'TTODO: File not readable:' a:filename
+            let lines = []
+        else
+            let lines = readfile(a:filename)
+            if has('iconv')
+                " TLogVAR keys(a:fileargs)
+                let tenc = get(a:fileargs, 'encoding', &enc)
+                " TLogVAR tenc, &enc
+                if tenc != &enc
+                    let lines = map(lines, 'iconv(v:val, tenc, &enc)')
+                endif
             endif
         endif
         return {'source': 'file', 'lines': lines}
