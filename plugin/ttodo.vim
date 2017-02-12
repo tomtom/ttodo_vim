@@ -1,8 +1,8 @@
 " @Author:      Tom Link (micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-02-04
-" @Revision:    100
+" @Last Change: 2017-02-12
+" @Revision:    117
 " GetLatestVimScripts: 5262 0 :AutoInstall: ttodo.vim
 
 if &cp || exists("loaded_ttodo")
@@ -15,6 +15,7 @@ set cpo&vim
 
 
 if !exists('g:ttodo_nmap')
+    " Call |:Ttodo|.
     let g:ttodo_nmap = '<Leader>1'   "{{{2
 endif
 
@@ -88,9 +89,11 @@ endif
 command! -bang -nargs=* -complete=customlist,ttodo#CComplete Ttodo call ttodo#Show(!empty("<bang>"), [<f-args>])
 
 
+" Add a new task.
 command! -nargs=+ -complete=customlist,ttodo#CComplete Ttodonew call ttodo#NewTask([<f-args>])
 
 
+" Show newly (maybe semi-automatically) added tasks, i.e. tasks that are in the @Inbox list.
 command! -bar Ttodoinbox Ttodo --has_lists=Inbox
 
 
@@ -99,6 +102,9 @@ command! -bar Ttodoinbox Ttodo --has_lists=Inbox
 command! -bar Ttodonext Ttodo --has_lists=next
 
 
+" Scan todo files and notes for some text -- see |:Trag| for details.
+"
+" NOTE: This command requires the trag VIM plugin to be installed.
 command! -bang -nargs=+ Ttodogrep if exists(':Trag') == 2 | Trag<bang> --file_sources=*ttodo#FileSources <args> | else | echom ':Ttodogrep requires the trag_vim plugin to be installed!' | endif
 
 

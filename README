@@ -45,8 +45,8 @@ If filetype is ttodo, the following buffer-local keymaps are enabled:
     <cr> ................. Add a new task;
                            if |g:ttodo#ftplugin#add_at_eof| is true, add the 
                            task at the end of file
-    <c-cr> ............... Add a new task; copy any list and tags from the 
-                           current task;
+    <c-cr> ............... Add a new task; copy any list, tags, and notes from 
+                           the current task;
                            if |g:ttodo#ftplugin#add_at_eof| is true, add the 
                            task at the end of file
     <s-cr> ............... Add a new subtask
