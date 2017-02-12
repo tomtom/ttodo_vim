@@ -55,7 +55,7 @@ endif
 
 if !exists('g:ttodo#file_pattern')
     " A glob pattern matching todo.txt files.
-    let g:ttodo#file_pattern = '*todo.txt'   "{{{2
+    let g:ttodo#file_pattern = ['*todo.txt', '*TODO.TXT']   "{{{2
 endif
 
 
@@ -364,20 +364,23 @@ function! s:GetFiles(args) abort "{{{3
                 let dirsdefs = s:GetDirsDefs(a:args)
                 for [dir, dirargs] in items(dirsdefs)
                     Tlibtrace 'ttodo', dir, keys(dirargs)
-                    let pattern = get(a:args, 'pattern', s:GetOpt(dirargs, 'file_pattern'))
-                    Tlibtrace 'ttodo', pattern
-                    let files = tlib#file#Glob(tlib#file#Join([dir, pattern]))
-                    let file_include_rx = get(a:args, 'file_include_rx', s:GetOpt(a:args, 'file_include_rx'))
-                    if !empty(file_include_rx)
-                        let files = filter(files, 'v:val =~# file_include_rx')
-                    endif
-                    let file_exclude_rx = get(a:args, 'file_exclude_rx', s:GetOpt(a:args, 'file_exclude_rx'))
-                    if !empty(file_exclude_rx)
-                        let files = filter(files, 'v:val !~# file_exclude_rx')
-                        for file in files
-                            call add(filedefs, {'fileargs': dirargs, 'file': file})
-                        endfor
-                    endif
+                    let pattern0 = get(a:args, 'pattern', s:GetOpt(dirargs, 'file_pattern'))
+                    Tlibtrace 'ttodo', pattern0
+                    let patterns = type(pattern0) == v:t_string ? [pattern0] : pattern0
+                    for pattern in patterns
+                        let files = tlib#file#Glob(tlib#file#Join([dir, pattern]))
+                        let file_include_rx = get(a:args, 'file_include_rx', s:GetOpt(a:args, 'file_include_rx'))
+                        if !empty(file_include_rx)
+                            let files = filter(files, 'v:val =~# file_include_rx')
+                        endif
+                        let file_exclude_rx = get(a:args, 'file_exclude_rx', s:GetOpt(a:args, 'file_exclude_rx'))
+                        if !empty(file_exclude_rx)
+                            let files = filter(files, 'v:val !~# file_exclude_rx')
+                            for file in files
+                                call add(filedefs, {'fileargs': dirargs, 'file': file})
+                            endfor
+                        endif
+                    endfor
                 endfor
             endif
         endif
