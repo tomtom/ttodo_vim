@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-10-17
-" @Revision:    1339
+" @Last Change: 2017-02-12
+" @Revision:    1373
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 122
@@ -115,7 +115,7 @@ if !exists('g:ttodo#sort')
     " |:Ttodo| and |:Ttodosort|.
     "
     " A "-" as prefix reverses the sort order.
-    let g:ttodo#sort = '-overdue,pri,due,done,lists,tags,idx'   "{{{2
+    let g:ttodo#sort = '-next,-overdue,pri,due,done,lists,tags,idx'   "{{{2
 endif
 
 
@@ -124,6 +124,7 @@ if !exists('g:ttodo#sort_defaults')
     let g:ttodo#sort_defaults = {
                 \ 'pri': 'I',
                 \ 'overdue': 0,
+                \ 'next': 0,
                 \ 'due': strftime(g:tlib#date#date_format, localtime() + g:tlib#date#dayshift * 28),
                 \ }
 endif
@@ -578,6 +579,7 @@ endf
 function! s:GetTasks(args) abort "{{{3
     let qfl = []
     for filedef in s:GetFiles(a:args)
+        Tlibtrace 'ttodo', filedef
         let filetasks = ttodo#GetFileTasks(a:args, filedef.file, filedef.fileargs)
         if !empty(filetasks)
             let qfl = extend(qfl, filetasks.qfl)
@@ -630,6 +632,9 @@ function! ttodo#ParseTask(line, file, ...) abort "{{{3
         endif
         let task.lists = filter(map(split(a:line, '\ze@'), 'matchstr(v:val, ''^@\zs\S\+'')'), '!empty(v:val)') + get(args, 'lists', [])
         let task.tags = filter(map(split(a:line, '\ze+'), 'matchstr(v:val, ''^+\zs\S\+'')'), '!empty(v:val)') + get(args, 'tags', [])
+        if index(task.lists, 'next') != -1
+            let task.next = 1
+        endif
         let task.file = a:file
         let s:parsed_tasks[cid] = deepcopy(task)
     endif

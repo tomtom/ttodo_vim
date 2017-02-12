@@ -20,6 +20,7 @@ endif
 
 
 if !exists('g:ttodo_nmap_important')
+    " Call |:Ttodonext|.
     let g:ttodo_nmap_important = '<Leader>!'   "{{{2
 endif
 
@@ -87,6 +88,11 @@ command! -nargs=+ -complete=customlist,ttodo#CComplete Ttodonew call ttodo#NewTa
 command! -bar Ttodoinbox Ttodo --has_lists=Inbox
 
 
+" Show tasks that should be done next, i.e. tasks that are in the @next 
+" list.
+command! -bar Ttodonext Ttodo --has_lists=next
+
+
 command! -bang -nargs=+ Ttodogrep if exists(':Trag') == 2 | Trag<bang> --file_sources=*ttodo#FileSources <args> | else | echom ':Ttodogrep requires the trag_vim plugin to be installed!' | endif
 
 
@@ -96,7 +102,10 @@ endif
 
 
 if !empty(g:ttodo_nmap_important)
-    exec 'noremap' g:ttodo_nmap_important ':Ttodo!<cr>'
+    exec 'noremap' g:ttodo_nmap_important ':Ttodonext<cr>'
+endif
+
+
 endif
 
 
