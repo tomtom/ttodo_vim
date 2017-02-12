@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-11-03
-" @Revision:    357
+" @Last Change: 2017-01-30
+" @Revision:    364
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -252,14 +252,25 @@ function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
                     endif
                 endif
             endif
+            if get(task, 'next', 0)
+                if line =~ '@next\s\+'
+                    let line = substitute(line, '@next\s\+', '', '')
+                else
+                    let line = substitute(line, '\s\+@next\>', '', '')
+                endif
+                " call setline(lnum, line)
+            endif
         endif
         if get(task, 'subtask', 0) && !has_key(task, 'parent')
             let parent = s:GetParentId(lnum)
             if !empty(parent)
-                call setline(lnum, line .' parent:'. parent)
+                let line = line .' parent:'. parent
+                " call setline(lnum, line .' parent:'. parent)
             endif
         endif
-        exec lnum .'s/^\s*\zs\C\%(x\s\+\%('. g:tlib#date#date_rx .'\s\+\)\?\)\?/x '. donedate .' /'
+        let line = substitute(line, '^\s*\zs\C\%(x\s\+\%('. g:tlib#date#date_rx .'\s\+\)\?\)\?', 'x '. donedate .' ', '')
+        call setline(lnum, line)
+        " exec lnum .'s/^\s*\zs\C\%(x\s\+\%('. g:tlib#date#date_rx .'\s\+\)\?\)\?/x '. donedate .' /'
     endfor
     exec lnum0 + a:count
 endf
