@@ -157,10 +157,12 @@ Contents~
 
         g:ttodo_nmap ............................ |g:ttodo_nmap|
         g:ttodo_nmap_important .................. |g:ttodo_nmap_important|
+        g:ttodo_localmap ........................ |g:ttodo_localmap|
         g:ttodo_enable_ftdetect ................. |g:ttodo_enable_ftdetect|
         :Ttodo .................................. |:Ttodo|
         :Ttodonew ............................... |:Ttodonew|
         :Ttodoinbox ............................. |:Ttodoinbox|
+        :Ttodonext .............................. |:Ttodonext|
         :Ttodogrep .............................. |:Ttodogrep|
         g:ttodo#fileargs ........................ |g:ttodo#fileargs|
         g:ttodo#file_pattern .................... |g:ttodo#file_pattern|
@@ -169,65 +171,32 @@ Contents~
         g:ttodo#file_exclude_rx ................. |g:ttodo#file_exclude_rx|
         g:ttodo#task_include_rx ................. |g:ttodo#task_include_rx|
         g:ttodo#task_exclude_rx ................. |g:ttodo#task_exclude_rx|
-        g:ttodo#task_hide_rx .................... |g:ttodo#task_hide_rx|
         g:ttodo#viewer .......................... |g:ttodo#viewer|
         g:ttodo#sort ............................ |g:ttodo#sort|
         g:ttodo#default_t ....................... |g:ttodo#default_t|
         g:ttodo#new_task ........................ |g:ttodo#new_task|
         g:ttodo#inbox ........................... |g:ttodo#inbox|
-        ttodo#GetDirs ........................... |ttodo#GetDirs()|
-        ttodo#ParseTask ......................... |ttodo#ParseTask()|
-        ttodo#GetOpts ........................... |ttodo#GetOpts()|
-        ttodo#GetOverdueRx ...................... |ttodo#GetOverdueRx()|
-        ttodo#InitListBuffer .................... |ttodo#InitListBuffer()|
-        ttodo#CollectTags ....................... |ttodo#CollectTags()|
-        ttodo#FiletypeDetect .................... |ttodo#FiletypeDetect()|
         ttodo#SortBuffer ........................ |ttodo#SortBuffer()|
-        ttodo#NewTask ........................... |ttodo#NewTask()|
-        ttodo#FormatTags ........................ |ttodo#FormatTags()|
-        ttodo#MaybeAppend ....................... |ttodo#MaybeAppend()|
-        ttodo#MaybeSetPriority .................. |ttodo#MaybeSetPriority()|
-        ttodo#FileSources ....................... |ttodo#FileSources()|
-        ttodo#InputNumber ....................... |ttodo#InputNumber()|
-        ttodo#SetCreateDate ..................... |ttodo#SetCreateDate()|
-        g:ttodo#ftplugin#notef .................. |g:ttodo#ftplugin#notef|
         g:ttodo#ftplugin#note_prefix ............ |g:ttodo#ftplugin#note_prefix|
         g:ttodo#ftplugin#edit_note .............. |g:ttodo#ftplugin#edit_note|
         g:ttodo#ftplugin#add_at_eof ............. |g:ttodo#ftplugin#add_at_eof|
         g:ttodo#ftplugin#rec_copy ............... |g:ttodo#ftplugin#rec_copy|
         g:ttodo#ftplugin#new_subtask_copy_pri ... |g:ttodo#ftplugin#new_subtask_copy_pri|
-        ttodo#ftplugin#Archive .................. |ttodo#ftplugin#Archive()|
-        ttodo#ftplugin#ArchiveCurrentBuffer ..... |ttodo#ftplugin#ArchiveCurrentBuffer()|
-        ttodo#ftplugin#Note ..................... |ttodo#ftplugin#Note()|
-        ttodo#ftplugin#New ...................... |ttodo#ftplugin#New()|
-        ttodo#ftplugin#MarkDone ................. |ttodo#ftplugin#MarkDone()|
-        ttodo#ftplugin#MarkDue .................. |ttodo#ftplugin#MarkDue()|
-        ttodo#ftplugin#SetPriority .............. |ttodo#ftplugin#SetPriority()|
-        ttodo#ftplugin#Agent .................... |ttodo#ftplugin#Agent()|
-        ttodo#ftplugin#AddId .................... |ttodo#ftplugin#AddId()|
-        ttodo#ftplugin#SyntaxDue ................ |ttodo#ftplugin#SyntaxDue()|
-        ttodo#ftplugin#AddDep ................... |ttodo#ftplugin#AddDep()|
-        ttodo#ftplugin#Duplicate ................ |ttodo#ftplugin#Duplicate()|
-        n_<cr> .................................. |n_<cr>|
-        n_<c-cr> ................................ |n_<c-cr>|
-        n_<s-cr> ................................ |n_<s-cr>|
-        i_<cr> .................................. |i_<cr>|
-        i_<c-cr> ................................ |i_<c-cr>|
-        i_<s-cr> ................................ |i_<s-cr>|
-        :Ttodosort .............................. |:Ttodosort|
-        :Ttodoarchive ........................... |:Ttodoarchive|
-        :Ttodobuffer ............................ |:Ttodobuffer|
-        :Ttodonote .............................. |:Ttodonote|
 
 
-========================================================================
-plugin/ttodo.vim~
-
+------------------------------------------------------------------------
+                                                    *plugin/ttodo.vim*
                                                     *g:ttodo_nmap*
 g:ttodo_nmap                   (default: '<Leader>1')
+    Call |:Ttodo|.
 
                                                     *g:ttodo_nmap_important*
 g:ttodo_nmap_important         (default: '<Leader>!')
+    Call |:Ttodonext|.
+
+                                                    *g:ttodo_localmap*
+g:ttodo_localmap               (default: '<Localleader>1')
+    Call |:Ttodo| with `%:p:h/TODO.TXT`.
 
                                                     *g:ttodo_enable_ftdetect*
 g:ttodo_enable_ftdetect        (default: 1)
@@ -285,24 +254,33 @@ g:ttodo_enable_ftdetect        (default: 1)
 
                                                     *:Ttodonew*
 :Ttodonew
+    Add a new task.
 
                                                     *:Ttodoinbox*
 :Ttodoinbox
+    Show newly (maybe semi-automatically) added tasks, i.e. tasks that are in the @Inbox list.
+
+                                                    *:Ttodonext*
+:Ttodonext
+    Show tasks that should be done next, i.e. tasks that are in the @next 
+    list.
 
                                                     *:Ttodogrep*
 :Ttodogrep
+    Scan todo files and notes for some text -- see |:Trag| for details.
+
+    NOTE: This command requires the trag VIM plugin to be installed.
 
 
-========================================================================
-autoload/ttodo.vim~
-
+------------------------------------------------------------------------
+                                                    *autoload/ttodo.vim*
                                                     *g:ttodo#fileargs*
 g:ttodo#fileargs               (default: {})
     A dictionary of {filename |regexp|: {additional args}} -- see 
     |g:ttodo#dirs| for details on supported arguments.
 
                                                     *g:ttodo#file_pattern*
-g:ttodo#file_pattern           (default: '*todo.txt')
+g:ttodo#file_pattern           (default: ['*todo.txt', '*TODO.TXT'])
     A glob pattern matching todo.txt files.
 
                                                     *g:ttodo#force_filetype*
@@ -330,9 +308,6 @@ g:ttodo#task_include_rx        (default: '')
 g:ttodo#task_exclude_rx        (default: '')
     Exclude tasks matching this |regexp| from the list.
 
-                                                    *g:ttodo#task_hide_rx*
-g:ttodo#task_hide_rx           (default: '')
-
                                                     *g:ttodo#viewer*
 g:ttodo#viewer                 (default: 'tlib')
     Supported values:
@@ -343,7 +318,7 @@ g:ttodo#viewer                 (default: 'tlib')
                   initial filter is a standard |regexp|.
 
                                                     *g:ttodo#sort*
-g:ttodo#sort                   (default: '-overdue,pri,due,done,lists,tags,idx')
+g:ttodo#sort                   (default: '-next,-overdue,pri,due,done,lists,tags,idx')
     A comma-separated list of fields that determine the sort order for 
     |:Ttodo| and |:Ttodosort|.
 
@@ -364,27 +339,6 @@ g:ttodo#inbox                  (default: 'todo.txt')
     Tasks added by |:Ttodonew| will be added to this file in the 
     default (i.e. the first) directory in |g:ttodo#dirs|.
 
-                                                    *ttodo#GetDirs()*
-ttodo#GetDirs()
-
-                                                    *ttodo#ParseTask()*
-ttodo#ParseTask(line, file, ...)
-
-                                                    *ttodo#GetOpts()*
-ttodo#GetOpts(bang, cmdargs)
-
-                                                    *ttodo#GetOverdueRx()*
-ttodo#GetOverdueRx(args)
-
-                                                    *ttodo#InitListBuffer()*
-ttodo#InitListBuffer()
-
-                                                    *ttodo#CollectTags()*
-ttodo#CollectTags(type)
-
-                                                    *ttodo#FiletypeDetect()*
-ttodo#FiletypeDetect(...)
-
                                                     *ttodo#SortBuffer()*
 ttodo#SortBuffer(cmdargs)
     If called with --sortseps=tags,lists, an empty line is inserted after 
@@ -392,34 +346,9 @@ ttodo#SortBuffer(cmdargs)
 
     Sorting doesn't work for outlines, i.e. tasks with subtasks.
 
-                                                    *ttodo#NewTask()*
-ttodo#NewTask(cmdargs)
 
-                                                    *ttodo#FormatTags()*
-ttodo#FormatTags(prefix, lists)
-
-                                                    *ttodo#MaybeAppend()*
-ttodo#MaybeAppend(text, suffix)
-
-                                                    *ttodo#MaybeSetPriority()*
-ttodo#MaybeSetPriority(text, priority)
-
-                                                    *ttodo#FileSources()*
-ttodo#FileSources(args)
-
-                                                    *ttodo#InputNumber()*
-ttodo#InputNumber(prompt, ...)
-
-                                                    *ttodo#SetCreateDate()*
-ttodo#SetCreateDate(line, ...)
-
-
-========================================================================
-autoload/ttodo/ftplugin.vim~
-
-                                                    *g:ttodo#ftplugin#notef*
-g:ttodo#ftplugin#notef         (default: 'notes/%s/%s-%s.md')
-
+------------------------------------------------------------------------
+                                                    *autoload/ttodo/ftplugin.vim*
                                                     *g:ttodo#ftplugin#note_prefix*
 g:ttodo#ftplugin#note_prefix   (default: 'root://')
     Prefix for references to notes.
@@ -453,82 +382,6 @@ g:ttodo#ftplugin#rec_copy      (default: 1)
                                                     *g:ttodo#ftplugin#new_subtask_copy_pri*
 g:ttodo#ftplugin#new_subtask_copy_pri (default: 1)
     If true, copy the parent task's priority when creating subtasks.
-
-                                                    *ttodo#ftplugin#Archive()*
-ttodo#ftplugin#Archive(filename)
-
-                                                    *ttodo#ftplugin#ArchiveCurrentBuffer()*
-ttodo#ftplugin#ArchiveCurrentBuffer()
-
-                                                    *ttodo#ftplugin#Note()*
-ttodo#ftplugin#Note()
-
-                                                    *ttodo#ftplugin#New()*
-ttodo#ftplugin#New(move, copytags, mode, ...)
-
-                                                    *ttodo#ftplugin#MarkDone()*
-ttodo#ftplugin#MarkDone(count, ...)
-
-                                                    *ttodo#ftplugin#MarkDue()*
-ttodo#ftplugin#MarkDue(unit, count)
-
-                                                    *ttodo#ftplugin#SetPriority()*
-ttodo#ftplugin#SetPriority(count, ...)
-
-                                                    *ttodo#ftplugin#Agent()*
-ttodo#ftplugin#Agent(world, selected, fn, ...)
-
-                                                    *ttodo#ftplugin#AddId()*
-ttodo#ftplugin#AddId(count)
-
-                                                    *ttodo#ftplugin#SyntaxDue()*
-ttodo#ftplugin#SyntaxDue()
-
-                                                    *ttodo#ftplugin#AddDep()*
-ttodo#ftplugin#AddDep()
-
-                                                    *ttodo#ftplugin#Duplicate()*
-ttodo#ftplugin#Duplicate(count, markdone)
-
-
-========================================================================
-ftplugin/ttodo.vim~
-
-                                                    *n_<cr>*
-n_<cr> ... ttodo#ftplugin#New("", 0, "n")
-
-                                                    *n_<c-cr>*
-n_<c-cr> ... ttodo#ftplugin#New("", 1, "n")
-
-                                                    *n_<s-cr>*
-n_<s-cr> ... ttodo#ftplugin#New(">", 1, "n")
-
-                                                    *i_<cr>*
-i_<cr> ... ttodo#ftplugin#New("", 0, "i")
-
-                                                    *i_<c-cr>*
-i_<c-cr> ... ttodo#ftplugin#New("", 1, "i")
-
-                                                    *i_<s-cr>*
-i_<s-cr> ... ttodo#ftplugin#New(">", 1, "i")
-
-                                                    *:Ttodosort*
-:Ttodosort
-    Sort the tasks in the current buffer.
-
-    Sorting task outlines (i.e. subtasks) is not supported.
-
-                                                    *:Ttodoarchive*
-:Ttodoarchive
-    Archive completed tasks in the current buffer.
-
-                                                    *:Ttodobuffer*
-:Ttodobuffer
-    View the tasks in the current buffer.
-
-                                                    *:Ttodonote*
-:Ttodonote
-    Add a new task to the task at the cursor.
 
 
 
