@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2017-02-12
-" @Revision:    1373
+" @Last Change: 2017-02-13
+" @Revision:    1377
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 122
@@ -245,6 +245,7 @@ endf
 " Register a new directory with todo.txt files. The first directory is 
 " the default directory for |g:ttodo#inbox|.
 function! s:ItemDef(item, first) abort "{{{3
+    Tlibtrace 'ttodo', a:item, a:first
     if type(a:item) == 1
         let item  = a:item
         let opts = {}
@@ -292,10 +293,11 @@ endif
 
 
 function! s:GetDefaultDirDef(args, default) abort "{{{3
+    Tlibtrace 'ttodo', a:args, a:default
     let dirsdefs = s:GetDirsDefs(a:args)
-    " TLogVAR dirsdefs
+    Tlibtrace 'ttodo', dirsdefs
     let default_dirs = filter(copy(dirsdefs), 'get(v:val, "default", 0)')
-    " TLogVAR keys(default_dirs)
+    Tlibtrace 'ttodo', keys(default_dirs)
     if empty(default_dirs)
         return {'__name__': a:default}
     else
@@ -348,8 +350,10 @@ let s:ttodo_args = {
 function! s:GetFiles(args) abort "{{{3
     let bufname = get(a:args, 'bufname', '')
     let filedefs = []
+    Tlibtrace 'ttodo', 1, filedefs
     if !empty(bufname)
         call add(filedefs, {'fileargs': {}, 'file': bufname(bufname)})
+        Tlibtrace 'ttodo', 2, filedefs
     else
         let bufnr = get(a:args, 'bufnr', '')
         if !empty(bufnr)
@@ -358,11 +362,13 @@ function! s:GetFiles(args) abort "{{{3
             for file in files
                 call add(filedefs, {'fileargs': {}, 'file': file})
             endfor
+            Tlibtrace 'ttodo', 3, filedefs
         else
             if has_key(a:args, 'files')
                 let files0 = filter(copy(a:args.files), {i,v -> filereadable(v)})
                 let files = s:ItemsDefs(files0, 1)
                 call extend(filedefs, map(items(files), {i, kv -> {"fileargs": kv[1], "file": kv[0]}}))
+                Tlibtrace 'ttodo', 4, filedefs
             else
                 let dirsdefs = s:GetDirsDefs(a:args)
                 for [dir, dirargs] in items(dirsdefs)
@@ -370,24 +376,25 @@ function! s:GetFiles(args) abort "{{{3
                     let pattern0 = get(a:args, 'pattern', s:GetOpt(dirargs, 'file_pattern'))
                     Tlibtrace 'ttodo', pattern0
                     let patterns = type(pattern0) == v:t_string ? [pattern0] : pattern0
-                    for pattern in patterns
-                        let files = tlib#file#Glob(tlib#file#Join([dir, pattern]))
-                        let file_include_rx = get(a:args, 'file_include_rx', s:GetOpt(a:args, 'file_include_rx'))
-                        if !empty(file_include_rx)
-                            let files = filter(files, 'v:val =~# file_include_rx')
-                        endif
-                        let file_exclude_rx = get(a:args, 'file_exclude_rx', s:GetOpt(a:args, 'file_exclude_rx'))
-                        if !empty(file_exclude_rx)
-                            let files = filter(files, 'v:val !~# file_exclude_rx')
-                            for file in files
-                                call add(filedefs, {'fileargs': dirargs, 'file': file})
-                            endfor
-                        endif
-                    endfor
+                    let ffiles = map(copy(patterns), {i, pattern -> tlib#file#Glob(tlib#file#Join([dir, pattern]))})
+                    let files = tlib#list#Uniq(tlib#list#Flatten(ffiles))
+                    let file_include_rx = get(a:args, 'file_include_rx', s:GetOpt(a:args, 'file_include_rx'))
+                    if !empty(file_include_rx)
+                        let files = filter(files, 'v:val =~# file_include_rx')
+                    endif
+                    let file_exclude_rx = get(a:args, 'file_exclude_rx', s:GetOpt(a:args, 'file_exclude_rx'))
+                    if !empty(file_exclude_rx)
+                        let files = filter(files, 'v:val !~# file_exclude_rx')
+                        for file in files
+                            call add(filedefs, {'fileargs': dirargs, 'file': file})
+                        endfor
+                    endif
                 endfor
+                Tlibtrace 'ttodo', 5, filedefs
             endif
         endif
     endif
+    Tlibtrace 'ttodo', filedefs
     let filedefs = map(filedefs, 's:EnrichWithFileargs(v:val)')
     Tlibtrace 'ttodo', len(filedefs)
     Tlibassert tlib#type#Are(copy(filedefs), 'dict')
@@ -419,14 +426,14 @@ endf
 
 
 function! s:EnrichWithFileargs(filedef) abort "{{{3
-    " TLogVAR a:filedef
+    Tlibtrace 'ttodo', a:filedef
     let filename = a:filedef.file
     for [rx, fileargs] in items(g:ttodo#fileargs)
-        " TLogVAR rx
+        Tlibtrace 'ttodo', rx
         if filename =~# rx
-            " TLogVAR fileargs
+            Tlibtrace 'ttodo', fileargs
             let a:filedef.fileargs = tlib#eval#Extend(copy(a:filedef.fileargs), fileargs)
-            " TLogVAR a:filedef.fileargs
+            Tlibtrace 'ttodo', a:filedef.fileargs
         endif
     endfor
     return a:filedef
@@ -448,7 +455,7 @@ endf
 
 ":nodoc:
 function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
-    " TLogVAR a:file, keys(a:fileargs)
+    Tlibtrace 'ttodo', a:file, keys(a:fileargs)
     let qfl = []
     let task_by_id = {}
     let qfe_by_lnum = {}
@@ -462,28 +469,27 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
         let task = ttodo#ParseTask(line, a:file, a:args)
         let id = get(task, 'id', '')
         let task.__source__ = source
-        " TLogVAR task
+        Tlibtrace 'ttodo', task
         if get(task, 'subtask', 0) && pred_idx >= 0
-            " TLogVAR task
             let indentstr = matchstr(line, '^\%(\s\{1,'. &shiftwidth .'}\)\+')
-            " TLogVAR indentstr
+            Tlibtrace 'ttodo', indentstr
             let indentstr = substitute(indentstr, '\%(\s\{1,'. &shiftwidth .'}\)', '+', 'g')
             let indent = len(indentstr)
-            " TLogVAR indentstr, indent
+            Tlibtrace 'ttodo', indentstr, indent
             let line = substitute(line, '^\s\+', '', '')
             let parent_idx = pred_idx
             let parent = qfl[parent_idx]
-            " TLogVAR -1, parent
+            Tlibtrace 'ttodo', parent
             while get(parent.task, '__indent__', 0) >= indent
                 let parent_idx = parent.task.__parent_idx__
                 let parent = qfl[parent_idx]
             endwh
             let parent_indent = get(parent.task, '__indent__', 0)
-            " TLogVAR indent, parent_indent, parent_idx, parent
+            Tlibtrace 'ttodo', indent, parent_indent, parent_idx, parent
             if !task.done
                 " let parent.task.has_subtasks = get(parent.task, 'has_subtasks', 0) + 1
                 let parent.task.has_subtasks = 1
-                " TLogVAR parent, parent_idx, pred_idx
+                Tlibtrace 'ttodo', parent, parent_idx, pred_idx
                 let qfl[parent_idx] = parent
             endif
             if has_key(task, 'due') && task.due > get(parent.task, 'due', task.due)
@@ -501,15 +507,15 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
                 let children[parent_idx] = {}
             endif
             let children[parent_idx][pred_idx + 1] = 1
-            " TLogVAR task, qfl[parent_idx]
+            Tlibtrace 'ttodo', task, qfl[parent_idx]
             let line .= ' | '. substitute(s:FormatTask(a:args, copy(parent), 0).text, '^\C\s*\%(x\s\+\)\?\%((\u)\s\+\)\?', '', '')
             if has_key(parent.task, 'pri') && !has_key(task0, 'pri')
-                " TLogVAR task0
+                Tlibtrace 'ttodo', task0
                 let line = '('. parent.task.pri .') '. line
             endif
-            " TLogVAR line
+            Tlibtrace 'ttodo', line
         else
-            " TLogVAR a:file, a:fileargs, line
+            Tlibtrace 'ttodo', line
             for [prefix, key] in [['@', 'lists'], ['+', 'tags']]
                 if has_key(a:fileargs, key)
                     let vals = a:fileargs[key]
@@ -517,7 +523,7 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
                     let line = ttodo#MaybeAppend(line, ttodo#FormatTags(prefix, vals))
                 endif
             endfor
-            " TLogVAR line
+            Tlibtrace 'ttodo', line
         endif
         let pred_idx += 1
         let task.idx = pred_idx
@@ -542,7 +548,7 @@ function! s:SetPending(idx, qfe, task_by_id) abort "{{{3
                 let done = get(a:task_by_id[dep], 'done', 1)
                 if !done
                     let a:qfe.task.pending = 1
-                    " TLogVAR a:idx, done
+                    Tlibtrace 'ttodo', a:idx, done
                     break
                 endif
             endif
@@ -561,9 +567,9 @@ function! s:GetLines(filename, fileargs) abort "{{{3
         else
             let lines = readfile(a:filename)
             if has('iconv')
-                " TLogVAR keys(a:fileargs)
+                Tlibtrace 'ttodo', keys(a:fileargs)
                 let tenc = get(a:fileargs, 'encoding', &enc)
-                " TLogVAR tenc, &enc
+                Tlibtrace 'ttodo', tenc, &enc
                 if tenc != &enc
                     let lines = map(lines, 'iconv(v:val, tenc, &enc)')
                 endif
@@ -596,7 +602,7 @@ function! ttodo#ParseTask(line, file, ...) abort "{{{3
     TVarArg ['args', {}]
     let cid = join([a:line, a:file, get(args, 'lists', []), get(args, 'tags', [])], "\n")
     if has_key(s:parsed_tasks, cid)
-        " TLogVAR cid
+        Tlibtrace 'ttodo', cid
         let task = deepcopy(s:parsed_tasks[cid])
     else
         let task = {'text': a:line}
@@ -621,10 +627,10 @@ function! ttodo#ParseTask(line, file, ...) abort "{{{3
             unlet val
         endfor
         if has_key(task, 'due')
-            " TLogVAR task
+            Tlibtrace 'ttodo', task
             if task.due ==# 'today'
                 let task.due = strftime(g:tlib#date#date_format)
-                " TLogVAR task
+                Tlibtrace 'ttodo', task.due
             endif
             if task.due < strftime(g:tlib#date#date_format)
                 let task.overdue = 1
@@ -703,14 +709,15 @@ endf
 
 
 function! s:HasAnyList(tags, vals) abort "{{{3
+    Tlibtrace 'ttodo', a:tags, a:vals
     let rv = !empty(filter(copy(a:tags), 'index(a:vals, v:val) != -1'))
-    " TLogVAR a:tags, a:vals, rv
+    Tlibtrace 'ttodo', rv
     return rv
 endf
 
 
 function! s:CheckThreshold(t, due, today) abort "{{{3
-    " TLogVAR a:t, a:due, a:today
+    Tlibtrace 'ttodo', a:t, a:due, a:today
     let t = 0
     let tn = ''
     if !empty(a:t)
@@ -730,7 +737,7 @@ function! s:CheckThreshold(t, due, today) abort "{{{3
             endif
         endif
     endif
-    " TLogVAR tn, t
+    Tlibtrace 'ttodo', tn, t
     if !empty(t)
         return a:today >= t
     else
@@ -766,7 +773,7 @@ endf
 
 
 function! s:SortTasks(args, qfl) abort "{{{3
-    " TLogVAR a:qfl
+    Tlibtrace 'ttodo', a:qfl
     let params = {'qfl': a:qfl, 'fields': tlib#string#SplitCommaList(get(a:args, 'sort', g:ttodo#sort))}
     let params = extend(params, s:sort_params, 'keep')
     let qfl = sort(a:qfl, 's:SortTask', params)
@@ -788,7 +795,7 @@ function! s:SortTask(a, b) dict abort "{{{3
         let aa = self.GetSortItem(a:a, a, item, default)
         let bb = self.GetSortItem(a:b, b, item, default)
         if item == 'overdue'
-            " TLogVAR aa, bb, default, a, b
+            Tlibtrace 'ttodo', 'overdue', aa, bb, default, a, b
         endif
         if aa != bb
             return mul * (aa > bb ? 1 : -1)
@@ -800,13 +807,13 @@ endf
 
 
 function! s:FormatTask(args, qfe, maybe_iconv) abort "{{{3
-    " TLogVAR a:qfe
+    Tlibtrace 'ttodo', a:qfe
     let text = a:qfe.text
     let text0 = text
-    " TLogVAR text0
+    Tlibtrace 'ttodo', text0
     for [rx, subst] in g:ttodo#rewrite_gsub
         let text = substitute(text, rx, subst, 'g')
-        " TLogVAR rx, subst, text
+        Tlibtrace 'ttodo', rx, subst, text
     endfor
     if text !=# text0
         let qfe = copy(a:qfe)
@@ -832,11 +839,9 @@ endf
 function! ttodo#Show(bang, cmdargs) abort "{{{3
     let args = ttodo#GetOpts(a:bang, a:cmdargs)
     Tlibtrace 'ttodo', args
-    " TLogVAR args
     if args.__exit__
         return
     else
-        " TLogVAR args
         let qfl = copy(s:FilterTasks(args))
         let qfl = s:SortTasks(args, qfl)
         let qfl = map(qfl, 's:FormatTask(args, v:val, 1)')
@@ -888,8 +893,7 @@ endf
 function! ttodo#InitListBuffer() dict abort "{{{3
     call call('tlib#qfl#SetSyntax', [], self)
     if has_key(self, 'overdue_rx')
-        Tlibtrace self.overdue_rx
-        " TLogVAR self.overdue_rx
+        Tlibtrace 'ttodo', self.overdue_rx
         exec 'syntax match TtodoOverdue /'. escape(self.overdue_rx, '/') .'/ contained containedin=TtodoTag'
         hi def link TtodoOverdue ErrorMsg
         syntax cluster TtodoTask add=TtodoOverdue
@@ -962,18 +966,18 @@ endf
 
 function! ttodo#FiletypeDetect(...) abort "{{{3
     let filename = a:0 >= 1 ? a:1 : expand('%:p')
-    " TLogVAR filename
+    Tlibtrace 'ttodo', filename
     let bdir = substitute(filename, '\\', '/', 'g')
     let bdir = substitute(bdir, '/[^/]\+$', '', '')
     let dirs = map(keys(s:ttodo_dirs), 'substitute(resolve(fnamemodify(v:val, ":p:h")), ''\\'', ''/'', ''g'')')
-    " TLogVAR bdir, dirs
+    Tlibtrace 'ttodo', bdir, dirs
     if index(dirs, bdir, 0, !has('fname_case')) != -1
         if g:ttodo#force_filetype
             setl ft=ttodo
         else
             setf ttodo
         endif
-        " TLogVAR &ft
+        Tlibtrace 'ttodo', &ft
     endif
 endf
 
@@ -992,7 +996,7 @@ function! ttodo#SortBuffer(cmdargs) abort "{{{3
     endif
     let qfl = s:SortTasks(args, qfl)
     let seps = get(args, 'sortseps', []) 
-    " TLogVAR seps
+    Tlibtrace 'ttodo', seps
     if empty(seps)
         let tasks = map(qfl, 'v:val.task.text')
     else
@@ -1001,7 +1005,7 @@ function! ttodo#SortBuffer(cmdargs) abort "{{{3
         for qfe in qfl
             for sep in seps
                 if !empty(last) && get(get(last.task, sep, []), 0, '') != get(get(qfe.task, sep, []), 0, '')
-                    " TLogVAR last, qfe
+                    Tlibtrace 'ttodo', last, qfe
                     call add(tasks, '')
                     break
                 endif
@@ -1026,7 +1030,7 @@ function! ttodo#NewTask(cmdargs) abort "{{{3
     let filename = get(args, 'inboxfile', '')
     if empty(filename)
         let dirdef = s:GetDefaultDirDef(args, '.')
-        " TLogVAR keys(dirdef), dirdef.__name__
+        Tlibtrace 'ttodo', keys(dirdef), dirdef.__name__
         let filename = tlib#file#Join([dirdef.__name__, get(args, 'inbox', get(dirdef, 'inbox', g:ttodo#inbox))])
     endif
     let text = join(args.__rest__)
@@ -1041,7 +1045,7 @@ endf
 
 
 function! ttodo#FormatTags(prefix, lists) abort "{{{3
-    " TLogVAR a:prefix, a:lists
+    Tlibtrace 'ttodo', a:prefix, a:lists
     return join(map(copy(a:lists), 'a:prefix . v:val'))
 endf
 
