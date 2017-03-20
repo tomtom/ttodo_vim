@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2017-02-13
-" @Revision:    1377
+" @Last Change: 2017-03-20
+" @Revision:    1391
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 122
@@ -211,6 +211,7 @@ let s:list_env = {
             \ 'qfl_list_syntax': 'ttodo',
             \ 'qfl_list_syntax_nextgroup': '@TtodoTask',
             \ 'set_syntax': 'ttodo#InitListBuffer',
+            \ 'pick_last_item': 0,
             \ 'scratch': '__Ttodo__',
             \ }
 
@@ -607,7 +608,7 @@ function! ttodo#ParseTask(line, file, ...) abort "{{{3
     else
         let task = {'text': a:line}
         for [key, rx] in items(g:ttodo#parse_rx)
-            if key =~ '+$'
+            if key =~# '+$'
                 let key = substitute(key, '+$', '', '')
                 if tlib#type#IsList(rx)
                     let val = call('tlib#string#MatchAll', [a:line] + rx)
@@ -617,7 +618,7 @@ function! ttodo#ParseTask(line, file, ...) abort "{{{3
                 let task[key] = val
             else
                 let val = matchstr(a:line, rx)
-                if key =~ '?$'
+                if key =~# '?$'
                     let key = substitute(key, '?$', '', '')
                     let task[key] = !empty(val)
                 elseif !empty(val)
@@ -636,8 +637,8 @@ function! ttodo#ParseTask(line, file, ...) abort "{{{3
                 let task.overdue = 1
             endif
         endif
-        let task.lists = filter(map(split(a:line, '\ze@'), 'matchstr(v:val, ''^@\zs\S\+'')'), '!empty(v:val)') + get(args, 'lists', [])
-        let task.tags = filter(map(split(a:line, '\ze+'), 'matchstr(v:val, ''^+\zs\S\+'')'), '!empty(v:val)') + get(args, 'tags', [])
+        let task.lists = filter(map(split(a:line, '\(^ \|\s\)\ze@'), 'matchstr(v:val, ''^@\zs\S\+'')'), '!empty(v:val)') + get(args, 'lists', [])
+        let task.tags = filter(map(split(a:line, '\(^ \|\s\)\ze+'), 'matchstr(v:val, ''^+\zs\S\+'')'), '!empty(v:val)') + get(args, 'tags', [])
         if index(task.lists, 'next') != -1
             let task.next = 1
         endif
@@ -656,12 +657,12 @@ function! s:FilterTasks(args) abort "{{{3
     if has_key(a:args, 'due')
         let due = a:args.due
         let today = strftime(g:tlib#date#date_format)
-        if due =~ '^t%\[oday]$'
+        if due =~# '^t%\[oday]$'
             call filter(qfl, 'empty(get(v:val.task, "due", "")) || get(v:val.task, "due", "") <= '. string(today))
-        elseif due =~ '^\d\+-\d\+-\d\+$'
+        elseif due =~# '^\d\+-\d\+-\d\+$'
             call filter(qfl, 'empty(get(v:val.task, "due", "")) || get(v:val.task, "due", "") <= '. string(due))
         else
-            if due =~ '^\d\+w$'
+            if due =~# '^\d\+w$'
                 let due = matchstr(due, '^\d\+') * 7
             endif
             call filter(qfl, 'empty(get(v:val.task, "due", "")) || tlib#date#DiffInDays(v:val.task.due) <= '. due)
@@ -721,7 +722,7 @@ function! s:CheckThreshold(t, due, today) abort "{{{3
     let t = 0
     let tn = ''
     if !empty(a:t)
-        if a:t =~ '^'. g:tlib#date#date_rx .'$'
+        if a:t =~# '^'. g:tlib#date#date_rx .'$'
             let t = a:t
         elseif !empty(a:due)
             let tn = a:t
@@ -732,7 +733,7 @@ function! s:CheckThreshold(t, due, today) abort "{{{3
     if t == 0 && !empty(tn) && !empty(a:due)
         let n = str2nr(matchstr(tn, '^-\?\d\+\ze[d]$'))
         if n != 0
-            if tn =~ 'd$'
+            if tn =~# 'd$'
                 let t = strftime(g:tlib#date#date_format, tlib#date#SecondsSince1970(a:due) + n * g:tlib#date#dayshift)
             endif
         endif
@@ -794,7 +795,7 @@ function! s:SortTask(a, b) dict abort "{{{3
         let default = get(g:ttodo#sort_defaults, item, '')
         let aa = self.GetSortItem(a:a, a, item, default)
         let bb = self.GetSortItem(a:b, b, item, default)
-        if item == 'overdue'
+        if item ==# 'overdue'
             Tlibtrace 'ttodo', 'overdue', aa, bb, default, a, b
         endif
         if aa != bb
@@ -951,7 +952,7 @@ endf
 
 function! ttodo#CollectTags(type) abort "{{{3
     let args = {}
-    if &ft == 'ttodo'
+    if &ft ==# 'ttodo'
         let args.bufname = '%'
     endif
     let tasks = s:GetTasks(args)
@@ -995,7 +996,7 @@ function! ttodo#SortBuffer(cmdargs) abort "{{{3
         throw 'ttodo#SortBuffer: Cannot sort task outlines!'
     endif
     let qfl = s:SortTasks(args, qfl)
-    let seps = get(args, 'sortseps', []) 
+    let seps = get(args, 'sortseps', [])
     Tlibtrace 'ttodo', seps
     if empty(seps)
         let tasks = map(qfl, 'v:val.task.text')
@@ -1095,7 +1096,7 @@ endf
 
 " :nodoc:
 function! ttodo#IsValidDue(due) abort "{{{3
-    return a:due =~ '^\%(today\|[0-9]\+[dwmy]\)$' || tlib#date#IsDate(a:due)
+    return a:due =~# '^\%(today\|[0-9]\+[dwmy]\)$' || tlib#date#IsDate(a:due)
 endf
 
 
