@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2017-03-20
-" @Revision:    1391
+" @Last Change: 2017-03-24
+" @Revision:    1405
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 122
@@ -66,7 +66,7 @@ if !exists('g:ttodo#force_filetype')
     "
     " If true, ttodo will make sure the filetype is `ttodo` by using 
     " |:set| to set 'filetype'.
-    let g:ttodo#force_filetype = 0   "{{{2
+    let g:ttodo#force_filetype = 1   "{{{2
 endif
 
 
@@ -366,9 +366,9 @@ function! s:GetFiles(args) abort "{{{3
             Tlibtrace 'ttodo', 3, filedefs
         else
             if has_key(a:args, 'files')
-                let files0 = filter(copy(a:args.files), {i,v -> filereadable(v)})
+                let files0 = filter(copy(a:args.files), 'filereadable(v:val)')
                 let files = s:ItemsDefs(files0, 1)
-                call extend(filedefs, map(items(files), {i, kv -> {"fileargs": kv[1], "file": kv[0]}}))
+                call extend(filedefs, map(items(files), '{"fileargs": v:val[1], "file": v:val[0]}'))
                 Tlibtrace 'ttodo', 4, filedefs
             else
                 let dirsdefs = s:GetDirsDefs(a:args)
@@ -377,7 +377,7 @@ function! s:GetFiles(args) abort "{{{3
                     let pattern0 = get(a:args, 'pattern', s:GetOpt(dirargs, 'file_pattern'))
                     Tlibtrace 'ttodo', pattern0
                     let patterns = type(pattern0) == v:t_string ? [pattern0] : pattern0
-                    let ffiles = map(copy(patterns), {i, pattern -> tlib#file#Glob(tlib#file#Join([dir, pattern]))})
+                    let ffiles = map(copy(patterns), 'tlib#file#Glob(tlib#file#Join([dir, v:val]))')
                     let files = tlib#list#Uniq(tlib#list#Flatten(ffiles))
                     let file_include_rx = get(a:args, 'file_include_rx', s:GetOpt(a:args, 'file_include_rx'))
                     if !empty(file_include_rx)
@@ -528,7 +528,7 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
         endif
         let pred_idx += 1
         let task.idx = pred_idx
-        let qfe = {"filename": a:file, "lnum": lnum, "text": line, "task": task}
+        let qfe = {'filename': a:file, 'lnum': lnum, 'text': line, 'task': task}
         call add(qfl, qfe)
         if !empty(id)
             let task_by_id[id] = task
@@ -569,10 +569,10 @@ function! s:GetLines(filename, fileargs) abort "{{{3
             let lines = readfile(a:filename)
             if has('iconv')
                 Tlibtrace 'ttodo', keys(a:fileargs)
-                let tenc = get(a:fileargs, 'encoding', &enc)
+                let tenc = get(a:fileargs, 'encoding', &encoding)
                 Tlibtrace 'ttodo', tenc, &enc
-                if tenc != &enc
-                    let lines = map(lines, 'iconv(v:val, tenc, &enc)')
+                if tenc != &encoding
+                    let lines = map(lines, 'iconv(v:val, tenc, &encoding)')
                 endif
             endif
         endif
@@ -952,7 +952,7 @@ endf
 
 function! ttodo#CollectTags(type) abort "{{{3
     let args = {}
-    if &ft ==# 'ttodo'
+    if &filetype ==# 'ttodo'
         let args.bufname = '%'
     endif
     let tasks = s:GetTasks(args)
@@ -971,14 +971,15 @@ function! ttodo#FiletypeDetect(...) abort "{{{3
     let bdir = substitute(filename, '\\', '/', 'g')
     let bdir = substitute(bdir, '/[^/]\+$', '', '')
     let dirs = map(keys(s:ttodo_dirs), 'substitute(resolve(fnamemodify(v:val, ":p:h")), ''\\'', ''/'', ''g'')')
-    Tlibtrace 'ttodo', bdir, dirs
+    Tlibtrace 'ttodo', dirs, bdir
     if index(dirs, bdir, 0, !has('fname_case')) != -1
+        Tlibtrace 'ttodo', g:ttodo#force_filetype, &filetype
         if g:ttodo#force_filetype
-            setl ft=ttodo
+            setl filetype=ttodo
         else
             setf ttodo
         endif
-        Tlibtrace 'ttodo', &ft
+        Tlibtrace 'ttodo', &filetype
     endif
 endf
 
