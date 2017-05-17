@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2017-01-30
-" @Revision:    364
+" @Last Change: 2017-05-11
+" @Revision:    365
 
 
 if !exists('g:ttodo#ftplugin#notef')
@@ -50,7 +50,7 @@ endif
 
 if !exists('g:ttodo#ftplugin#new_subtask_copy_pri')
     " If true, copy the parent task's priority when creating subtasks.
-    let g:ttodo#ftplugin#new_subtask_copy_pri = 1   "{{{2
+    let g:ttodo#ftplugin#new_subtask_copy_pri = 0   "{{{2
 endif
 
 
