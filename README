@@ -156,7 +156,8 @@ Please set |g:ttodo#dirs| in |vimrc| before using |:Ttodo|.
 
 
 
-Dependencies:["\n  tlib (>= 1.26) :: http://github.com/tomtom/tlib_vim"]
+Dependencies:
+  tlib (>= 1.26) :: http://github.com/tomtom/tlib_vim
 
 License: GPLv3 or later
 
