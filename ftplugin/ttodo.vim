@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2016-10-31.
-" @Revision:    112
+" @Last Change: 2017-09-18.
+" @Revision:    113
 
 if exists("b:did_ftplugin")
     finish
@@ -34,13 +34,15 @@ exec 'xnoremap <buffer>' g:ttodo#mapleader .'/ y:<C-U>Ttodogrep <c-r>0<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'b :<C-U>Ttodo --bufname=%<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'* :<C-U>Ttodo --bufname=% <c-r><c-w><cr>'
 
-nnoremap <buffer> <expr> <cr> ttodo#ftplugin#New("", 0, "n")
-nnoremap <buffer> <expr> <c-cr> ttodo#ftplugin#New("", 1, "n")
-nnoremap <buffer> <expr> <s-cr> ttodo#ftplugin#New(">", 1, "n")
+nnoremap <buffer> <expr> <cr> ttodo#ftplugin#New('', 0, 'n')
+nnoremap <buffer> <expr> <c-cr> ttodo#ftplugin#New('', 1, 'n')
+nnoremap <buffer> <expr> <s-cr> ttodo#ftplugin#New('>', 1, 'n')
+nnoremap <buffer> <expr> <c-s-cr> ttodo#ftplugin#New('', 2, 'n')
 
-inoremap <buffer> <expr> <cr> ttodo#ftplugin#New("", 0, "i")
-inoremap <buffer> <expr> <c-cr> ttodo#ftplugin#New("", 1, "i")
-inoremap <buffer> <expr> <s-cr> ttodo#ftplugin#New(">", 1, "i")
+inoremap <buffer> <expr> <cr> ttodo#ftplugin#New('', 0, 'i')
+inoremap <buffer> <expr> <c-cr> ttodo#ftplugin#New('', 1, 'i')
+inoremap <buffer> <expr> <s-cr> ttodo#ftplugin#New('>', 1, 'i')
+inoremap <buffer> <expr> <c-cr> ttodo#ftplugin#New('', 2, 'i')
 
 
 " Sort the tasks in the current buffer.

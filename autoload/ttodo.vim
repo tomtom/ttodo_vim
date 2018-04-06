@@ -1,14 +1,14 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2017-03-24
-" @Revision:    1405
+" @Last Change: 2018-02-08
+" @Revision:    1414
 
 
-if !exists('g:loaded_tlib') || g:loaded_tlib < 122
+if !exists('g:loaded_tlib') || g:loaded_tlib < 126
     runtime plugin/tlib.vim
-    if !exists('g:loaded_tlib') || g:loaded_tlib < 122
-        echoerr 'tlib >= 1.22 is required'
+    if !exists('g:loaded_tlib') || g:loaded_tlib < 126
+        echoerr 'tlib >= 1.26 is required'
         finish
     endif
 endif
@@ -203,11 +203,17 @@ if !exists('g:ttodo#inbox')
 endif
 
 
+if !exists('g:ttodo#qfl_short_filename')
+    " Possible values: "basename", "shorten", ""
+    let g:ttodo#qfl_short_filename = 'basename'   "{{{2
+endif
+
+
 call tlib#type#Define('ttodo_type_itemdef_opts', {'__name__': 's', '__rx__': 's'})
 
 
 let s:list_env = {
-            \ 'qfl_short_filename': 1,
+            \ 'qfl_short_filename': g:ttodo#qfl_short_filename,
             \ 'qfl_list_syntax': 'ttodo',
             \ 'qfl_list_syntax_nextgroup': '@TtodoTask',
             \ 'set_syntax': 'ttodo#InitListBuffer',
@@ -467,73 +473,77 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
     let source = filelines.source
     for line in filelines.lines
         let lnum += 1
-        let task = ttodo#ParseTask(line, a:file, a:args)
-        let id = get(task, 'id', '')
-        let task.__source__ = source
-        Tlibtrace 'ttodo', task
-        if get(task, 'subtask', 0) && pred_idx >= 0
-            let indentstr = matchstr(line, '^\%(\s\{1,'. &shiftwidth .'}\)\+')
-            Tlibtrace 'ttodo', indentstr
-            let indentstr = substitute(indentstr, '\%(\s\{1,'. &shiftwidth .'}\)', '+', 'g')
-            let indent = len(indentstr)
-            Tlibtrace 'ttodo', indentstr, indent
-            let line = substitute(line, '^\s\+', '', '')
-            let parent_idx = pred_idx
-            let parent = qfl[parent_idx]
-            Tlibtrace 'ttodo', parent
-            while get(parent.task, '__indent__', 0) >= indent
-                let parent_idx = parent.task.__parent_idx__
-                let parent = qfl[parent_idx]
-            endwh
-            let parent_indent = get(parent.task, '__indent__', 0)
-            Tlibtrace 'ttodo', indent, parent_indent, parent_idx, parent
-            if !task.done
-                " let parent.task.has_subtasks = get(parent.task, 'has_subtasks', 0) + 1
-                let parent.task.has_subtasks = 1
-                Tlibtrace 'ttodo', parent, parent_idx, pred_idx
-                let qfl[parent_idx] = parent
-            endif
-            if has_key(task, 'due') && task.due > get(parent.task, 'due', task.due)
-                echohl WarningMsg
-                echom 'WARN ttodo#GetFileTasks: subtask has due date after the parent''s task due date: '. line
-                echohl NONE
-            endif
-            let task0 = task
-            let task = tlib#eval#Extend(copy(parent.task), task)
-            let task.has_subtasks = 0
-            let task.__level__ = get(parent.task, '__level__', 0) + 1
-            let task.__indent__ = indent
-            let task.__parent_idx__ = parent_idx
-            if !has_key(children, parent_idx)
-                let children[parent_idx] = {}
-            endif
-            let children[parent_idx][pred_idx + 1] = 1
-            Tlibtrace 'ttodo', task, qfl[parent_idx]
-            let line .= ' | '. substitute(s:FormatTask(a:args, copy(parent), 0).text, '^\C\s*\%(x\s\+\)\?\%((\u)\s\+\)\?', '', '')
-            if has_key(parent.task, 'pri') && !has_key(task0, 'pri')
-                Tlibtrace 'ttodo', task0
-                let line = '('. parent.task.pri .') '. line
-            endif
-            Tlibtrace 'ttodo', line
-        else
-            Tlibtrace 'ttodo', line
-            for [prefix, key] in [['@', 'lists'], ['+', 'tags']]
-                if has_key(a:fileargs, key)
-                    let vals = a:fileargs[key]
-                    let task[key] += vals
-                    let line = ttodo#MaybeAppend(line, ttodo#FormatTags(prefix, vals))
+        if line =~ '\S'
+            let task = ttodo#ParseTask(line, a:file, a:args)
+            if !empty(task)
+                let id = get(task, 'id', '')
+                let task.__source__ = source
+                Tlibtrace 'ttodo', task
+                if get(task, 'subtask', 0) && pred_idx >= 0
+                    let indentstr = matchstr(line, '^\%(\s\{1,'. &shiftwidth .'}\)\+')
+                    Tlibtrace 'ttodo', indentstr
+                    let indentstr = substitute(indentstr, '\%(\s\{1,'. &shiftwidth .'}\)', '+', 'g')
+                    let indent = len(indentstr)
+                    Tlibtrace 'ttodo', indentstr, indent
+                    let line = substitute(line, '^\s\+', '', '')
+                    let parent_idx = pred_idx
+                    let parent = qfl[parent_idx]
+                    Tlibtrace 'ttodo', parent
+                    while get(parent.task, '__indent__', 0) >= indent
+                        let parent_idx = parent.task.__parent_idx__
+                        let parent = qfl[parent_idx]
+                    endwh
+                    let parent_indent = get(parent.task, '__indent__', 0)
+                    Tlibtrace 'ttodo', indent, parent_indent, parent_idx, parent
+                    if !task.done
+                        " let parent.task.has_subtasks = get(parent.task, 'has_subtasks', 0) + 1
+                        let parent.task.has_subtasks = 1
+                        Tlibtrace 'ttodo', parent, parent_idx, pred_idx
+                        let qfl[parent_idx] = parent
+                    endif
+                    if has_key(task, 'due') && task.due > get(parent.task, 'due', task.due)
+                        echohl WarningMsg
+                        echom 'WARN ttodo#GetFileTasks: subtask has due date after the parent''s task due date: '. line
+                        echohl NONE
+                    endif
+                    let task0 = task
+                    let task = tlib#eval#Extend(copy(parent.task), task)
+                    let task.has_subtasks = 0
+                    let task.__level__ = get(parent.task, '__level__', 0) + 1
+                    let task.__indent__ = indent
+                    let task.__parent_idx__ = parent_idx
+                    if !has_key(children, parent_idx)
+                        let children[parent_idx] = {}
+                    endif
+                    let children[parent_idx][pred_idx + 1] = 1
+                    Tlibtrace 'ttodo', task, qfl[parent_idx]
+                    let line .= ' | '. substitute(s:FormatTask(a:args, copy(parent), 0).text, '^\C\s*\%(x\s\+\)\?\%((\u)\s\+\)\?', '', '')
+                    if has_key(parent.task, 'pri') && !has_key(task0, 'pri')
+                        Tlibtrace 'ttodo', task0
+                        let line = '('. parent.task.pri .') '. line
+                    endif
+                    Tlibtrace 'ttodo', line
+                else
+                    Tlibtrace 'ttodo', line
+                    for [prefix, key] in [['@', 'lists'], ['+', 'tags']]
+                        if has_key(a:fileargs, key)
+                            let vals = a:fileargs[key]
+                            let task[key] += vals
+                            let line = ttodo#MaybeAppend(line, ttodo#FormatTags(prefix, vals))
+                        endif
+                    endfor
+                    Tlibtrace 'ttodo', line
                 endif
-            endfor
-            Tlibtrace 'ttodo', line
+                let pred_idx += 1
+                let task.idx = pred_idx
+                let qfe = {'filename': a:file, 'lnum': lnum, 'text': line, 'task': task}
+                call add(qfl, qfe)
+                if !empty(id)
+                    let task_by_id[id] = task
+                endif
+                let qfe_by_lnum[lnum] = qfe
+            endif
         endif
-        let pred_idx += 1
-        let task.idx = pred_idx
-        let qfe = {'filename': a:file, 'lnum': lnum, 'text': line, 'task': task}
-        call add(qfl, qfe)
-        if !empty(id)
-            let task_by_id[id] = task
-        endif
-        let qfe_by_lnum[lnum] = qfe
     endfor
     let qfl = map(qfl, 's:SetPending(v:key, v:val, task_by_id)')
     let filetasks = extend({'qfl': qfl, 'task_by_id': task_by_id, 'qfe_by_lnum': qfe_by_lnum}, s:filetasks)
@@ -601,51 +611,55 @@ let s:parsed_tasks = {}
 
 function! ttodo#ParseTask(line, file, ...) abort "{{{3
     TVarArg ['args', {}]
-    let cid = join([a:line, a:file, get(args, 'lists', []), get(args, 'tags', [])], "\n")
-    if has_key(s:parsed_tasks, cid)
-        Tlibtrace 'ttodo', cid
-        let task = deepcopy(s:parsed_tasks[cid])
+    if a:line !~# '\S'
+        return {}
     else
-        let task = {'text': a:line}
-        for [key, rx] in items(g:ttodo#parse_rx)
-            if key =~# '+$'
-                let key = substitute(key, '+$', '', '')
-                if tlib#type#IsList(rx)
-                    let val = call('tlib#string#MatchAll', [a:line] + rx)
-                else
-                    let val = tlib#string#MatchAll(a:line, rx)
-                endif
-                let task[key] = val
-            else
-                let val = matchstr(a:line, rx)
-                if key =~# '?$'
-                    let key = substitute(key, '?$', '', '')
-                    let task[key] = !empty(val)
-                elseif !empty(val)
+        let cid = join([a:line, a:file, get(args, 'lists', []), get(args, 'tags', [])], "\n")
+        if has_key(s:parsed_tasks, cid)
+            Tlibtrace 'ttodo', cid
+            let task = deepcopy(s:parsed_tasks[cid])
+        else
+            let task = {'text': a:line}
+            for [key, rx] in items(g:ttodo#parse_rx)
+                if key =~# '+$'
+                    let key = substitute(key, '+$', '', '')
+                    if tlib#type#IsList(rx)
+                        let val = call('tlib#string#MatchAll', [a:line] + rx)
+                    else
+                        let val = tlib#string#MatchAll(a:line, rx)
+                    endif
                     let task[key] = val
+                else
+                    let val = matchstr(a:line, rx)
+                    if key =~# '?$'
+                        let key = substitute(key, '?$', '', '')
+                        let task[key] = !empty(val)
+                    elseif !empty(val)
+                        let task[key] = val
+                    endif
+                endif
+                unlet val
+            endfor
+            if has_key(task, 'due')
+                Tlibtrace 'ttodo', task
+                if task.due ==# 'today'
+                    let task.due = strftime(g:tlib#date#date_format)
+                    Tlibtrace 'ttodo', task.due
+                endif
+                if task.due < strftime(g:tlib#date#date_format)
+                    let task.overdue = 1
                 endif
             endif
-            unlet val
-        endfor
-        if has_key(task, 'due')
-            Tlibtrace 'ttodo', task
-            if task.due ==# 'today'
-                let task.due = strftime(g:tlib#date#date_format)
-                Tlibtrace 'ttodo', task.due
+            let task.lists = filter(map(split(a:line, '\(^ \|\s\)\ze@'), 'matchstr(v:val, ''^@\zs\S\+'')'), '!empty(v:val)') + get(args, 'lists', [])
+            let task.tags = filter(map(split(a:line, '\(^ \|\s\)\ze+'), 'matchstr(v:val, ''^+\zs\S\+'')'), '!empty(v:val)') + get(args, 'tags', [])
+            if index(task.lists, 'next') != -1
+                let task.next = 1
             endif
-            if task.due < strftime(g:tlib#date#date_format)
-                let task.overdue = 1
-            endif
+            let task.file = a:file
+            let s:parsed_tasks[cid] = deepcopy(task)
         endif
-        let task.lists = filter(map(split(a:line, '\(^ \|\s\)\ze@'), 'matchstr(v:val, ''^@\zs\S\+'')'), '!empty(v:val)') + get(args, 'lists', [])
-        let task.tags = filter(map(split(a:line, '\(^ \|\s\)\ze+'), 'matchstr(v:val, ''^+\zs\S\+'')'), '!empty(v:val)') + get(args, 'tags', [])
-        if index(task.lists, 'next') != -1
-            let task.next = 1
-        endif
-        let task.file = a:file
-        let s:parsed_tasks[cid] = deepcopy(task)
+        return task
     endif
-    return task
 endf
 
 
@@ -658,17 +672,17 @@ function! s:FilterTasks(args) abort "{{{3
         let due = a:args.due
         let today = strftime(g:tlib#date#date_format)
         if due =~# '^t%\[oday]$'
-            call filter(qfl, 'empty(get(v:val.task, "due", "")) || get(v:val.task, "due", "") <= '. string(today))
+            call filter(qfl, 'get(v:val.task, "next", 0) || empty(get(v:val.task, "due", "")) || get(v:val.task, "due", "") <= '. string(today))
         elseif due =~# '^\d\+-\d\+-\d\+$'
-            call filter(qfl, 'empty(get(v:val.task, "due", "")) || get(v:val.task, "due", "") <= '. string(due))
+            call filter(qfl, 'get(v:val.task, "next", 0) || empty(get(v:val.task, "due", "")) || get(v:val.task, "due", "") <= '. string(due))
         else
             if due =~# '^\d\+w$'
                 let due = matchstr(due, '^\d\+') * 7
             endif
-            call filter(qfl, 'empty(get(v:val.task, "due", "")) || tlib#date#DiffInDays(v:val.task.due) <= '. due)
+            call filter(qfl, 'get(v:val.task, "next", 0) || empty(get(v:val.task, "due", "")) || tlib#date#DiffInDays(v:val.task.due) <= '. due)
         endif
         if !get(a:args, 'undated', 0)
-            call filter(qfl, '!empty(get(v:val.task, "due", ""))')
+            call filter(qfl, 'get(v:val.task, "next", 0) || !empty(get(v:val.task, "due", ""))')
         endif
     endif
     for lst in ['lists', 'tags']
@@ -703,7 +717,7 @@ function! s:FilterTasks(args) abort "{{{3
     endif
     if get(a:args, 'threshold', 1)
         let today = strftime(g:tlib#date#date_format)
-        call filter(qfl, 's:CheckThreshold(get(v:val.task, "t", ""), get(v:val.task, "due", ""), today)')
+        call filter(qfl, 'get(v:val.task, "next", 0) || s:CheckThreshold(get(v:val.task, "t", ""), get(v:val.task, "due", ""), today)')
     endif
     return qfl
 endf
@@ -917,28 +931,29 @@ endf
 function! ttodo#CComplete(ArgLead, CmdLine, CursorPos) abort "{{{3
     let words = tlib#arg#CComplete(s:ttodo_args, a:ArgLead)
     if !empty(a:ArgLead)
+            let fn = exists('*strcharpart') ? 'strcharpart' : 'strpart'
         if a:ArgLead =~# '^--pref='
             let words = keys(g:ttodo#prefs)
             let apref = substitute(a:ArgLead, '^--pref=', '', '')
             if !empty(apref)
                 let nchar = len(apref)
-                call filter(words, 'strpart(v:val, 0, nchar) ==# apref')
+                call filter(words, fn .'(v:val, 0, nchar) ==# apref')
             endif
             let words = map(words, '"--pref=". v:val')
         elseif a:ArgLead =~# '^@'
             let words = map(ttodo#CollectTags("lists"), '"@". v:val')
             let nchar = len(a:ArgLead)
-            call filter(words, 'strpart(v:val, 0, nchar) ==# a:ArgLead')
+            call filter(words, fn .'(v:val, 0, nchar) ==# a:ArgLead')
         elseif a:ArgLead =~# '^+'
             let words = map(ttodo#CollectTags("tags"), '"+". v:val')
             let nchar = len(a:ArgLead)
-            call filter(words, 'strpart(v:val, 0, nchar) ==# a:ArgLead')
+            call filter(words, fn .'(v:val, 0, nchar) ==# a:ArgLead')
         else
             let nchar = len(a:ArgLead)
             let texts = {}
             for task in s:GetTasks({})
                 for word in split(task.text, '\s\+')
-                    if strpart(word, 0, nchar) ==# a:ArgLead
+                    if call(fn, [word, 0, nchar]) ==# a:ArgLead
                         let texts[word] = 1
                     endif
                 endfor
@@ -1039,7 +1054,10 @@ function! ttodo#NewTask(cmdargs) abort "{{{3
     let text = ttodo#MaybeAppend(text, get(args, 'suffix', ''))
     let text = ttodo#MaybeAppend(text, ttodo#FormatTags('@', get(args, 'lists', [])))
     let text = ttodo#MaybeAppend(text, ttodo#FormatTags('+', get(args, 'tags', [])))
-    let args = extend(args, ttodo#ParseTask(text, filename))
+    let ttask = ttodo#ParseTask(text, filename)
+    if !empty(ttask)
+        let args = extend(args, ttask)
+    endif
     exec 'tab drop' fnameescape(filename)
     let text = substitute(text, '\C^\s*(\u)\s*', '', '')
     exec 'norm!' ttodo#ftplugin#New('G', 0, 'n', args) . text

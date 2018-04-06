@@ -1,12 +1,16 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2017-05-11
-" @Revision:    365
+" @Last Change: 2018-04-04
+" @Revision:    434
 
 
-if !exists('g:ttodo#ftplugin#notef')
-    let g:ttodo#ftplugin#notef = 'notes/%s/%s-%s.md'   "{{{2
+if !exists('g:ttodo#ftplugin#notefmt')
+    if exists('g:ttodo#ftplugin#notef') " && g:ttodo#ftplugin#notef !=# 'notes/%s/%s-%s.md'
+        let g:ttodo#ftplugin#notefmt = printf(g:ttodo#ftplugin#notef, '${name}', '${date}', '${index}')
+    else
+        let g:ttodo#ftplugin#notefmt = 'notes/${year}/${name}/${date}-${index}.md'   "{{{2
+    endif
 endif
 
 
@@ -108,14 +112,15 @@ function! ttodo#ftplugin#Note() abort "{{{3
     let nname = get(task.lists, 0, 'misc')
     let nname = substitute(nname, '\W', '_', 'g')
     let date = strftime('%Y%m%d')
+    let year = strftime('%Y')
     let dir = expand('%:p:h')
     Tlibtrace 'ttodo', nname, dir
-    let n = 0
+    let fargs = {'name': nname, 'date': date, 'year': year, 'index': 0}
     while 1
-        let shortname = printf(g:ttodo#ftplugin#notef, nname, date, n)
+        let shortname = tlib#string#Format(g:ttodo#ftplugin#notefmt, fargs, '$')
         let filename = tlib#file#Join([dir, shortname])
         if filereadable(filename)
-            let n += 1
+            let fargs.n += 1
         else
             let notename = g:ttodo#ftplugin#note_prefix . shortname
             break
@@ -130,25 +135,58 @@ function! ttodo#ftplugin#Note() abort "{{{3
 endf
 
 
+" Values for copytags:
+"   1 ... Copy tags
+"   2 ... Copy tags & mark as dependency
 function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
-    " TLogVAR a:move, a:copytags
+    Tlibtrace 'ttodo', a:move, a:copytags, a:mode, a:000
     if a:mode == 'i'
         let o = "\<c-m>"
     else
         let o = "o"
     endif
     let new = strftime(g:tlib#date#date_format)
+    if a:copytags == 2
+        let [isnew, id] = s:EnsureIdAtLine(line('.'))
+        if isnew
+            if a:mode == 'i'
+                let o = "\<End> id:". id . o
+            else
+                let o = 'A id:'. id ."\<Esc>". o
+            endif
+        endif
+        let new .= ' dep:'. id
+    endif
     let i0 = indent('.')
+    Tlibtrace 'ttodo', o, new, i0
+    " new item after indented line
     if i0 > 0 && empty(a:move)
-        return o . new .' '
+        let move_down = ''
+        for pos1 in range(line('.') + 1, line('$'))
+            let i1 = indent(pos1)
+            Tlibtrace 'ttodo', i1
+            if i1 > i0
+                let move_down .= 'j'
+            else
+                break
+            endif
+        endfor
+        let keys = o . new .' '
+        if !empty(move_down)
+            let keys .= "\<Esc>ddk" . move_down . 'pA'
+        endif
+        Tlibtrace 'ttodo', keys
+        return keys
     else
         let task = a:0 >= 1 ? a:1 : ttodo#ParseTask(getline('.'), expand('%:p'))
         if a:move == '>'
             let new = new .' '
             if g:ttodo#ftplugin#new_subtask_copy_pri
+                Tlibtrace 'ttodo', g:ttodo#ftplugin#new_subtask_copy_pri, new
                 let new = s:MaybeCopyPriority(task, new)
             endif
             let prefix = matchstr(getline('.'), '^\s\+')
+            Tlibtrace 'ttodo', prefix
             if g:ttodo#ftplugin#add_at_eof
                 for lnum in range(line('.'), line('$') - 1)
                     let i1 = indent(lnum + 1)
@@ -160,10 +198,11 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
                     endif
                 endfor
             endif
+            Tlibtrace 'ttodo', o, new
             return o ."\<c-t>" . new
         else
             let o .= "\<home>"
-            if a:copytags
+            if a:copytags > 0
                 let new = ttodo#MaybeAppend(new, ttodo#FormatTags('@', task.lists))
                 let new = ttodo#MaybeAppend(new, ttodo#FormatTags('+', task.tags))
                 let new = ttodo#MaybeAppend(new, join(task.notes))
@@ -177,6 +216,7 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
             if a:mode == 'i' && !empty(move)
                 let move = "\<c-\>\<c-o>"
             endif
+            Tlibtrace 'ttodo', move, o, new
             return move . o . new .' '
         endif
     endif
@@ -199,11 +239,14 @@ endf
 
 function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
     TVarArg ['ignore_rec', 0]
+    Tlibtrace 'ttodo', a:count, ignore_rec
     let donedate = strftime(g:tlib#date#date_format)
     let lnum0 = line('.')
     for lnum in range(lnum0, lnum0 + a:count)
         let line = getline(lnum)
+        Tlibtrace 'ttodo', lnum, line
         let task = ttodo#ParseTask(line, expand('%:p'))
+        Tlibtrace 'ttodo', task
         if !get(task, 'done', 0)
             if !ignore_rec
                 let rec = get(task, 'rec', '')
@@ -224,28 +267,27 @@ function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
                             call append('$', line)
                             let lnum = line('$')
                         endif
-                        let due = get(task, 'due', '')
                         let shift = matchstr(rec, '\d\+\a$')
-                        let refdate = rec =~ '^+' && !empty(due) ? due : donedate
-                        let ndue = empty(due) ? donedate : due
-                        " TLogVAR rec, due, shift, refdate
-                        while 1
-                            let ndue = tlib#date#Shift(ndue, shift)
-                            " TLogVAR ndue
-                            if ndue > refdate
-                                break
-                            endif
-                        endwh
-                        exec lnum
-                        call s:MarkDueDate(ndue)
+                        let due = get(task, 'due', '')
+                        if !empty(due)
+                            let refdate = rec =~ '^+' && !empty(due) ? due : donedate
+                            let ndue = empty(due) ? donedate : due
+                            Tlibtrace 'ttodo', rec, due, shift, refdate, ndue
+                            while 1
+                                let ndue = tlib#date#Shift(ndue, shift)
+                                Tlibtrace 'ttodo', ndue
+                                if ndue > refdate
+                                    break
+                                endif
+                            endwh
+                            exec lnum
+                            call s:MarkDueDate(ndue)
+                        endif
                         if has_key(task, 't') && task.t =~# g:tlib#date#date_rx
                             let t0 = task.t
-                            let t0s = tlib#date#SecondsSince1970(t0)
-                            let dues = tlib#date#SecondsSince1970(due)
-                            let t0diff = dues - t0s
-                            let ndues = tlib#date#SecondsSince1970(ndue)
-                            let t1s = ndues - t0diff
-                            let t1 = tlib#date#Format(t1s)
+                            let t1 = tlib#date#Shift(t0, shift)
+                            Tlibtrace 'ttodo', t1
+                            exec lnum
                             call s:SetTag('t', g:tlib#date#date_rx, t1)
                         endif
                         continue
@@ -262,7 +304,7 @@ function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
             endif
         endif
         if get(task, 'subtask', 0) && !has_key(task, 'parent')
-            let parent = s:GetParentId(lnum)
+            let parent = s:GetParentID(lnum)
             if !empty(parent)
                 let line = line .' parent:'. parent
                 " call setline(lnum, line .' parent:'. parent)
@@ -276,20 +318,34 @@ function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
 endf
 
 
-function! s:GetParentId(lnum0) abort "{{{3
-    let indent0 = indent(a:lnum0)
+function! s:GetIdAtLine(lnum) abort "{{{3
+    let line = getline(a:lnum)
     let filename = expand('%:p')
+    let task = ttodo#ParseTask(line, filename)
+    if !has_key(task, 'id')
+        exec a:lnum
+        call ttodo#ftplugin#AddId(0)
+        let task = ttodo#ParseTask(getline(a:lnum), filename)
+    endif
+    return task.id
+endf
+
+
+function! s:GetParentID(lnum0) abort "{{{3
+    let indent0 = indent(a:lnum0)
+    " let filename = expand('%:p')
     for lnum in range(a:lnum0 - 1, 1, -1)
         let indent = indent(lnum)
         if indent < indent0
-            let line = getline(lnum)
-            let task = ttodo#ParseTask(line, filename)
-            if !has_key(task, 'id')
-                exec lnum
-                call ttodo#ftplugin#AddId(0)
-                let task = ttodo#ParseTask(getline(lnum), filename)
-            endif
-            return task.id
+            return s:GetIdAtLine(lnum)
+            " let line = getline(lnum)
+            " let task = ttodo#ParseTask(line, filename)
+            " if !has_key(task, 'id')
+            "     exec lnum
+            "     call ttodo#ftplugin#AddId(0)
+            "     let task = ttodo#ParseTask(getline(lnum), filename)
+            " endif
+            " return task.id
         endif
     endfor
     return ''
@@ -371,18 +427,38 @@ function! s:AgentEvalArg(arg) abort "{{{3
 endf
 
 
+function! s:EnsureIdAtLine(lnum, ...) abort "{{{3
+    let filename = a:0 >= 1 ? a:1 : expand('%:p')
+    let filetasks = a:0 >= 2 ? a:2 : ttodo#GetFileTasks({}, filename, {})
+    let fqfl = filetasks.qfl
+    let line = getline(a:lnum)
+    let task = ttodo#ParseTask(line, filename)
+    if !has_key(task, 'id')
+        let qfe = filetasks.GetQfeByLnum(a:lnum)
+        let ttask = string(empty(qfe) ? task : qfe)
+        if v:version < 800 || !has('+reltime')
+            let id = tlib#hash#Adler32(ttask)
+        else
+            " let id = 't'. tlib#number#ConvertBase(localtime(), 36)
+            let id = tlib#number#ConvertBase(str2nr(substitute(reltimestr(reltime()), '\.', '', '')), 36)
+        endif
+        Tlibtrace 'ttodo', id
+        return [1, id]
+    else
+        return [0, task.id]
+    endif
+endf
+
+
 function! ttodo#ftplugin#AddId(count) abort "{{{3
     let filename = expand('%:p')
     let filetasks = ttodo#GetFileTasks({}, filename, {})
     let fqfl = filetasks.qfl
     for lnum in range(line('.'), line('.') + a:count)
-        let line = getline(lnum)
-        let task = ttodo#ParseTask(line, filename)
-        if !has_key(task, 'id')
-            let qfe = filetasks.GetQfeByLnum(lnum)
-            let ttask = string(empty(qfe) ? task : qfe)
-            let id = tlib#hash#Adler32(ttask)
-            let line .= ' id:'. id
+        let [isnew, id] = s:EnsureIdAtLine(lnum, filename, filetasks)
+        if isnew
+            let line = getline(lnum) .' id:'. id
+            Tlibtrace 'ttodo', lnum, line
             call setline(lnum, line)
         endif
     endfor
