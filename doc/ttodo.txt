@@ -86,12 +86,17 @@ also https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):
                            outline addon handles subtasks (see also 
                            https://github.com/samuelsnyder/outline-todo.txt)
 
+                                                    *ttodo-tags*
 A TASK may contain the following tags:
-
+                                                    *ttodo-@next*
     @list ............ a "list" tag
+                       NOTE: The is a special list `@next` that marks important 
+                       task that should really be tackled next.
     +keyword ......... a "keyword" tag
     h:1 .............. hidden task
     due:YYYY-MM-DD ... due dates
+                       NOTE: If a task is member of the `@next` list, filters 
+                       by due dates will be ignored
     rec:+Nx .......... When marking a task a "done", add a new task with a due 
                        date in N d(ays), w(eeks), m(onths), y(ears); with the 
                        leading '+' use the original due date; else use the 
@@ -176,12 +181,18 @@ Contents~
         g:ttodo#default_t ....................... |g:ttodo#default_t|
         g:ttodo#new_task ........................ |g:ttodo#new_task|
         g:ttodo#inbox ........................... |g:ttodo#inbox|
+        g:ttodo#qfl_short_filename .............. |g:ttodo#qfl_short_filename|
         ttodo#SortBuffer ........................ |ttodo#SortBuffer()|
         g:ttodo#ftplugin#note_prefix ............ |g:ttodo#ftplugin#note_prefix|
         g:ttodo#ftplugin#edit_note .............. |g:ttodo#ftplugin#edit_note|
         g:ttodo#ftplugin#add_at_eof ............. |g:ttodo#ftplugin#add_at_eof|
         g:ttodo#ftplugin#rec_copy ............... |g:ttodo#ftplugin#rec_copy|
         g:ttodo#ftplugin#new_subtask_copy_pri ... |g:ttodo#ftplugin#new_subtask_copy_pri|
+        ttodo#ftplugin#New ...................... |ttodo#ftplugin#New()|
+        :Ttodosort .............................. |:Ttodosort|
+        :Ttodoarchive ........................... |:Ttodoarchive|
+        :Ttodobuffer ............................ |:Ttodobuffer|
+        :Ttodonote .............................. |:Ttodonote|
 
 
 ------------------------------------------------------------------------
@@ -284,7 +295,7 @@ g:ttodo#file_pattern           (default: ['*todo.txt', '*TODO.TXT'])
     A glob pattern matching todo.txt files.
 
                                                     *g:ttodo#force_filetype*
-g:ttodo#force_filetype         (default: 0)
+g:ttodo#force_filetype         (default: 1)
     By default, |ttodo#FiletypeDetect()| uses |:setf| to set the 
     filetype. This only works, if there isn't already a filetype 
     assigned to the buffer.
@@ -339,6 +350,10 @@ g:ttodo#inbox                  (default: 'todo.txt')
     Tasks added by |:Ttodonew| will be added to this file in the 
     default (i.e. the first) directory in |g:ttodo#dirs|.
 
+                                                    *g:ttodo#qfl_short_filename*
+g:ttodo#qfl_short_filename     (default: 'basename')
+    Possible values: "basename", "shorten", ""
+
                                                     *ttodo#SortBuffer()*
 ttodo#SortBuffer(cmdargs)
     If called with --sortseps=tags,lists, an empty line is inserted after 
@@ -380,8 +395,35 @@ g:ttodo#ftplugin#rec_copy      (default: 1)
     as completed and will then create a new updated task.
 
                                                     *g:ttodo#ftplugin#new_subtask_copy_pri*
-g:ttodo#ftplugin#new_subtask_copy_pri (default: 1)
+g:ttodo#ftplugin#new_subtask_copy_pri (default: 0)
     If true, copy the parent task's priority when creating subtasks.
+
+                                                    *ttodo#ftplugin#New()*
+ttodo#ftplugin#New(move, copytags, mode, ...)
+    Values for copytags:
+      1 ... Copy tags
+      2 ... Copy tags & mark as dependency
+
+
+------------------------------------------------------------------------
+                                                    *ftplugin/ttodo.vim*
+                                                    *:Ttodosort*
+:Ttodosort
+    Sort the tasks in the current buffer.
+
+    Sorting task outlines (i.e. subtasks) is not supported.
+
+                                                    *:Ttodoarchive*
+:Ttodoarchive
+    Archive completed tasks in the current buffer.
+
+                                                    *:Ttodobuffer*
+:Ttodobuffer
+    View the tasks in the current buffer.
+
+                                                    *:Ttodonote*
+:Ttodonote
+    Add a new task to the task at the cursor.
 
 
 

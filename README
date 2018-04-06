@@ -83,12 +83,17 @@ also https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format):
                            outline addon handles subtasks (see also 
                            https://github.com/samuelsnyder/outline-todo.txt)
 
+                                                    *ttodo-tags*
 A TASK may contain the following tags:
-
+                                                    *ttodo-@next*
     @list ............ a "list" tag
+                       NOTE: The is a special list `@next` that marks important 
+                       task that should really be tackled next.
     +keyword ......... a "keyword" tag
     h:1 .............. hidden task
     due:YYYY-MM-DD ... due dates
+                       NOTE: If a task is member of the `@next` list, filters 
+                       by due dates will be ignored
     rec:+Nx .......... When marking a task a "done", add a new task with a due 
                        date in N d(ays), w(eeks), m(onths), y(ears); with the 
                        leading '+' use the original due date; else use the 
@@ -151,10 +156,8 @@ Please set |g:ttodo#dirs| in |vimrc| before using |:Ttodo|.
 
 
 
-Dependencies:
-  tlib (>= 1.22) :: http://github.com/tomtom/tlib_vim
+Dependencies:["\n  tlib (>= 1.26) :: http://github.com/tomtom/tlib_vim"]
 
 License: GPLv3 or later
-Install: See http://github.com/tomtom/vimtlib/blob/master/INSTALL.TXT
-See http://github.com/tomtom for related plugins.
+
 
