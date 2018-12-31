@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2018-04-04
-" @Revision:    434
+" @Last Change: 2018-08-20
+" @Revision:    446
 
 
 if !exists('g:ttodo#ftplugin#notefmt')
@@ -58,9 +58,18 @@ if !exists('g:ttodo#ftplugin#new_subtask_copy_pri')
 endif
 
 
+if !exists('g:ttodo#ftplugin#done_filename_rewrite_expr')
+    let g:ttodo#ftplugin#done_filename_rewrite_expr = 'substitute(%s, ''\<todo\(_.\{-}\)\?\.txt$'', ''done\1.txt'', '''')'   "{{{2
+endif
+
+
 function! ttodo#ftplugin#Archive(filename) abort "{{{3
     let basename = fnamemodify(a:filename, ':t')
-    let arc = fnamemodify(a:filename, ':p:h') .'/done.txt'
+    if exists('g:ttodo#ftplugin#done_filename_rewrite_expr') && !empty(g:ttodo#ftplugin#done_filename_rewrite_expr)
+        let arc = eval(printf(g:ttodo#ftplugin#done_filename_rewrite_expr, string(fnamemodify(a:filename, ':p'))))
+    else
+        let arc = fnamemodify(a:filename, ':p:h') .'/done.txt'
+    endif
     if filereadable(arc) && !filewritable(arc)
         throw 'TTodo: Cannot write: '. arc
     endif
@@ -369,9 +378,18 @@ function! ttodo#ftplugin#MarkDue(unit, count) abort "{{{3
         else
             throw 'ttodo#ftplugin#MarkDue: count must be a number or a string'
         endif
-        let today = strftime(g:tlib#date#date_format)
-        let due = tlib#date#Shift(today, n . a:unit)
+        let task = ttodo#ParseTask(getline('.'), expand('%:p'))
+        " let due = strftime(g:tlib#date#date_format)
+        let due = get(task, 'due', strftime(g:tlib#date#date_format))
+        let shift = n . a:unit
+        let due = tlib#date#Shift(due, shift)
         call s:MarkDueDate(due)
+        if has_key(task, 't') && task.t =~# g:tlib#date#date_rx
+            let t0 = task.t
+            let t1 = tlib#date#Shift(t0, shift)
+            Tlibtrace 'ttodo', t1
+            call s:SetTag('t', g:tlib#date#date_rx, t1)
+        endif
     endif
 endf
 
