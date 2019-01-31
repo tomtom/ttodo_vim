@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2018-08-20
-" @Revision:    446
+" @Last Change: 2019-01-11
+" @Revision:    452
 
 
 if !exists('g:ttodo#ftplugin#notefmt')
@@ -82,7 +82,14 @@ function! ttodo#ftplugin#Archive(filename) abort "{{{3
     let filetasks = ttodo#GetFileTasks({}, a:filename, {})
     let lines = readfile(a:filename)
     for lnum0 in range(len(lines))
-        let task = filetasks.GetQfeByLnum(lnum0 + 1).task
+        let qfi = filetasks.GetQfeByLnum(lnum0 + 1)
+        if empty(qfi)
+            continue
+        elseif has_key(qfi, 'task')
+            let task = qfi.task
+        else
+            throw 'ttodo#ftplugin#Archive: Unexpected item lnum='. (lnum0 + 1) .': '. string(qfi)
+        endif
         " let line = lines[lnum0]
         let line = task.text
         if line != lines[lnum0]
@@ -279,18 +286,17 @@ function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
                         let shift = matchstr(rec, '\d\+\a$')
                         let due = get(task, 'due', '')
                         if !empty(due)
-                            let refdate = rec =~ '^+' && !empty(due) ? due : donedate
-                            let ndue = empty(due) ? donedate : due
-                            Tlibtrace 'ttodo', rec, due, shift, refdate, ndue
+                            let refdate = rec =~ '^+' ? due : donedate
+                            Tlibtrace 'ttodo', rec, due, shift, refdate
                             while 1
-                                let ndue = tlib#date#Shift(ndue, shift)
-                                Tlibtrace 'ttodo', ndue
-                                if ndue > refdate
+                                let due = tlib#date#Shift(due, shift)
+                                Tlibtrace 'ttodo', due
+                                if due > refdate
                                     break
                                 endif
                             endwh
                             exec lnum
-                            call s:MarkDueDate(ndue)
+                            call s:MarkDueDate(due)
                         endif
                         if has_key(task, 't') && task.t =~# g:tlib#date#date_rx
                             let t0 = task.t
