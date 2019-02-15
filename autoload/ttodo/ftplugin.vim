@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2019-01-11
-" @Revision:    452
+" @Last Change: 2019-02-07
+" @Revision:    471
 
 
 if !exists('g:ttodo#ftplugin#notefmt')
@@ -15,6 +15,8 @@ endif
 
 
 if !exists('g:ttodo#ftplugin#note_prefix')
+    " OPTION: note_prefix:PREFIX
+    "
     " Prefix for references to notes.
     "
     " Possible (potentially useful) values:
@@ -37,6 +39,8 @@ endif
 
 
 if !exists('g:ttodo#ftplugin#add_at_eof')
+    " OPTION: add_at_eof:VALUE
+    "
     " If true, the <cr> or <c-cr> map will make ttodo add a new task at 
     " the end of the file. Otherwise the task will be added below the 
     " current line.
@@ -46,6 +50,8 @@ endif
 
 
 if !exists('g:ttodo#ftplugin#rec_copy')
+    " OPTION: rec_copy:VALUE
+    "
     " If true, marking a recurring task as "done" will mark the old task 
     " as completed and will then create a new updated task.
     let g:ttodo#ftplugin#rec_copy = 1   "{{{2
@@ -53,8 +59,22 @@ endif
 
 
 if !exists('g:ttodo#ftplugin#new_subtask_copy_pri')
+    " OPTION: new_subtask_copy_pri:VALUE
+    "
     " If true, copy the parent task's priority when creating subtasks.
     let g:ttodo#ftplugin#new_subtask_copy_pri = 0   "{{{2
+endif
+
+
+if !exists('g:ttodo#ftplugin#new_with_creation_date')
+    " OPTION: new_with_creation_date:VALUE
+    let g:ttodo#ftplugin#new_with_creation_date = 1   "{{{2
+endif
+
+
+if !exists('g:ttodo#ftplugin#new_default_priority')
+    " OPTION: new_default_priority:VALUE
+    let g:ttodo#ftplugin#new_default_priority = 'C'   "{{{2
 endif
 
 
@@ -138,7 +158,7 @@ function! ttodo#ftplugin#Note() abort "{{{3
         if filereadable(filename)
             let fargs.n += 1
         else
-            let notename = g:ttodo#ftplugin#note_prefix . shortname
+            let notename = ttodo#GetOption('note_prefix', g:ttodo#ftplugin#note_prefix) . shortname
             break
         endif
     endwh
@@ -161,7 +181,7 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
     else
         let o = "o"
     endif
-    let new = strftime(g:tlib#date#date_format)
+    let new = ttodo#GetOption('new_with_creation_date', g:ttodo#ftplugin#new_with_creation_date) ? strftime(g:tlib#date#date_format) : ''
     if a:copytags == 2
         let [isnew, id] = s:EnsureIdAtLine(line('.'))
         if isnew
@@ -171,9 +191,10 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
                 let o = 'A id:'. id ."\<Esc>". o
             endif
         endif
-        let new .= ' dep:'. id
+        let new = ttodo#MaybeAppend(new, 'dep:'. id)
     endif
     let i0 = indent('.')
+    let add_at_eof = ttodo#GetOption('add_at_eof', g:ttodo#ftplugin#add_at_eof)
     Tlibtrace 'ttodo', o, new, i0
     " new item after indented line
     if i0 > 0 && empty(a:move)
@@ -187,7 +208,7 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
                 break
             endif
         endfor
-        let keys = o . new .' '
+        let keys = o . ttodo#MaybePadRight(new)
         if !empty(move_down)
             let keys .= "\<Esc>ddk" . move_down . 'pA'
         endif
@@ -196,14 +217,15 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
     else
         let task = a:0 >= 1 ? a:1 : ttodo#ParseTask(getline('.'), expand('%:p'))
         if a:move == '>'
-            let new = new .' '
-            if g:ttodo#ftplugin#new_subtask_copy_pri
-                Tlibtrace 'ttodo', g:ttodo#ftplugin#new_subtask_copy_pri, new
+            let new = ttodo#MaybePadRight(new)
+            let new_subtask_copy_pri = ttodo#GetOption('new_subtask_copy_pri', g:ttodo#ftplugin#new_subtask_copy_pri)
+            if new_subtask_copy_pri
+                Tlibtrace 'ttodo', new_subtask_copy_pri, new
                 let new = s:MaybeCopyPriority(task, new)
             endif
             let prefix = matchstr(getline('.'), '^\s\+')
             Tlibtrace 'ttodo', prefix
-            if g:ttodo#ftplugin#add_at_eof
+            if add_at_eof
                 for lnum in range(line('.'), line('$') - 1)
                     let i1 = indent(lnum + 1)
                     Tlibtrace 'ttodo', lnum, i0, i1
@@ -218,22 +240,26 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
             return o ."\<c-t>" . new
         else
             let o .= "\<home>"
-            if a:copytags > 0
-                let new = ttodo#MaybeAppend(new, ttodo#FormatTags('@', task.lists))
-                let new = ttodo#MaybeAppend(new, ttodo#FormatTags('+', task.tags))
-                let new = ttodo#MaybeAppend(new, join(task.notes))
+            let new_default_priority = ttodo#GetOption('new_default_priority', g:ttodo#ftplugin#new_default_priority)
+            if !empty(new_default_priority)
+                let new = '('. new_default_priority .') '. new
             endif
-            let new = s:MaybeCopyPriority(task, new)
+            if a:copytags > 0
+                let new = ttodo#MaybeAppend(new, ttodo#FormatTags('@', get(task, 'lists', [])))
+                let new = ttodo#MaybeAppend(new, ttodo#FormatTags('+', get(task, 'tags', [])))
+                let new = ttodo#MaybeAppend(new, join(get(task, 'notes', [])))
+                let new = s:MaybeCopyPriority(task, new)
+            endif
             let move = a:move
             if empty(move) && i0 == 0
-                let move = g:ttodo#ftplugin#add_at_eof ? 'G' : ''
+                let move = add_at_eof ? 'G' : ''
                 " else " TODO: find last line with same indent
             endif
             if a:mode == 'i' && !empty(move)
                 let move = "\<c-\>\<c-o>"
             endif
             Tlibtrace 'ttodo', move, o, new
-            return move . o . new .' '
+            return move . o . ttodo#MaybePadRight(new)
         endif
     endif
 endf
@@ -277,7 +303,7 @@ function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
                         echom "TTodo: Cannot complete top tasks with a 'rec:' tag:" line
                         continue
                     else
-                        if g:ttodo#ftplugin#rec_copy
+                        if ttodo#GetOption('rec_copy', g:ttodo#ftplugin#rec_copy)
                             call ttodo#ftplugin#MarkDone(0, 1)
                             let line = ttodo#SetCreateDate(line)
                             call append('$', line)

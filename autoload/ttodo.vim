@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2018-02-08
-" @Revision:    1414
+" @Last Change: 2019-02-07
+" @Revision:    1437
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 126
@@ -470,6 +470,7 @@ function! ttodo#GetFileTasks(args, file, fileargs) abort "{{{3
     let lnum = 0
     let pred_idx = -1
     let filelines = s:GetLines(a:file, a:fileargs)
+    let s:file_options[a:file] = {}
     let source = filelines.source
     for line in filelines.lines
         let lnum += 1
@@ -607,12 +608,24 @@ endf
 
 
 let s:parsed_tasks = {}
+let s:file_options = {}
+
+
+function! ttodo#GetOption(name, default, ...) abort "{{{3
+    let filename = tlib#file#Canonic(a:0 >= 1 ? a:1 : expand('%:p'))
+    let options = get(s:file_options, filename, {})
+    return get(options, a:name, a:default)
+endf
 
 
 function! ttodo#ParseTask(line, file, ...) abort "{{{3
     TVarArg ['args', {}]
     if a:line !~# '\S'
         return {}
+    elseif a:line =~ '\(^\|\s\)\$TTODO\$\s'
+        let oname = matchstr(a:line, '\(^\|\s\)\$TTODO\$\s\+\zs\w\+')
+        let oval = matchstr(a:line, '\(^\|\s\)\$TTODO\$\s\+\w\+:\zs.*$')
+        let s:file_options[tlib#file#Canonic(a:file)][oname] = oval
     else
         let cid = join([a:line, a:file, get(args, 'lists', []), get(args, 'tags', [])], "\n")
         if has_key(s:parsed_tasks, cid)
@@ -1073,8 +1086,19 @@ endf
 function! ttodo#MaybeAppend(text, suffix) abort "{{{3
     if empty(a:suffix)
         return a:text
+    elseif empty(a:text)
+        return a:suffix
     else
         return a:text .' '. a:suffix
+    endif
+endf
+
+
+function! ttodo#MaybePadRight(text) abort "{{{3
+    if empty(a:text)
+        return a:text
+    else
+        return a:text .' '
     endif
 endf
 
