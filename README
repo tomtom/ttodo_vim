@@ -108,6 +108,11 @@ A TASK may contain the following tags:
                        IDs is a comma-separated list of IDs
     parent:ID ........ In outlines: the current task is the child of 
                        task with ID
+                                                    *ttodo-file-options*
+    $TTODO$ OPTION:VALUE .. If a line matches `$TTODO$` it is assumed to 
+                       contain a file-local option. Search the help file for 
+                       `OPTION:` to see which options are available. Users will 
+                       typically want to hide such lines using `h:1`
 
 If you set |g:ttodo_enable_ftdetect| to 0, you can use the |:Ttodo| command in 
 conjunction with other syntax files/ftplugins such as:

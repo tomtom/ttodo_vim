@@ -18,7 +18,9 @@ g:ttodo#fileargs	ttodo.txt	/*g:ttodo#fileargs*
 g:ttodo#force_filetype	ttodo.txt	/*g:ttodo#force_filetype*
 g:ttodo#ftplugin#add_at_eof	ttodo.txt	/*g:ttodo#ftplugin#add_at_eof*
 g:ttodo#ftplugin#edit_note	ttodo.txt	/*g:ttodo#ftplugin#edit_note*
+g:ttodo#ftplugin#new_default_priority	ttodo.txt	/*g:ttodo#ftplugin#new_default_priority*
 g:ttodo#ftplugin#new_subtask_copy_pri	ttodo.txt	/*g:ttodo#ftplugin#new_subtask_copy_pri*
+g:ttodo#ftplugin#new_with_creation_date	ttodo.txt	/*g:ttodo#ftplugin#new_with_creation_date*
 g:ttodo#ftplugin#note_prefix	ttodo.txt	/*g:ttodo#ftplugin#note_prefix*
 g:ttodo#ftplugin#rec_copy	ttodo.txt	/*g:ttodo#ftplugin#rec_copy*
 g:ttodo#inbox	ttodo.txt	/*g:ttodo#inbox*
@@ -36,5 +38,6 @@ plugin/ttodo.vim	ttodo.txt	/*plugin\/ttodo.vim*
 ttodo#SortBuffer()	ttodo.txt	/*ttodo#SortBuffer()*
 ttodo#ftplugin#New()	ttodo.txt	/*ttodo#ftplugin#New()*
 ttodo-@next	ttodo.txt	/*ttodo-@next*
+ttodo-file-options	ttodo.txt	/*ttodo-file-options*
 ttodo-tags	ttodo.txt	/*ttodo-tags*
 ttodo.txt	ttodo.txt	/*ttodo.txt*
