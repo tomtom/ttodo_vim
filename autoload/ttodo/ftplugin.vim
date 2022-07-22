@@ -1,16 +1,20 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2019-02-07
-" @Revision:    471
+" @Last Change: 2022-05-11
+" @Revision:    493
 
 
 if !exists('g:ttodo#ftplugin#notefmt')
     if exists('g:ttodo#ftplugin#notef') " && g:ttodo#ftplugin#notef !=# 'notes/%s/%s-%s.md'
-        let g:ttodo#ftplugin#notefmt = printf(g:ttodo#ftplugin#notef, '${name}', '${date}', '${index}')
+        let g:ttodo#ftplugin#notefmt = [printf(g:ttodo#ftplugin#notef, '${name}', '${date}', '${index}')]
     else
-        let g:ttodo#ftplugin#notefmt = 'notes/${year}/${name}/${date}-${index}.md'   "{{{2
+        let g:ttodo#ftplugin#notefmt = ['notes/${year}/${name}/${date}-${index}.md', 'notes/${name}/<++>.md']   "{{{2
     endif
+elseif type(g:ttodo#ftplugin#notefmt) == 1
+    let s:notefmt = g:ttodo#ftplugin#notefmt
+    unlet! g:ttodo#ftplugin#notefmt
+    let g:ttodo#ftplugin#notefmt = [s:notefmt]   "{{{2
 endif
 
 
@@ -63,6 +67,12 @@ if !exists('g:ttodo#ftplugin#new_subtask_copy_pri')
     "
     " If true, copy the parent task's priority when creating subtasks.
     let g:ttodo#ftplugin#new_subtask_copy_pri = 0   "{{{2
+endif
+
+
+if !exists('g:ttodo#ftplugin#new_subtask_place_cursor_before_copied_attribs')
+    " OPTION: new_subtask_place_cursor_before_copied_attribs:VALUE
+    let g:ttodo#ftplugin#new_subtask_place_cursor_before_copied_attribs = 1   "{{{2
 endif
 
 
@@ -141,7 +151,7 @@ function! ttodo#ftplugin#ArchiveCurrentBuffer() abort "{{{3
 endf
 
 
-function! ttodo#ftplugin#Note() abort "{{{3
+function! ttodo#ftplugin#Note(format_id) abort "{{{3
     let line = getline('.')
     let task = ttodo#ParseTask(line, expand('%:p'))
     Tlibtrace 'ttodo', task
@@ -153,7 +163,7 @@ function! ttodo#ftplugin#Note() abort "{{{3
     Tlibtrace 'ttodo', nname, dir
     let fargs = {'name': nname, 'date': date, 'year': year, 'index': 0}
     while 1
-        let shortname = tlib#string#Format(g:ttodo#ftplugin#notefmt, fargs, '$')
+        let shortname = tlib#string#Format(g:ttodo#ftplugin#notefmt[a:format_id], fargs, '$')
         let filename = tlib#file#Join([dir, shortname])
         if filereadable(filename)
             let fargs.n += 1
@@ -239,16 +249,25 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
             Tlibtrace 'ttodo', o, new
             return o ."\<c-t>" . new
         else
+            let post = ''
             let o .= "\<home>"
+            let new_subtask_place_cursor_before_copied_attribs = ttodo#GetOption('new_subtask_place_cursor_before_copied_attribs', g:ttodo#ftplugin#new_subtask_place_cursor_before_copied_attribs)
             let new_default_priority = ttodo#GetOption('new_default_priority', g:ttodo#ftplugin#new_default_priority)
             if !empty(new_default_priority)
                 let new = '('. new_default_priority .') '. new
             endif
             if a:copytags > 0
+                if new_subtask_place_cursor_before_copied_attribs
+                    let new = new . ' '
+                endif
+                let nnew = strwidth(new)
                 let new = ttodo#MaybeAppend(new, ttodo#FormatTags('@', get(task, 'lists', [])))
                 let new = ttodo#MaybeAppend(new, ttodo#FormatTags('+', get(task, 'tags', [])))
                 let new = ttodo#MaybeAppend(new, join(get(task, 'notes', [])))
                 let new = s:MaybeCopyPriority(task, new)
+                if new_subtask_place_cursor_before_copied_attribs
+                    let post .= repeat("\<Left>", strwidth(new) - nnew)
+                endif
             endif
             let move = a:move
             if empty(move) && i0 == 0
@@ -258,8 +277,11 @@ function! ttodo#ftplugin#New(move, copytags, mode, ...) abort "{{{3
             if a:mode == 'i' && !empty(move)
                 let move = "\<c-\>\<c-o>"
             endif
-            Tlibtrace 'ttodo', move, o, new
-            return move . o . ttodo#MaybePadRight(new)
+            if !new_subtask_place_cursor_before_copied_attribs
+                let new = ttodo#MaybePadRight(new)
+            endif
+            Tlibtrace 'ttodo', move, o, new, post
+            return move . o . new . post
         endif
     endif
 endf
@@ -347,7 +369,7 @@ function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
         if get(task, 'subtask', 0) && !has_key(task, 'parent')
             let parent = s:GetParentID(lnum)
             if !empty(parent)
-                let line = line .' parent:'. parent
+                let line = s:Append(line, 'parent:'. parent)
                 " call setline(lnum, line .' parent:'. parent)
             endif
         endif
@@ -486,17 +508,22 @@ function! s:EnsureIdAtLine(lnum, ...) abort "{{{3
     if !has_key(task, 'id')
         let qfe = filetasks.GetQfeByLnum(a:lnum)
         let ttask = string(empty(qfe) ? task : qfe)
-        if v:version < 800 || !has('+reltime')
+        if v:version < 800 || !has('reltime')
             let id = tlib#hash#Adler32(ttask)
         else
             " let id = 't'. tlib#number#ConvertBase(localtime(), 36)
-            let id = tlib#number#ConvertBase(str2nr(substitute(reltimestr(reltime()), '\.', '', '')), 36)
+            let id = tlib#number#ConvertBase(str2nr(substitute(reltimestr(reltime()), '\.', '', '')), 62)
         endif
         Tlibtrace 'ttodo', id
         return [1, id]
     else
         return [0, task.id]
     endif
+endf
+
+
+function! s:Append(a, b) abort "{{{3
+    return substitute(a:a, '\s\zs\s\+$', '', '') . a:b
 endf
 
 
@@ -507,7 +534,7 @@ function! ttodo#ftplugin#AddId(count) abort "{{{3
     for lnum in range(line('.'), line('.') + a:count)
         let [isnew, id] = s:EnsureIdAtLine(lnum, filename, filetasks)
         if isnew
-            let line = getline(lnum) .' id:'. id
+            let line = s:Append(getline(lnum), ' id:'. id)
             Tlibtrace 'ttodo', lnum, line
             call setline(lnum, line)
         endif
@@ -535,7 +562,7 @@ function! ttodo#ftplugin#AddDep() abort "{{{3
         let dep = tlib#input#List('s', 'Select dependency:', with_id)
         if !empty(dep)
             let id = matchstr(dep, '^[^\t]\+\ze\t')
-            call setline('.', getline('.') .' dep:'. id)
+            call setline('.', s:Append(getline('.'), 'dep:'. id))
         endif
     endif
 endf

@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2017-09-18.
-" @Revision:    113
+" @Last Change: 2020-05-25.
+" @Revision:    114
 
 if exists("b:did_ftplugin")
     finish
@@ -21,7 +21,8 @@ exec 'nnoremap <buffer>' g:ttodo#mapleader .'D :<C-U>call ttodo#ftplugin#AddDep(
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'d :<C-U>call ttodo#ftplugin#MarkDue("d", v:count)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'i :<C-U>call ttodo#ftplugin#AddId(v:count)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'m :<C-U>call ttodo#ftplugin#MarkDue("m", v:count1)<cr>'
-exec 'nnoremap <buffer>' g:ttodo#mapleader .'n :<C-U>call ttodo#ftplugin#Note()<cr>'
+exec 'nnoremap <buffer>' g:ttodo#mapleader .'n :<C-U>call ttodo#ftplugin#Note(0)<cr>'
+exec 'nnoremap <buffer>' g:ttodo#mapleader .'N :<C-U>call ttodo#ftplugin#Note(1)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'p :<C-U>call ttodo#ftplugin#Duplicate(v:count1, 0)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'P :<C-U>call ttodo#ftplugin#Duplicate(v:count1, 1)<cr>'
 exec 'nnoremap <buffer>' g:ttodo#mapleader .'w :<C-U>call ttodo#ftplugin#MarkDue("w", v:count1)<cr>'
