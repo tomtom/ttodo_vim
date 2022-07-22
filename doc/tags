@@ -20,6 +20,7 @@ g:ttodo#ftplugin#add_at_eof	ttodo.txt	/*g:ttodo#ftplugin#add_at_eof*
 g:ttodo#ftplugin#edit_note	ttodo.txt	/*g:ttodo#ftplugin#edit_note*
 g:ttodo#ftplugin#new_default_priority	ttodo.txt	/*g:ttodo#ftplugin#new_default_priority*
 g:ttodo#ftplugin#new_subtask_copy_pri	ttodo.txt	/*g:ttodo#ftplugin#new_subtask_copy_pri*
+g:ttodo#ftplugin#new_subtask_place_cursor_before_copied_attribs	ttodo.txt	/*g:ttodo#ftplugin#new_subtask_place_cursor_before_copied_attribs*
 g:ttodo#ftplugin#new_with_creation_date	ttodo.txt	/*g:ttodo#ftplugin#new_with_creation_date*
 g:ttodo#ftplugin#note_prefix	ttodo.txt	/*g:ttodo#ftplugin#note_prefix*
 g:ttodo#ftplugin#rec_copy	ttodo.txt	/*g:ttodo#ftplugin#rec_copy*

@@ -165,41 +165,42 @@ Please set |g:ttodo#dirs| in |vimrc| before using |:Ttodo|.
 ========================================================================
 Contents~
 
-        g:ttodo_nmap .............................. |g:ttodo_nmap|
-        g:ttodo_nmap_important .................... |g:ttodo_nmap_important|
-        g:ttodo_localmap .......................... |g:ttodo_localmap|
-        g:ttodo_enable_ftdetect ................... |g:ttodo_enable_ftdetect|
-        :Ttodo .................................... |:Ttodo|
-        :Ttodonew ................................. |:Ttodonew|
-        :Ttodoinbox ............................... |:Ttodoinbox|
-        :Ttodonext ................................ |:Ttodonext|
-        :Ttodogrep ................................ |:Ttodogrep|
-        g:ttodo#fileargs .......................... |g:ttodo#fileargs|
-        g:ttodo#file_pattern ...................... |g:ttodo#file_pattern|
-        g:ttodo#force_filetype .................... |g:ttodo#force_filetype|
-        g:ttodo#file_include_rx ................... |g:ttodo#file_include_rx|
-        g:ttodo#file_exclude_rx ................... |g:ttodo#file_exclude_rx|
-        g:ttodo#task_include_rx ................... |g:ttodo#task_include_rx|
-        g:ttodo#task_exclude_rx ................... |g:ttodo#task_exclude_rx|
-        g:ttodo#viewer ............................ |g:ttodo#viewer|
-        g:ttodo#sort .............................. |g:ttodo#sort|
-        g:ttodo#default_t ......................... |g:ttodo#default_t|
-        g:ttodo#new_task .......................... |g:ttodo#new_task|
-        g:ttodo#inbox ............................. |g:ttodo#inbox|
-        g:ttodo#qfl_short_filename ................ |g:ttodo#qfl_short_filename|
-        ttodo#SortBuffer .......................... |ttodo#SortBuffer()|
-        g:ttodo#ftplugin#note_prefix .............. |g:ttodo#ftplugin#note_prefix|
-        g:ttodo#ftplugin#edit_note ................ |g:ttodo#ftplugin#edit_note|
-        g:ttodo#ftplugin#add_at_eof ............... |g:ttodo#ftplugin#add_at_eof|
-        g:ttodo#ftplugin#rec_copy ................. |g:ttodo#ftplugin#rec_copy|
-        g:ttodo#ftplugin#new_subtask_copy_pri ..... |g:ttodo#ftplugin#new_subtask_copy_pri|
-        g:ttodo#ftplugin#new_with_creation_date ... |g:ttodo#ftplugin#new_with_creation_date|
-        g:ttodo#ftplugin#new_default_priority ..... |g:ttodo#ftplugin#new_default_priority|
-        ttodo#ftplugin#New ........................ |ttodo#ftplugin#New()|
-        :Ttodosort ................................ |:Ttodosort|
-        :Ttodoarchive ............................. |:Ttodoarchive|
-        :Ttodobuffer .............................. |:Ttodobuffer|
-        :Ttodonote ................................ |:Ttodonote|
+        g:ttodo_nmap ...................................................... |g:ttodo_nmap|
+        g:ttodo_nmap_important ............................................ |g:ttodo_nmap_important|
+        g:ttodo_localmap .................................................. |g:ttodo_localmap|
+        g:ttodo_enable_ftdetect ........................................... |g:ttodo_enable_ftdetect|
+        :Ttodo ............................................................ |:Ttodo|
+        :Ttodonew ......................................................... |:Ttodonew|
+        :Ttodoinbox ....................................................... |:Ttodoinbox|
+        :Ttodonext ........................................................ |:Ttodonext|
+        :Ttodogrep ........................................................ |:Ttodogrep|
+        g:ttodo#fileargs .................................................. |g:ttodo#fileargs|
+        g:ttodo#file_pattern .............................................. |g:ttodo#file_pattern|
+        g:ttodo#force_filetype ............................................ |g:ttodo#force_filetype|
+        g:ttodo#file_include_rx ........................................... |g:ttodo#file_include_rx|
+        g:ttodo#file_exclude_rx ........................................... |g:ttodo#file_exclude_rx|
+        g:ttodo#task_include_rx ........................................... |g:ttodo#task_include_rx|
+        g:ttodo#task_exclude_rx ........................................... |g:ttodo#task_exclude_rx|
+        g:ttodo#viewer .................................................... |g:ttodo#viewer|
+        g:ttodo#sort ...................................................... |g:ttodo#sort|
+        g:ttodo#default_t ................................................. |g:ttodo#default_t|
+        g:ttodo#new_task .................................................. |g:ttodo#new_task|
+        g:ttodo#inbox ..................................................... |g:ttodo#inbox|
+        g:ttodo#qfl_short_filename ........................................ |g:ttodo#qfl_short_filename|
+        ttodo#SortBuffer .................................................. |ttodo#SortBuffer()|
+        g:ttodo#ftplugin#note_prefix ...................................... |g:ttodo#ftplugin#note_prefix|
+        g:ttodo#ftplugin#edit_note ........................................ |g:ttodo#ftplugin#edit_note|
+        g:ttodo#ftplugin#add_at_eof ....................................... |g:ttodo#ftplugin#add_at_eof|
+        g:ttodo#ftplugin#rec_copy ......................................... |g:ttodo#ftplugin#rec_copy|
+        g:ttodo#ftplugin#new_subtask_copy_pri ............................. |g:ttodo#ftplugin#new_subtask_copy_pri|
+        g:ttodo#ftplugin#new_subtask_place_cursor_before_copied_attribs ... |g:ttodo#ftplugin#new_subtask_place_cursor_before_copied_attribs|
+        g:ttodo#ftplugin#new_with_creation_date ........................... |g:ttodo#ftplugin#new_with_creation_date|
+        g:ttodo#ftplugin#new_default_priority ............................. |g:ttodo#ftplugin#new_default_priority|
+        ttodo#ftplugin#New ................................................ |ttodo#ftplugin#New()|
+        :Ttodosort ........................................................ |:Ttodosort|
+        :Ttodoarchive ..................................................... |:Ttodoarchive|
+        :Ttodobuffer ...................................................... |:Ttodobuffer|
+        :Ttodonote ........................................................ |:Ttodonote|
 
 
 ------------------------------------------------------------------------
@@ -412,6 +413,10 @@ g:ttodo#ftplugin#new_subtask_copy_pri (default: 0)
     OPTION: new_subtask_copy_pri:VALUE
 
     If true, copy the parent task's priority when creating subtasks.
+
+                                                    *g:ttodo#ftplugin#new_subtask_place_cursor_before_copied_attribs*
+g:ttodo#ftplugin#new_subtask_place_cursor_before_copied_attribs (default: 1)
+    OPTION: new_subtask_place_cursor_before_copied_attribs:VALUE
 
                                                     *g:ttodo#ftplugin#new_with_creation_date*
 g:ttodo#ftplugin#new_with_creation_date (default: 1)
