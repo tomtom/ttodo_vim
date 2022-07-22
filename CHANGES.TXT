@@ -110,3 +110,37 @@ version: '1.01'
   - Support for file-local options
   SHA256 checksum: 6fcd0ebac1f0a01222ef9b836fd39843921f03a5eab4d93e3c30ec4ad1c4edf1
 
+version: '1.01'
+  - s/@inbox/@Inbox/
+  - Allow for `due:today` shortcut
+  - list view: FIX invocation of some commands on multiple items
+  - g:ttodo#ftplugin#edit_note defaults to ''
+  - syntax: don't accidentally highlight tags, keywords etc. within words
+  - FIX #1: If g:ttodo#force_filetype evaluates to true, use `set ft=ttodo` instead of `setf ttodo`
+  - FIX #2: Remove leading whitespace when archiving a sub-task
+  - FIX #3: Use ttodo#IsValidDue(due) to validate the value of the `due` command-line flag
+  - FIX handling of --[no-]undated
+  - Support for rec:Nb business days
+  - g:ttodo#ftplugin#note_prefix defaults to 'root://'
+  - syntax/ttodo.vim: TtodoTag: Highlight only known tags
+  - ttodo#SetCreateDate(): Marking a recurring task as done updates the created date
+  - require tlib >= 1.22
+  - <c-cr> also copies notes
+  - FIX #4: docs for maps
+  - Misc improvments
+  - g:ttodo#file_pattern can be a list
+  - --files command-line option actually works; more checks if a file exists
+  - Support for @next lists
+  - Command & map to open todo files in the current working directory
+  - ttodo#ftplugin#MarkDone(): Don't inherit the @next list for recurrent items
+  - s:GetFiles(): use map(); etc.
+  - ftdetect: Also check for upper case TODO.TXT pattern
+  - FIX parsing of tags & lists; FIX linter warnings
+  - g:ttodo#ftplugin#new_subtask_copy_pri defaults to 0
+  - misc improvements
+  - Use tcomment#type#Define() instead of tcomment#DefineType() for tcomment >= 4.00
+  - Make the done filename configurable
+  - Misc improvements to "mark done" & "archive"
+  - Support for file-local options
+  SHA256 checksum: 6fcd0ebac1f0a01222ef9b836fd39843921f03a5eab4d93e3c30ec4ad1c4edf1
+
