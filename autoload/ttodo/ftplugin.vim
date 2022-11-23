@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2022-05-11
-" @Revision:    493
+" @Last Change: 2022-11-11
+" @Revision:    496
 
 
 if !exists('g:ttodo#ftplugin#notefmt')
@@ -523,7 +523,7 @@ endf
 
 
 function! s:Append(a, b) abort "{{{3
-    return substitute(a:a, '\s\zs\s\+$', '', '') . a:b
+    return substitute(a:a, '\s\+$', '', '') .' '. a:b
 endf
 
 
@@ -534,7 +534,7 @@ function! ttodo#ftplugin#AddId(count) abort "{{{3
     for lnum in range(line('.'), line('.') + a:count)
         let [isnew, id] = s:EnsureIdAtLine(lnum, filename, filetasks)
         if isnew
-            let line = s:Append(getline(lnum), ' id:'. id)
+            let line = s:Append(getline(lnum), 'id:'. id)
             Tlibtrace 'ttodo', lnum, line
             call setline(lnum, line)
         endif
