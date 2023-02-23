@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2022-11-11
-" @Revision:    496
+" @Last Change: 2023-02-23
+" @Revision:    503
 
 
 if !exists('g:ttodo#ftplugin#notefmt')
@@ -510,9 +510,11 @@ function! s:EnsureIdAtLine(lnum, ...) abort "{{{3
         let ttask = string(empty(qfe) ? task : qfe)
         if v:version < 800 || !has('reltime')
             let id = tlib#hash#Adler32(ttask)
+        elseif exists('*rand')
+            let id = tlib#number#ConvertBase(str2nr(a:lnum . rand() . substitute(reltimestr(reltime()), '\.', '', '')), 62)
         else
             " let id = 't'. tlib#number#ConvertBase(localtime(), 36)
-            let id = tlib#number#ConvertBase(str2nr(substitute(reltimestr(reltime()), '\.', '', '')), 62)
+            let id = tlib#number#ConvertBase(str2nr(a:lnum . substitute(reltimestr(reltime()), '\.', '', '')), 62)
         endif
         Tlibtrace 'ttodo', id
         return [1, id]
