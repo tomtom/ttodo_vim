@@ -1,8 +1,25 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2023-02-23
-" @Revision:    503
+" @Last Change: 2023-02-26
+" @Revision:    512
+
+
+if !exists('g:ttodo#ftplugin#id_version')
+    " If 1, use IDs based on Adler32 (see |tlib#hash#Adler32()|) of the 
+    " string representation of the internal structure representing a 
+    " task.
+    " If 2, use IDs based on |reltime()| and |rand()|.
+    let g:ttodo#ftplugin#id_version = v:version < 800 || !has('reltime') ? 1 : 2   "{{{2
+endif
+
+
+if !exists('g:ttodo#ftplugin#id_suffix')
+    " Add this suffix to the value used for generating the ID.
+    " If |g:ttodo#ftplugin#id_version| is 2, this must evaluate to a numeric value.
+    " This could be used to insert user IDs etc.
+    let g:ttodo#ftplugin#id_suffix = ''   "{{{2
+endif
 
 
 if !exists('g:ttodo#ftplugin#notefmt')
@@ -507,14 +524,17 @@ function! s:EnsureIdAtLine(lnum, ...) abort "{{{3
     let task = ttodo#ParseTask(line, filename)
     if !has_key(task, 'id')
         let qfe = filetasks.GetQfeByLnum(a:lnum)
-        let ttask = string(empty(qfe) ? task : qfe)
-        if v:version < 800 || !has('reltime')
+        if g:ttodo#ftplugin#id_version == 1
+            let ttask = string(empty(qfe) ? task : qfe) . g:ttodo#ftplugin#id_suffix
             let id = tlib#hash#Adler32(ttask)
-        elseif exists('*rand')
-            let id = tlib#number#ConvertBase(str2nr(a:lnum . rand() . substitute(reltimestr(reltime()), '\.', '', '')), 62)
+        elseif g:ttodo#ftplugin#id_version == 2
+            let suffix = a:lnum . g:ttodo#ftplugin#id_suffix
+            if exists('*rand')
+                let suffix .= rand()
+            endif
+            let id = tlib#number#ConvertBase(str2nr(substitute(reltimestr(reltime()), '\.', '', '') . suffix), 62)
         else
-            " let id = 't'. tlib#number#ConvertBase(localtime(), 36)
-            let id = tlib#number#ConvertBase(str2nr(a:lnum . substitute(reltimestr(reltime()), '\.', '', '')), 62)
+            throw 'TTodo: Unsupported value for g:ttodo#ftplugin#id_version: '. g:ttodo#ftplugin#id_version
         endif
         Tlibtrace 'ttodo', id
         return [1, id]

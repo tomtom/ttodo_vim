@@ -18,6 +18,8 @@ g:ttodo#fileargs	ttodo.txt	/*g:ttodo#fileargs*
 g:ttodo#force_filetype	ttodo.txt	/*g:ttodo#force_filetype*
 g:ttodo#ftplugin#add_at_eof	ttodo.txt	/*g:ttodo#ftplugin#add_at_eof*
 g:ttodo#ftplugin#edit_note	ttodo.txt	/*g:ttodo#ftplugin#edit_note*
+g:ttodo#ftplugin#id_suffix	ttodo.txt	/*g:ttodo#ftplugin#id_suffix*
+g:ttodo#ftplugin#id_version	ttodo.txt	/*g:ttodo#ftplugin#id_version*
 g:ttodo#ftplugin#new_default_priority	ttodo.txt	/*g:ttodo#ftplugin#new_default_priority*
 g:ttodo#ftplugin#new_subtask_copy_pri	ttodo.txt	/*g:ttodo#ftplugin#new_subtask_copy_pri*
 g:ttodo#ftplugin#new_subtask_place_cursor_before_copied_attribs	ttodo.txt	/*g:ttodo#ftplugin#new_subtask_place_cursor_before_copied_attribs*

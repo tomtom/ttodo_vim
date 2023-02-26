@@ -188,6 +188,8 @@ Contents~
         g:ttodo#inbox ..................................................... |g:ttodo#inbox|
         g:ttodo#qfl_short_filename ........................................ |g:ttodo#qfl_short_filename|
         ttodo#SortBuffer .................................................. |ttodo#SortBuffer()|
+        g:ttodo#ftplugin#id_version ....................................... |g:ttodo#ftplugin#id_version|
+        g:ttodo#ftplugin#id_suffix ........................................ |g:ttodo#ftplugin#id_suffix|
         g:ttodo#ftplugin#note_prefix ...................................... |g:ttodo#ftplugin#note_prefix|
         g:ttodo#ftplugin#edit_note ........................................ |g:ttodo#ftplugin#edit_note|
         g:ttodo#ftplugin#add_at_eof ....................................... |g:ttodo#ftplugin#add_at_eof|
@@ -372,6 +374,19 @@ ttodo#SortBuffer(cmdargs)
 
 ------------------------------------------------------------------------
                                                     *autoload/ttodo/ftplugin.vim*
+                                                    *g:ttodo#ftplugin#id_version*
+g:ttodo#ftplugin#id_version    (default: v:version < 800 || !has('reltime') ? 1 : 2)
+    If 1, use IDs based on Adler32 (see |tlib#hash#Adler32()|) of the 
+    string representation of the internal structure representing a 
+    task.
+    If 2, use IDs based on |reltime()| and |rand()|.
+
+                                                    *g:ttodo#ftplugin#id_suffix*
+g:ttodo#ftplugin#id_suffix     (default: '')
+    Add this suffix to the value used for generating the ID.
+    If |g:ttodo#ftplugin#id_version| is 2, this must evaluate to a numeric value.
+    This could be used to insert user IDs etc.
+
                                                     *g:ttodo#ftplugin#note_prefix*
 g:ttodo#ftplugin#note_prefix   (default: 'root://')
     OPTION: note_prefix:PREFIX
