@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2023-02-26
-" @Revision:    512
+" @Last Change: 2023-08-10
+" @Revision:    518
 
 
 if !exists('g:ttodo#ftplugin#id_version')
@@ -102,6 +102,14 @@ endif
 if !exists('g:ttodo#ftplugin#new_default_priority')
     " OPTION: new_default_priority:VALUE
     let g:ttodo#ftplugin#new_default_priority = 'C'   "{{{2
+endif
+
+
+if !exists('g:ttodo#ftplugin#mark_done_style')
+    " See https://github.com/todotxt/todo.txt#rule-2-the-date-of-completion-appears-directly-after-the-x-separated-by-a-space
+    " 1 ... x (PRI) COMPLETION_DATE CREATION_DATE ...
+    " 2 ... x COMPLETION_DATE CREATION_DATE ... pri:PRI
+    let g:ttodo#ftplugin#mark_done_style = 1   "{{{2
 endif
 
 
@@ -390,7 +398,14 @@ function! ttodo#ftplugin#MarkDone(count, ...) abort "{{{3
                 " call setline(lnum, line .' parent:'. parent)
             endif
         endif
-        let line = substitute(line, '^\s*\zs\C\%(x\s\+\%('. g:tlib#date#date_rx .'\s\+\)\?\)\?', 'x '. donedate .' ', '')
+        " let line = substitute(line, '^\s*\zs\C\%(x\s\+\%('. g:tlib#date#date_rx .'\s\+\)\?\)\?', 'x '. donedate .' ', '')
+        if g:ttodo#ftplugin#mark_done_style == 1
+            let line = substitute(line, '^\s*\zs\C\((\u)\s\)', 'x \1'. donedate .' ', '')
+        elseif g:ttodo#ftplugin#mark_done_style == 2
+            let line = substitute(line, '^\s*\zs\C\((\(\u\))\s\)\(.*\)$', 'x '. donedate .' \3 pri:\2', '')
+        else
+            throw 'ttodo: Unsupported value for g:ttodo#ftplugin#mark_done_style = '. g:ttodo#ftplugin#mark_done_style
+        endif
         call setline(lnum, line)
         " exec lnum .'s/^\s*\zs\C\%(x\s\+\%('. g:tlib#date#date_rx .'\s\+\)\?\)\?/x '. donedate .' /'
     endfor
