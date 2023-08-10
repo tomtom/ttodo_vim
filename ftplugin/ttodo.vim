@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2023-02-18.
-" @Revision:    116
+" @Last Change: 2023-02-26.
+" @Revision:    118
 
 if exists("b:did_ftplugin")
     finish
@@ -11,7 +11,7 @@ let b:did_ftplugin = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
-" setlocal nowrap
+" setlocal wrap
 setlocal textwidth=0
 setlocal linebreak
 setlocal commentstring=x\ %s
