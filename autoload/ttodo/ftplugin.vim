@@ -1,15 +1,16 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     https://github.com/tomtom
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2023-08-10
-" @Revision:    518
+" @Last Change: 2024-01-30
+" @Revision:    527
 
 
 if !exists('g:ttodo#ftplugin#id_version')
     " If 1, use IDs based on Adler32 (see |tlib#hash#Adler32()|) of the 
     " string representation of the internal structure representing a 
     " task.
-    " If 2, use IDs based on |reltime()| and |rand()|.
+    " If 2, use IDs based on |reltime()|.
+    " If 3, use IDs based on |rand()|.
     let g:ttodo#ftplugin#id_version = v:version < 800 || !has('reltime') ? 1 : 2   "{{{2
 endif
 
@@ -543,11 +544,18 @@ function! s:EnsureIdAtLine(lnum, ...) abort "{{{3
             let ttask = string(empty(qfe) ? task : qfe) . g:ttodo#ftplugin#id_suffix
             let id = tlib#hash#Adler32(ttask)
         elseif g:ttodo#ftplugin#id_version == 2
-            let suffix = a:lnum . g:ttodo#ftplugin#id_suffix
-            if exists('*rand')
-                let suffix .= rand()
+            if !has('reltime')
+                throw 'TTodo: g:ttodo#ftplugin#id_version == 2 requires +reltime'
             endif
-            let id = tlib#number#ConvertBase(str2nr(substitute(reltimestr(reltime()), '\.', '', '') . suffix), 62)
+            let suffix = ''. a:lnum . g:ttodo#ftplugin#id_suffix
+            let ids = str2nr(substitute(reltimestr(reltime()), '\.', '', '')) . suffix
+            let id = tlib#number#ConvertBase(ids, 62)
+        elseif g:ttodo#ftplugin#id_version == 3
+            if !exists('*rand')
+                throw 'TTodo: g:ttodo#ftplugin#id_version == 3 requires +rand'
+            endif
+            let ids = ''. a:lnum . g:ttodo#ftplugin#id_suffix . rand()
+            let id = tlib#number#ConvertBase(ids, 62)
         else
             throw 'TTodo: Unsupported value for g:ttodo#ftplugin#id_version: '. g:ttodo#ftplugin#id_version
         endif
